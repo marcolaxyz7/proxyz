@@ -2,14 +2,13 @@ const mysql = require('mysql2');
 require('dotenv').config();
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
+    host: process.env.DB_HOST, // Pega do .env
+    user: process.env.DB_USER, // Pega do .env
+    password: process.env.DB_PASS, // Pega do .env
+    database: process.env.DB_NAME, // Pega do .env
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
-const promisePool = pool.promise();
-module.exports = promisePool;
+module.exports = pool.promise();

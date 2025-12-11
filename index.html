@@ -681,44 +681,35 @@
     </div>
 
     <script>
+const API_URL = 'http://localhost:3000/api';
 
-        // --- FUNÇÃO QUE SUBSTITUI O ALERT ---
-function showMsg(title, text, type = 'info') {
-    const modal = document.getElementById('msgModal');
-    const icon = document.getElementById('msgIcon');
-    const titleEl = document.getElementById('msgTitle');
-    const textEl = document.getElementById('msgText');
+        // --- FUNÇÕES VISUAIS DO MODAL (MSG) ---
+        function showMsg(title, text, type = 'info') {
+            const modal = document.getElementById('msgModal');
+            const icon = document.getElementById('msgIcon');
+            const titleEl = document.getElementById('msgTitle');
+            const textEl = document.getElementById('msgText');
 
-    // Configura texto
-    titleEl.innerText = title;
-    textEl.innerText = text;
+            titleEl.innerText = title;
+            textEl.innerText = text;
 
-    // Configura Ícone e Cor
-    icon.className = 'msg-icon fa-solid'; // Reseta
-    if (type === 'success') {
-        icon.classList.add('fa-check-circle', 'msg-success');
-    } else if (type === 'error') {
-        icon.classList.add('fa-circle-xmark', 'msg-error');
-    } else {
-        icon.classList.add('fa-circle-exclamation', 'msg-info');
-    }
+            icon.className = 'msg-icon fa-solid';
+            if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
+            else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
+            else icon.classList.add('fa-circle-exclamation', 'msg-info');
 
-    modal.style.display = 'flex';
-}
+            modal.style.display = 'flex';
+        }
 
-function closeMsgModal() {
-    document.getElementById('msgModal').style.display = 'none';
-}
+        function closeMsgModal() {
+            document.getElementById('msgModal').style.display = 'none';
+        }
 
-        const API_URL = 'http://localhost:3000/api';
-
+        // --- ANIMAÇÕES E INTERFACE ---
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                } else {
-                    entry.target.classList.remove('active');
-                }
+                if (entry.isIntersecting) entry.target.classList.add('active');
+                else entry.target.classList.remove('active');
             });
         });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
@@ -730,7 +721,6 @@ function closeMsgModal() {
             modal.style.display = 'flex';
             switchStep(initialStep === 'login' ? 'step-login' : 'step-signup');
         }
-
         function closeModal() { modal.style.display = 'none'; }
         
         function switchStep(stepId) {
@@ -741,6 +731,7 @@ function closeMsgModal() {
         function openLegalModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeLegalModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
+        // --- MÁSCARA WHATSAPP ---
         const whatsappInput = document.getElementById('whatsappInput');
         if(whatsappInput) {
             whatsappInput.addEventListener('input', function (e) {
@@ -755,41 +746,38 @@ function closeMsgModal() {
             btn.disabled = !checkbox.checked;
         }
 
+        // --- LÓGICA DE LOGIN (CORRIGIDA) ---
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
 
-                    // DENTRO DE loginUser()
-        if (!email || !password) return showMsg('Campos Vazios', 'Por favor, preencha e-mail e senha.', 'error');
+            if (!email || !password) return showMsg('Campos Vazios', 'Por favor, preencha e-mail e senha.', 'error');
 
-        // ... dentro do try/catch ...
-        if (response.ok) {
-            // Sucesso não precisa de alert, já redireciona
-            window.location.href = 'dashboard.html';
-        } else {
-            showMsg('Falha no Login', data.error, 'error'); // AQUI!
-        }
-        // ... no catch ...
-        showMsg('Erro de Conexão', 'Não foi possível conectar ao servidor.', 'error');
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
+                const data = await response.json();
 
-        // DENTRO DE registerUser()
-        // ... dentro do try/catch ...
-        if (response.ok) {
-            closeModal();
-            // AQUI O SUCESSO:
-            showMsg('Sucesso!', 'Cadastro realizado. Faça login para acessar.', 'success');
-            openModal('login');
-        } else {
-            showMsg('Erro no Cadastro', data.error, 'error'); // AQUI!
-            // ...
-        }
-        // ... no catch ...
-        showMsg('Erro Crítico', 'Servidor indisponível no momento.', 'error');
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showMsg('Falha no Login', data.error, 'error');
+                }
+            } catch (error) {
+                console.error(error);
+                showMsg('Erro de Conexão', 'Não foi possível conectar ao servidor.', 'error');
+            }
         }
 
+        // --- LÓGICA DE CADASTRO (CORRIGIDA) ---
         async function registerUser() {
             const btn = document.getElementById('btn-finish-pix');
+            const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...';
             btn.disabled = true;
 
@@ -807,21 +795,26 @@ function closeMsgModal() {
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Cadastro realizado com sucesso! Faça login para entrar.');
                     closeModal();
-                    openModal('login');
+                    showMsg('Sucesso!', 'Cadastro realizado. Faça login para acessar.', 'success');
+                    // Reset botão
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    // Abre login após fechar modal de msg? (O usuário clica em "Entendi" e depois abre o login manualmente, ou podemos forçar aqui)
+                    setTimeout(() => openModal('login'), 2000); 
                 } else {
-                    alert('Erro: ' + data.error);
-                    btn.innerHTML = 'JÁ FIZ O PIX';
+                    showMsg('Erro no Cadastro', data.error, 'error');
+                    btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
             } catch (error) {
-                alert('Erro de conexão.');
-                btn.innerHTML = 'JÁ FIZ O PIX';
+                showMsg('Erro Crítico', 'Servidor indisponível no momento.', 'error');
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
 
+        // --- MINIGAME ---
         const luckySection = document.getElementById('luckySection');
         const coins = document.querySelectorAll('.hand-coin');
         const prizeDisplay = document.getElementById('prizeDisplay');
