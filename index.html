@@ -218,8 +218,11 @@
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .auth-input { width: 100%; padding: 15px; margin: 10px 0; background: #000; border: 1px solid #222; color: white; outline: none; border-radius: 4px; font-family: 'Roboto', sans-serif; }
         .auth-input:focus { border-color: #cc0000; }
+        
+        /* BOTÕES DE TROCA DE TELA (LINK EMBAIXO) */
         .switch-btn { background: none; border: none; color: #888; text-decoration: underline; cursor: pointer; margin-top: 10px; font-size: 0.9rem; }
         .switch-btn:hover { color: white; }
+        
         .pix-box { background: #fff; padding: 10px; display: inline-block; margin: 20px 0; border-radius: 8px; }
         .legal-check-wrapper { text-align: left; margin: 15px 0; font-size: 0.8rem; color: #aaa; display: flex; gap: 10px; align-items: flex-start; }
         .legal-check-wrapper input { margin-top: 3px; cursor: pointer; }
@@ -236,7 +239,7 @@
         .social-box a { font-size: 1.2rem; margin-left: 15px; color: #555; transition: 0.3s; }
         .social-box a:hover { color: #fff; }
 
-                /* --- MODAL DE MENSAGEM (Custom Alert) --- */
+        /* --- MODAL DE MENSAGEM (Custom Alert) --- */
         #msgModal { z-index: 9999; } /* Fica acima de tudo, inclusive do login */
 
         .msg-icon { 
@@ -248,6 +251,55 @@
 
         #msgTitle { font-family: 'Oswald'; font-size: 1.5rem; margin-bottom: 10px; text-transform: uppercase; }
         #msgText { color: #ccc; margin-bottom: 30px; font-size: 1rem; }
+
+        /* --- ESTILO DOS ERROS NOS CAMPOS --- */
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px; /* Espaço extra para o input não grudar */
+        }
+
+        .field-error {
+            position: absolute;
+            bottom: 100%; /* Fica exatamente acima do input */
+            left: 0;
+            background-color: #cc0000;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: none; /* Escondido por padrão */
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        /* Setinha do balão */
+        .field-error::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 15px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #cc0000 transparent transparent transparent;
+        }
+
+        /* Borda vermelha no input quando errar */
+        .input-invalid {
+            border-color: #cc0000 !important;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -637,21 +689,56 @@
                 <button class="btn-main" style="width:100%; margin-top:10px;" onclick="loginUser()">ENTRAR</button>
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-signup')">Não tenho conta. Cadastrar.</button>
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-forgot')" style="color:#cc0000;">Esqueci minha senha</button>
             </div>
 
             <div class="modal-step" id="step-signup">
                 <h2>CRIAR CONTA</h2>
                 <p style="color:#666; margin-bottom:20px;">Preencha para liberar o acesso.</p>
-                <input type="text" id="regName" class="auth-input" placeholder="Nome completo">
-                <input type="tel" id="whatsappInput" class="auth-input" placeholder="WhatsApp (DDD + Número)" maxlength="15">
-                <input type="email" id="regEmail" class="auth-input" placeholder="Melhor e-mail">
-                <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha">
-                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="switchStep('step-pix')">IR PARA PAGAMENTO &rarr;</button>
+                
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-name">Nome obrigatório</span>
+                    <input type="text" id="regName" class="auth-input" placeholder="Nome completo" oninput="clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-whats">Número inválido</span>
+                    <input type="tel" id="whatsappInput" class="auth-input" placeholder="WhatsApp (DDD + Número)" maxlength="15" oninput="clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-email">E-mail inválido</span>
+                    <input type="email" id="regEmail" class="auth-input" placeholder="Melhor e-mail" oninput="clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-pass">Mínimo 8 caracteres</span>
+                    <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha" oninput="clearError(this)">
+                </div>
+
+                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPix()">IR PARA PAGAMENTO &rarr;</button>
+                
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-login')">Já tenho conta.</button>
             </div>
 
-             <div class="modal-step" id="step-pix">
+            <div class="modal-step" id="step-forgot">
+                <h2>RECUPERAR SENHA</h2>
+                <p style="color:#666; margin-bottom:20px;">Digite seu e-mail para receber o link.</p>
+                
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-forgot-email">E-mail inválido</span>
+                    <input type="email" id="forgotEmail" class="auth-input" placeholder="Seu e-mail cadastrado" oninput="clearError(this)">
+                </div>
+
+                <button class="btn-main" id="btn-forgot" style="width:100%; margin-top:10px;" onclick="requestPasswordReset()">ENVIAR LINK</button>
+                
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-login')">Voltar para Login</button>
+            </div>
+
+            <div class="modal-step" id="step-pix">
                 <h2>LIBERAÇÃO IMEDIATA</h2>
                 <p style="color:#cc0000; font-weight:bold; margin-top:20px;">VALOR SIMBÓLICO: R$ 19,90</p>
                 <div class="pix-box">
@@ -669,19 +756,19 @@
         </div>
 
         <div class="modal-overlay" id="msgModal" style="display: none;">
-    <div class="auth-card" style="max-width: 400px; border-color: #333;">
-        <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
-        
-        <h2 id="msgTitle">ATENÇÃO</h2>
-        <p id="msgText">Mensagem do sistema aqui.</p>
-        
-        <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
-    </div>
-</div>
+            <div class="auth-card" style="max-width: 400px; border-color: #333;">
+                <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
+                
+                <h2 id="msgTitle">ATENÇÃO</h2>
+                <p id="msgText">Mensagem do sistema aqui.</p>
+                
+                <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
+            </div>
+        </div>
     </div>
 
-    <script>
-const API_URL = 'http://localhost:3000/api';
+ <script>
+        const API_URL = 'http://localhost:3000/api';
 
         // --- FUNÇÕES VISUAIS DO MODAL (MSG) ---
         function showMsg(title, text, type = 'info') {
@@ -703,6 +790,12 @@ const API_URL = 'http://localhost:3000/api';
 
         function closeMsgModal() {
             document.getElementById('msgModal').style.display = 'none';
+        }
+
+        // --- VALIDAÇÃO DE EMAIL ---
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
         }
 
         // --- ANIMAÇÕES E INTERFACE ---
@@ -746,7 +839,7 @@ const API_URL = 'http://localhost:3000/api';
             btn.disabled = !checkbox.checked;
         }
 
-        // --- LÓGICA DE LOGIN (CORRIGIDA) ---
+        // --- LÓGICA DE LOGIN ---
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
@@ -766,7 +859,7 @@ const API_URL = 'http://localhost:3000/api';
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
                 } else {
-                    showMsg('Falha no Login', data.error, 'error');
+                    showMsg('Falha no Login', data.error || 'Verifique suas credenciais.', 'error');
                 }
             } catch (error) {
                 console.error(error);
@@ -774,17 +867,55 @@ const API_URL = 'http://localhost:3000/api';
             }
         }
 
-        // --- LÓGICA DE CADASTRO (CORRIGIDA) ---
+        // --- LÓGICA DE RECUPERAÇÃO DE SENHA (NOVO) ---
+        async function requestPasswordReset() {
+            const email = document.getElementById('forgotEmail').value.trim();
+            const btn = document.getElementById('btn-forgot');
+
+            if (!isValidEmail(email)) {
+                return showError('forgotEmail', 'err-forgot-email', 'E-mail inválido');
+            }
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMsg('E-mail Enviado', 'Verifique sua caixa de entrada (e spam) para redefinir sua senha.', 'success');
+                    switchStep('step-login');
+                } else {
+                    showMsg('Erro', data.error || 'Não foi possível enviar o e-mail.', 'error');
+                }
+            } catch (error) {
+                showMsg('Erro Crítico', 'Servidor indisponível.', 'error');
+            } finally {
+                btn.innerHTML = 'ENVIAR LINK';
+                btn.disabled = false;
+            }
+        }
+
+        // --- LÓGICA DE CADASTRO ---
         async function registerUser() {
             const btn = document.getElementById('btn-finish-pix');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...';
-            btn.disabled = true;
-
+            
             const name = document.getElementById('regName').value;
             const whatsapp = document.getElementById('whatsappInput').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPass').value;
+
+            // Validações básicas antes de enviar
+            if (!name || !email || !password) return showMsg('Atenção', 'Preencha todos os campos.', 'error');
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...';
+            btn.disabled = true;
 
             try {
                 const response = await fetch(`${API_URL}/register`, {
@@ -795,22 +926,70 @@ const API_URL = 'http://localhost:3000/api';
                 const data = await response.json();
 
                 if (response.ok) {
-                    closeModal();
-                    showMsg('Sucesso!', 'Cadastro realizado. Faça login para acessar.', 'success');
-                    // Reset botão
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    // Abre login após fechar modal de msg? (O usuário clica em "Entendi" e depois abre o login manualmente, ou podemos forçar aqui)
-                    setTimeout(() => openModal('login'), 2000); 
+                    closeModal(); 
+                    switchStep('step-login');
+                    showMsg('Conta Criada!', 'Cadastro realizado. Faça LOGIN para acessar.', 'success');
+                    setTimeout(() => { openModal('login'); }, 3000);
                 } else {
-                    showMsg('Erro no Cadastro', data.error, 'error');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
+                    showMsg('Erro no Cadastro', data.error || 'Não foi possível criar a conta.', 'error');
                 }
             } catch (error) {
-                showMsg('Erro Crítico', 'Servidor indisponível no momento.', 'error');
+                showMsg('Erro Crítico', 'Servidor indisponível.', 'error');
+            } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+            }
+        }
+
+        // --- VALIDAÇÃO VISUAL (TOOLTIPS) ---
+        function showError(inputId, spanId, message) {
+            const input = document.getElementById(inputId);
+            const span = document.getElementById(spanId);
+            
+            input.classList.add('input-invalid');
+            span.innerText = message;
+            span.style.display = 'block';
+        }
+
+        function clearError(inputElement) {
+            inputElement.classList.remove('input-invalid');
+            const span = inputElement.previousElementSibling;
+            if (span && span.classList.contains('field-error')) {
+                span.style.display = 'none';
+            }
+        }
+
+        function validateAndGoToPix() {
+            let isValid = true;
+
+            const name = document.getElementById('regName').value.trim();
+            const whatsapp = document.getElementById('whatsappInput').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPass').value.trim();
+
+            if (!name) {
+                showError('regName', 'err-name', 'Digite seu nome.');
+                isValid = false;
+            }
+
+            const cleanPhone = whatsapp.replace(/\D/g, ''); 
+            if (cleanPhone.length < 11) {
+                showError('whatsappInput', 'err-whats', 'Número incompleto (11 dígitos).');
+                isValid = false;
+            }
+
+            if (!isValidEmail(email)) {
+                showError('regEmail', 'err-email', 'E-mail inválido.');
+                isValid = false;
+            }
+
+            if (password.length < 8) {
+                showError('regPass', 'err-pass', 'Mínimo 8 caracteres.');
+                isValid = false;
+            }
+
+            if (isValid) {
+                switchStep('step-pix');
             }
         }
 
