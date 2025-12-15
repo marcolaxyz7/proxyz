@@ -223,6 +223,16 @@
         .switch-btn { background: none; border: none; color: #888; text-decoration: underline; cursor: pointer; margin-top: 10px; font-size: 0.9rem; }
         .switch-btn:hover { color: white; }
         
+        /* ABAS DE PAGAMENTO */
+        .pay-tabs { display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .pay-tab-btn {
+            background: #111; border: 1px solid #333; color: #666;
+            flex: 1; padding: 10px; cursor: pointer; font-family: 'Oswald';
+            transition: 0.3s;
+        }
+        .pay-tab-btn:hover { border-color: #666; }
+        .pay-tab-btn.active { background: #cc0000; color: white; border-color: #cc0000; }
+
         .pix-box { background: #fff; padding: 10px; display: inline-block; margin: 20px 0; border-radius: 8px; }
         .legal-check-wrapper { text-align: left; margin: 15px 0; font-size: 0.8rem; color: #aaa; display: flex; gap: 10px; align-items: flex-start; }
         .legal-check-wrapper input { margin-top: 3px; cursor: pointer; }
@@ -704,7 +714,7 @@
 
                 <div class="input-wrapper">
                     <span class="field-error" id="err-whats">Número inválido</span>
-                    <input type="tel" id="whatsappInput" class="auth-input" placeholder="WhatsApp (DDD + Número)" maxlength="15" oninput="clearError(this)">
+                    <input type="text" id="whatsappInput" class="auth-input" placeholder="Telefone (ex: +55 11 99999-9999)" oninput="clearError(this)">
                 </div>
 
                 <div class="input-wrapper">
@@ -717,7 +727,7 @@
                     <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha" oninput="clearError(this)">
                 </div>
 
-                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPix()">IR PARA PAGAMENTO &rarr;</button>
+                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPayment()">IR PARA PAGAMENTO &rarr;</button>
                 
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-login')">Já tenho conta.</button>
@@ -738,20 +748,35 @@
                 <button class="switch-btn" onclick="switchStep('step-login')">Voltar para Login</button>
             </div>
 
-            <div class="modal-step" id="step-pix">
-                <h2>LIBERAÇÃO IMEDIATA</h2>
-                <p style="color:#cc0000; font-weight:bold; margin-top:20px;">VALOR SIMBÓLICO: R$ 19,90</p>
-                <div class="pix-box">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" width="150" height="150" alt="QR Pix">
+            <div class="modal-step" id="step-payment">
+                <h2>FINALIZAR ACESSO</h2>
+                <p style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR SIMBÓLICO: R$ 19,90</p>
+                
+                <div class="pay-tabs">
+                    <button class="pay-tab-btn active" onclick="selectPayment('pix')" id="tab-pix">🇧🇷 PIX</button>
+                    <button class="pay-tab-btn" onclick="selectPayment('card')" id="tab-card">💳 CARTÃO / INT.</button>
                 </div>
-                <p style="color:#666; font-size:0.8rem; margin-bottom:20px;">Escaneie o QR Code acima com seu banco.</p>
+
+                <div id="pay-content-pix">
+                    <div class="pix-box">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" width="150" height="150" alt="QR Pix">
+                    </div>
+                    <p style="color:#666; font-size:0.8rem; margin-bottom:20px;">Escaneie o QR Code acima com seu banco.</p>
+                </div>
+
+                <div id="pay-content-card" style="display: none; padding: 20px 0;">
+                    <p style="color:#ccc; font-size:0.9rem;">Pagamento seguro via Cartão de Crédito.</p>
+                    <button class="btn-main" style="margin-top:15px; border-color:#fff;">
+                        <i class="fa-regular fa-credit-card"></i> PAGAR COM CARTÃO
+                    </button>
+                </div>
                 
                 <div class="legal-check-wrapper">
                     <input type="checkbox" id="legalCheck" onchange="togglePixButton()">
                     <label for="legalCheck">Entendo que este é um serviço digital de acesso imediato e concordo com os <a onclick="openLegalModal('modalTermos')">Termos de Uso</a>.</label>
                 </div>
 
-                <button class="btn-main" id="btn-finish-pix" style="width:100%; background:#cc0000; border-color:#cc0000;" onclick="registerUser()" disabled>JÁ FIZ O PIX</button>
+                <button class="btn-main" id="btn-finish-pix" style="width:100%; background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
             </div>
         </div>
 
@@ -769,6 +794,10 @@
 
  <script>
         const API_URL = 'http://localhost:3000/api';
+
+        // VARIÁVEIS GLOBAIS
+        let currentUserId = null;
+        let currentUserEmail = null;
 
         // --- FUNÇÕES VISUAIS DO MODAL (MSG) ---
         function showMsg(title, text, type = 'info') {
@@ -810,27 +839,55 @@
         function flipCard(element) { element.classList.toggle('flipped'); }
 
         const modal = document.getElementById('authModal');
+        
         function openModal(initialStep) {
             modal.style.display = 'flex';
             switchStep(initialStep === 'login' ? 'step-login' : 'step-signup');
         }
-        function closeModal() { modal.style.display = 'none'; }
+
+        function closeModal() { 
+            // BLOQUEIO SE ESTIVER NO PAGAMENTO
+            const paymentStep = document.getElementById('step-payment');
+            if (paymentStep.classList.contains('active')) {
+                // Se o usuário tentar fechar via ESC ou algo, não deixa.
+                // A única saída é o botão de verificação.
+                return; 
+            }
+            modal.style.display = 'none'; 
+        }
         
         function switchStep(stepId) {
             document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
             document.getElementById(stepId).classList.add('active');
+
+            // LOGICA DE TRANCAR O MODAL NO PAGAMENTO
+            const closeBtn = document.querySelector('.close-modal');
+            if (stepId === 'step-payment') {
+                closeBtn.style.display = 'none'; // Esconde o X
+                // Também garante que clicar fora não feche (já que o overlay fecha no padrão)
+                // O código atual não tem clique no overlay, mas se tiver, removemos aqui.
+            } else {
+                closeBtn.style.display = 'block'; // Mostra o X
+            }
         }
 
         function openLegalModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
         function closeLegalModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
 
-        // --- MÁSCARA WHATSAPP ---
-        const whatsappInput = document.getElementById('whatsappInput');
-        if(whatsappInput) {
-            whatsappInput.addEventListener('input', function (e) {
-                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
-                e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
-            });
+        // --- LÓGICA DE ABAS DE PAGAMENTO ---
+        function selectPayment(type) {
+            document.getElementById('tab-pix').classList.remove('active');
+            document.getElementById('tab-card').classList.remove('active');
+            document.getElementById('pay-content-pix').style.display = 'none';
+            document.getElementById('pay-content-card').style.display = 'none';
+
+            if (type === 'pix') {
+                document.getElementById('tab-pix').classList.add('active');
+                document.getElementById('pay-content-pix').style.display = 'block';
+            } else {
+                document.getElementById('tab-card').classList.add('active');
+                document.getElementById('pay-content-card').style.display = 'block';
+            }
         }
 
         function togglePixButton() {
@@ -858,6 +915,11 @@
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
+                } else if (response.status === 403 && data.payment_required) {
+                    // Se tentar logar sem pagar, avisa apenas.
+                    // O usuário não pode "recuperar" o QR Code aqui, pois você não quis essa lógica.
+                    // Ele terá que usar a conta que já criou (que está travada) ou criar outra (com outro email).
+                    showMsg('Pagamento Pendente', 'O pagamento não foi identificado para este usuário.', 'error');
                 } else {
                     showMsg('Falha no Login', data.error || 'Verifique suas credenciais.', 'error');
                 }
@@ -867,7 +929,7 @@
             }
         }
 
-        // --- LÓGICA DE RECUPERAÇÃO DE SENHA (NOVO) ---
+        // --- LÓGICA DE RECUPERAÇÃO DE SENHA ---
         async function requestPasswordReset() {
             const email = document.getElementById('forgotEmail').value.trim();
             const btn = document.getElementById('btn-forgot');
@@ -902,19 +964,25 @@
         }
 
         // --- LÓGICA DE CADASTRO ---
-        async function registerUser() {
-            const btn = document.getElementById('btn-finish-pix');
+        async function validateAndGoToPayment() {
+            let isValid = true;
+
+            const name = document.getElementById('regName').value.trim();
+            const whatsapp = document.getElementById('whatsappInput').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPass').value.trim();
+
+            if (!name) { showError('regName', 'err-name', 'Digite seu nome.'); isValid = false; }
+            const cleanPhone = whatsapp.replace(/\D/g, ''); 
+            if (cleanPhone.length < 8) { showError('whatsappInput', 'err-whats', 'Mínimo 8 dígitos.'); isValid = false; }
+            if (!isValidEmail(email)) { showError('regEmail', 'err-email', 'E-mail inválido.'); isValid = false; }
+            if (password.length < 8) { showError('regPass', 'err-pass', 'Mínimo 8 caracteres.'); isValid = false; }
+
+            if (!isValid) return;
+
+            const btn = document.querySelector('#step-signup .btn-main');
             const originalText = btn.innerHTML;
-            
-            const name = document.getElementById('regName').value;
-            const whatsapp = document.getElementById('whatsappInput').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPass').value;
-
-            // Validações básicas antes de enviar
-            if (!name || !email || !password) return showMsg('Atenção', 'Preencha todos os campos.', 'error');
-
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Criando conta...';
             btn.disabled = true;
 
             try {
@@ -922,19 +990,85 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, whatsapp, email, password })
                 });
-
                 const data = await response.json();
 
                 if (response.ok) {
-                    closeModal(); 
-                    switchStep('step-login');
-                    showMsg('Conta Criada!', 'Cadastro realizado. Faça LOGIN para acessar.', 'success');
-                    setTimeout(() => { openModal('login'); }, 3000);
+                    currentUserId = data.userId;
+                    currentUserEmail = data.email;
+                    
+                    switchStep('step-payment'); // Vai para a tela de pagamento
+                    generatePixPayment();       // Gera o QR Code Real
                 } else {
-                    showMsg('Erro no Cadastro', data.error || 'Não foi possível criar a conta.', 'error');
+                    showMsg('Erro', data.error, 'error');
                 }
             } catch (error) {
-                showMsg('Erro Crítico', 'Servidor indisponível.', 'error');
+                showMsg('Erro', 'Falha ao conectar.', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function generatePixPayment() {
+            const pixContainer = document.getElementById('pay-content-pix');
+            pixContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Gerando QR Code no Banco...</p>';
+
+            try {
+                const res = await fetch(`${API_URL}/create-payment`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: currentUserId, email: currentUserEmail })
+                });
+                const data = await res.json();
+
+                if (data.qr_code_base64) {
+                    pixContainer.innerHTML = `
+                        <div class="pix-box">
+                            <img src="data:image/png;base64,${data.qr_code_base64}" width="200" alt="QR Pix">
+                        </div>
+                        <div style="background:#111; padding:10px; border-radius:4px; margin:15px 0; word-break:break-all; font-family:monospace; font-size:0.7rem; color:#ccc; max-height:60px; overflow-y:auto; border:1px solid #333;">
+                            ${data.qr_code}
+                        </div>
+                        <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="padding:8px 20px; font-size:0.8rem; width:100%;">
+                            <i class="fa-regular fa-copy"></i> COPIAR CÓDIGO
+                        </button>
+                        <p style="color:#666; margin-top:10px; font-size:0.8rem;">Abra o app do seu banco e escolha "Pix Copia e Cola".</p>
+                    `;
+                }
+            } catch (e) {
+                pixContainer.innerHTML = '<p style="color:#cc0000; margin-top:20px;">Erro ao gerar PIX. Verifique sua conexão.</p>';
+            }
+        }
+
+        // --- LÓGICA DO BOTÃO "JÁ FIZ O PAGAMENTO" (Bloqueia Saída) ---
+        async function checkPaymentAndFinish() {
+            const btn = document.getElementById('btn-finish-pix');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
+            btn.disabled = true;
+
+            if (!currentUserId) {
+                // Se perdeu o ID, não tem o que fazer.
+                showMsg('Erro', 'Sessão perdida. Recarregue a página.', 'error');
+                return;
+            }
+
+            try {
+                // Verifica no servidor se o status mudou para 'active'
+                const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
+                const data = await res.json();
+
+                if (data.status === 'active') {
+                    showMsg('Sucesso!', 'Pagamento confirmado. Pode fazer login.', 'success');
+                    
+                    // AGORA SIM LIBERA A SAÍDA
+                    document.querySelector('.close-modal').style.display = 'block'; // Mostra o X de volta
+                    closeModal();
+                    switchStep('step-login');
+                } else {
+                    showMsg('Ainda Pendente', 'O banco ainda não confirmou o pagamento. Aguarde alguns segundos e tente novamente.', 'info');
+                }
+            } catch (error) {
+                console.log(error);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -945,7 +1079,6 @@
         function showError(inputId, spanId, message) {
             const input = document.getElementById(inputId);
             const span = document.getElementById(spanId);
-            
             input.classList.add('input-invalid');
             span.innerText = message;
             span.style.display = 'block';
@@ -956,40 +1089,6 @@
             const span = inputElement.previousElementSibling;
             if (span && span.classList.contains('field-error')) {
                 span.style.display = 'none';
-            }
-        }
-
-        function validateAndGoToPix() {
-            let isValid = true;
-
-            const name = document.getElementById('regName').value.trim();
-            const whatsapp = document.getElementById('whatsappInput').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPass').value.trim();
-
-            if (!name) {
-                showError('regName', 'err-name', 'Digite seu nome.');
-                isValid = false;
-            }
-
-            const cleanPhone = whatsapp.replace(/\D/g, ''); 
-            if (cleanPhone.length < 11) {
-                showError('whatsappInput', 'err-whats', 'Número incompleto (11 dígitos).');
-                isValid = false;
-            }
-
-            if (!isValidEmail(email)) {
-                showError('regEmail', 'err-email', 'E-mail inválido.');
-                isValid = false;
-            }
-
-            if (password.length < 8) {
-                showError('regPass', 'err-pass', 'Mínimo 8 caracteres.');
-                isValid = false;
-            }
-
-            if (isValid) {
-                switchStep('step-pix');
             }
         }
 
