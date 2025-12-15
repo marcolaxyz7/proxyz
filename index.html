@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
 
     <style>
         /* --- CONFIGURAÇÕES GERAIS --- */
@@ -310,6 +311,15 @@
             75% { transform: translateX(-5px); }
             100% { transform: translateX(0); }
         }
+
+        /* Botão Cancelar novo */
+        .btn-cancel {
+            background: transparent; border: none; color: #666; 
+            text-decoration: underline; margin-top: 15px; 
+            cursor: pointer; font-size: 0.8rem; width: 100%;
+            font-family: 'Roboto', sans-serif;
+        }
+        .btn-cancel:hover { color: #cc0000; }
     </style>
 </head>
 <body>
@@ -714,7 +724,9 @@
 
                 <div class="input-wrapper">
                     <span class="field-error" id="err-whats">Número inválido</span>
-                    <input type="text" id="whatsappInput" class="auth-input" placeholder="Telefone (ex: +55 11 99999-9999)" oninput="clearError(this)">
+                    <input type="tel" id="whatsappInput" class="auth-input" 
+                           placeholder="WhatsApp (Ex: +55 11 99999-9999)" 
+                           oninput="formatGlobalPhone(this); clearError(this)">
                 </div>
 
                 <div class="input-wrapper">
@@ -764,12 +776,39 @@
                     <p style="color:#666; font-size:0.8rem; margin-bottom:20px;">Escaneie o QR Code acima com seu banco.</p>
                 </div>
 
-                <div id="pay-content-card" style="display: none; padding: 20px 0;">
-                    <p style="color:#ccc; font-size:0.9rem;">Pagamento seguro via Cartão de Crédito.</p>
-                    <button class="btn-main" style="margin-top:15px; border-color:#fff;">
-                        <i class="fa-regular fa-credit-card"></i> PAGAR COM CARTÃO
-                    </button>
+            <div id="pay-content-card" style="display: none; padding: 10px 0;">
+                <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px;">Cartão de Crédito ou Débito (À Vista)</p>
+                
+                <div class="input-wrapper">
+                    <input type="text" id="cardNumber" class="auth-input" placeholder="Número do Cartão">
                 </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="input-wrapper">
+                        <input type="text" id="cardExpiration" class="auth-input" placeholder="MM/YY">
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="text" id="cardCvv" class="auth-input" placeholder="CVV">
+                    </div>
+                </div>
+
+                <div class="input-wrapper">
+                    <input type="text" id="cardHolderName" class="auth-input" placeholder="Nome impresso no cartão">
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <div class="input-wrapper">
+                        <select id="docType" class="auth-input" style="width:80px;"><option value="CPF">CPF</option></select>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="text" id="docNumber" class="auth-input" placeholder="CPF do Titular">
+                    </div>
+                </div>
+
+                <button class="btn-main" id="btn-pay-card" style="width:100%; background:#fff; color:#000; border-color:#fff;" onclick="processCardPayment()">
+                    PAGAR R$ 19,90
+                </button>
+            </div>
                 
                 <div class="legal-check-wrapper">
                     <input type="checkbox" id="legalCheck" onchange="togglePixButton()">
@@ -777,6 +816,8 @@
                 </div>
 
                 <button class="btn-main" id="btn-finish-pix" style="width:100%; background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
+                
+                <button class="btn-cancel" onclick="cancelRegistration()">Desistir da compra e apagar cadastro</button>
             </div>
         </div>
 
@@ -792,34 +833,34 @@
         </div>
     </div>
 
-<script>
+ <script>
         const API_URL = 'http://localhost:3000/api';
         let currentUserId = null;
         let currentUserEmail = null;
+        let mp = null;
 
-        /* --- 1. RESTAURANDO AS ANIMAÇÕES (IMPORTANTE!) --- */
+        // --- 1. VISUAL (Animação de Scroll) ---
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('active');
-                } else {
-                    // Se quiser que suma ao sair da tela, mantenha a linha abaixo.
-                    // Se quiser que fique visível pra sempre depois da primeira vez, apague a linha abaixo.
-                    entry.target.classList.remove('active'); 
-                }
+                if (entry.isIntersecting) entry.target.classList.add('active');
             });
         });
-        // Aplica o observador em tudo que tem a classe .reveal
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
         function flipCard(element) { element.classList.toggle('flipped'); }
 
-        // --- 2. SISTEMA DE MODAIS E PAGAMENTO ---
-
-        function showMsg(title, text) {
+        // --- 2. SISTEMA DE MODAL ---
+        function showMsg(title, text, type = 'info') {
             const modal = document.getElementById('msgModal');
+            const icon = document.getElementById('msgIcon');
             document.getElementById('msgTitle').innerText = title;
             document.getElementById('msgText').innerText = text;
+
+            icon.className = 'msg-icon fa-solid';
+            if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
+            else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
+            else icon.classList.add('fa-circle-exclamation', 'msg-info');
+
             modal.style.display = 'flex';
         }
         function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
@@ -829,24 +870,24 @@
             switchStep(step === 'login' ? 'step-login' : 'step-signup');
         }
 
-        // LÓGICA DO BOTÃO X (FECHAR) E DESISTÊNCIA
+        // LÓGICA DO BOTÃO X (FECHAR) - Agora chama o cancelamento corretamente
         function closeModal() {
             const paymentStep = document.getElementById('step-payment');
-            // Se fechar na tela de pagamento e tiver um ID gerado, cancela o cadastro
+            
+            // Se estiver na tela de pagamento (tem a classe active) E tivermos um usuário criado
             if (paymentStep.classList.contains('active') && currentUserId) {
-                console.log("Fechando modal na etapa de pagamento. Cancelando cadastro...");
+                console.log("Fechando pelo X na tela de pagamento -> Cancelando...");
                 cancelRegistration(); 
+                return; // O cancelRegistration já fecha o modal no final
             }
+            
             document.getElementById('authModal').style.display = 'none';
         }
 
         function switchStep(stepId) {
             document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
             document.getElementById(stepId).classList.add('active');
-            
-            // Garante que o botão X esteja visível
-            const closeBtn = document.querySelector('.close-modal');
-            if(closeBtn) closeBtn.style.display = 'block';
+            document.querySelector('.close-modal').style.display = 'block';
         }
 
         function openLegalModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -854,26 +895,70 @@
 
         // --- ABAS DE PAGAMENTO ---
         function selectPayment(type) {
-            document.getElementById('tab-pix').classList.remove('active');
-            document.getElementById('tab-card').classList.remove('active');
-            document.getElementById('pay-content-pix').style.display = type === 'pix' ? 'block' : 'none';
-            document.getElementById('pay-content-card').style.display = type === 'card' ? 'block' : 'none';
-            
-            if(type === 'pix') document.getElementById('tab-pix').classList.add('active');
-            else document.getElementById('tab-card').classList.add('active');
-        }
+        document.getElementById('pay-content-pix').style.display = type === 'pix' ? 'block' : 'none';
+        document.getElementById('pay-content-card').style.display = type === 'card' ? 'block' : 'none';
+        
+        // Botão PIX
+        const btnPix = document.getElementById('btn-finish-pix');
+        if(btnPix) btnPix.style.display = type === 'pix' ? 'block' : 'none';
 
+        // Abas
+        const btnPixTab = document.getElementById('tab-pix');
+        const btnCardTab = document.getElementById('tab-card');
+        
+        if(type === 'pix') {
+            btnPixTab.classList.add('active');
+            btnCardTab.classList.remove('active');
+        } else {
+            btnCardTab.classList.add('active');
+            btnPixTab.classList.remove('active');
+        }
+    }
+    
         function togglePixButton() {
             const check = document.getElementById('legalCheck');
             const btn = document.getElementById('btn-finish-pix');
             if(check && btn) btn.disabled = !check.checked;
         }
 
+        // --- 3. VALIDAÇÕES & FORMATAÇÃO ---
+        function formatGlobalPhone(input) {
+            let value = input.value.replace(/[^0-9+]/g, ''); 
+            if (value.includes('+')) {
+                const parts = value.split('+');
+                value = '+' + parts.join('');
+            }
+            input.value = value;
+        }
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showError(inputId, msg) {
+            const input = document.getElementById(inputId);
+            const span = input.previousElementSibling;
+            input.classList.add('input-invalid');
+            if (span && span.classList.contains('field-error')) {
+                span.innerText = msg;
+                span.style.display = 'block';
+            }
+        }
+
+        function clearError(input) {
+            input.classList.remove('input-invalid');
+            const span = input.previousElementSibling;
+            if (span && span.classList.contains('field-error')) {
+                span.style.display = 'none';
+            }
+        }
+
         // --- LOGIN ---
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
-            if(!email || !password) return showMsg('Erro', 'Preencha todos os campos.');
+            if(!email || !password) return showMsg('Erro', 'Preencha todos os campos.', 'error');
 
             try {
                 const res = await fetch(`${API_URL}/login`, {
@@ -887,24 +972,45 @@
                     localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
                 } else if (res.status === 403 && data.payment_required) {
-                    showMsg('Atenção', 'Pagamento pendente. Cadastre-se novamente para gerar um novo código.');
+                    currentUserId = data.userId;
+                    currentUserEmail = data.email;
+                    showMsg('Pagamento Pendente', 'Falta confirmar o pagamento. Vamos gerar o código novamente.', 'info');
+                    setTimeout(() => { closeMsgModal(); openModal('signup'); switchStep('step-payment'); generatePixPayment(); }, 2000);
                 } else {
-                    showMsg('Erro', data.error || 'Falha no login');
+                    showMsg('Erro', data.error || 'Falha no login', 'error');
                 }
-            } catch (e) { showMsg('Erro', 'Servidor offline ou erro de conexão.'); }
+            } catch (e) { showMsg('Erro', 'Servidor offline ou erro de conexão.', 'error'); }
         }
 
         // --- CADASTRO ---
         async function validateAndGoToPayment() {
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const password = document.getElementById('regPass').value;
-            const whatsapp = document.getElementById('whatsappInput').value;
+            const nameInput = document.getElementById('regName');
+            const emailInput = document.getElementById('regEmail');
+            const passInput = document.getElementById('regPass');
+            const whatsInput = document.getElementById('whatsappInput');
 
-            if(!name || !email || !password) return showMsg('Erro', 'Preencha todos os dados.');
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passInput.value;
+            const whatsapp = whatsInput.value.trim();
+
+            let hasError = false;
+
+            if (!name) { showError('regName', 'Nome obrigatório'); hasError = true; }
+            if (!validateEmail(email)) { showError('regEmail', 'E-mail inválido'); hasError = true; }
+            if (password.length < 8) { showError('regPass', 'Mínimo 8 caracteres'); hasError = true; }
+            const cleanPhone = whatsapp.replace(/\D/g, ''); 
+            if (cleanPhone.length < 8 || cleanPhone.length > 15) {
+                showError('whatsappInput', 'Número inválido (use DDI+DDD)');
+                hasError = true;
+            }
+
+            if (hasError) return;
 
             const btn = document.querySelector('#step-signup .btn-main');
-            btn.innerHTML = 'Processando...'; btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...'; 
+            btn.disabled = true;
 
             try {
                 const res = await fetch(`${API_URL}/register`, {
@@ -916,13 +1022,14 @@
                 if (res.ok) {
                     currentUserId = data.userId;
                     currentUserEmail = data.email;
-                    switchStep('step-payment'); // Avança para pagamento
-                    generatePixPayment();       // Chama o PIX
+                    console.log("Usuário criado temporariamente ID:", currentUserId); // DEBUG
+                    switchStep('step-payment'); 
+                    generatePixPayment();       
                 } else {
-                    showMsg('Erro', data.error);
+                    showMsg('Erro', data.error, 'error');
                 }
-            } catch (e) { showMsg('Erro', 'Falha ao conectar.'); }
-            finally { btn.innerHTML = 'IR PARA PAGAMENTO &rarr;'; btn.disabled = false; }
+            } catch (e) { showMsg('Erro', 'Falha ao conectar.', 'error'); }
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
         // --- GERAR PIX ---
@@ -939,38 +1046,51 @@
 
                 if (res.ok && data.qr_code_base64) {
                     container.innerHTML = `
-                        <div style="background:#fff; padding:10px; display:inline-block; border-radius:8px; margin:15px 0;">
-                            <img src="data:image/png;base64,${data.qr_code_base64}" width="180">
+                        <div style="background:#fff; padding:10px; border-radius:8px; margin:15px 0; display:inline-block;">
+                            <img src="data:image/png;base64,${data.qr_code_base64}" width="180" alt="QR Pix">
                         </div>
                         <textarea readonly style="width:100%; background:#111; color:#ccc; border:1px solid #333; font-size:0.7rem; margin:10px 0; height:60px;">${data.qr_code}</textarea>
                         <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="font-size:0.8rem; padding:5px;">COPIAR CÓDIGO</button>
                     `;
                 } else {
-                    container.innerHTML = `<p style="color:#cc0000">Erro: ${data.error || 'Falha ao gerar.'}</p>`;
+                    container.innerHTML = `<p style="color:#cc0000">Erro MP: ${data.error || 'Falha ao gerar.'}</p>`;
                 }
             } catch (e) { container.innerHTML = '<p style="color:#cc0000">Erro de conexão.</p>'; }
         }
 
-        // --- CANCELAR E LIMPAR ---
+        // --- CANCELAR E LIMPAR (ESSA É A FUNÇÃO IMPORTANTE) ---
         async function cancelRegistration() {
+            console.log("Iniciando cancelamento para ID:", currentUserId); // DEBUG NO CONSOLE
+
             if (currentUserId) {
-                // Chama a rota que apaga o usuário PENDING
-                fetch(`${API_URL}/cancel-register`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: currentUserId })
-                }).catch(e => console.error(e));
+                // Usamos await para tentar garantir que o comando saia antes de fechar visualmente
+                try {
+                    await fetch(`${API_URL}/cancel-register`, {
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ userId: currentUserId })
+                    });
+                    console.log("Comando de cancelamento enviado.");
+                } catch (e) {
+                    console.error("Erro ao enviar cancelamento:", e);
+                }
+            } else {
+                console.log("Nenhum usuário para cancelar.");
             }
-            // Limpa dados locais
+
+            // Limpa dados locais e reseta tela
             currentUserId = null;
             currentUserEmail = null;
-            // Volta pro inicio (Login)
-            setTimeout(() => { switchStep('step-login'); }, 300);
+            document.getElementById('authModal').style.display = 'none';
+            switchStep('step-login');
         }
 
         // --- VERIFICAR PAGAMENTO ---
         async function checkPaymentAndFinish() {
             const btn = document.getElementById('btn-finish-pix');
-            btn.innerHTML = 'Verificando...'; btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...'; 
+            btn.disabled = true;
             
             try {
                 const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
@@ -978,18 +1098,19 @@
                 
                 if (data.status === 'active') {
                     showMsg('Sucesso!', 'Acesso liberado! Faça login.', 'success');
+                    // Aqui limpamos as variáveis MAS NÃO CHAMAMOS CANCELAR
+                    // porque o usuário pagou de verdade.
+                    currentUserId = null;
                     document.getElementById('authModal').style.display = 'none';
                     switchStep('step-login');
                 } else {
                     showMsg('Pendente', 'Pagamento ainda não confirmado.', 'info');
                 }
             } catch (e) { console.error(e); }
-            finally { btn.innerHTML = 'JÁ FIZ O PAGAMENTO'; btn.disabled = false; }
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        // Helpers visuais
-        function clearError(input) { input.classList.remove('input-invalid'); }
-        // Minigame placeholder (para nao dar erro se nao tiver a logica completa)
+        // Minigame
         function resetLuckySection() {
             const display = document.getElementById('prizeDisplay');
             if(display) display.classList.remove('active');
@@ -1006,6 +1127,91 @@
                 resetLuckySection();
             }
         }
+
+        // INICIALIZA O MERCADO PAGO AO CARREGAR A PÁGINA
+    async function initMP() {
+        try {
+            const res = await fetch(`${API_URL}/config`);
+            const data = await res.json();
+            if(data.publicKey) {
+                mp = new MercadoPago(data.publicKey);
+            }
+        } catch(e) { console.error("Erro ao carregar MP", e); }
+    }
+    initMP(); // Chama a função
+
+    // --- PROCESSAR PAGAMENTO COM CARTÃO ---
+    async function processCardPayment() {
+        if (!mp) return showMsg('Erro', 'Sistema de pagamento indisponível.');
+
+        const btn = document.getElementById('btn-pay-card');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...'; 
+        btn.disabled = true;
+
+        try {
+            // 1. Cria o Token do Cartão (Isso envia os dados pro Mercado Pago, não pro seu server)
+            const cardToken = await mp.createCardToken({
+                cardNumber: document.getElementById('cardNumber').value.replace(/\D/g,''),
+                cardholderName: document.getElementById('cardHolderName').value,
+                cardExpirationMonth: document.getElementById('cardExpiration').value.split('/')[0],
+                cardExpirationYear: '20' + document.getElementById('cardExpiration').value.split('/')[1],
+                securityCode: document.getElementById('cardCvv').value,
+                identification: {
+                    type: document.getElementById('docType').value,
+                    number: document.getElementById('docNumber').value.replace(/\D/g,'')
+                }
+            });
+
+            // 2. Se deu erro no token (dados inválidos)
+            if (!cardToken || !cardToken.id) {
+                throw new Error("Dados do cartão inválidos. Verifique e tente novamente.");
+            }
+
+            // 3. Descobre a bandeira e banco (Issuer)
+            const paymentMethods = await mp.getPaymentMethods({ bin: cardToken.first_six_digits });
+            const paymentMethodId = paymentMethods.results[0].id;
+            const issuers = await mp.getIssuers({ paymentMethodId: paymentMethodId, bin: cardToken.first_six_digits });
+            const issuerId = issuers[0].id;
+
+            // 4. Envia tudo para o SEU Backend
+            const res = await fetch(`${API_URL}/create-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: currentUserId,
+                    email: currentUserEmail,
+                    type: 'card', // Indica que é cartão
+                    token: cardToken.id,
+                    paymentMethodId: paymentMethodId,
+                    issuerId: issuerId,
+                    payer: {
+                        docType: document.getElementById('docType').value,
+                        docNumber: document.getElementById('docNumber').value.replace(/\D/g,'')
+                    }
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.status === 'approved') {
+                showMsg('Sucesso!', 'Pagamento Aprovado! Bem-vindo.', 'success');
+                // Limpa variáveis locais e fecha
+                currentUserId = null;
+                document.getElementById('authModal').style.display = 'none';
+                switchStep('step-login');
+            } else {
+                showMsg('Recusado', 'O pagamento não foi autorizado pelo banco.', 'error');
+            }
+
+        } catch (e) {
+            console.error(e);
+            showMsg('Erro', e.message || 'Erro ao processar cartão.', 'error');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
     </script>
 </body>
 </html>
