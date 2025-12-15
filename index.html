@@ -792,13 +792,31 @@
         </div>
     </div>
 
- <script>
+<script>
         const API_URL = 'http://localhost:3000/api';
         let currentUserId = null;
         let currentUserEmail = null;
 
-        // --- MENSAGENS E MODAL ---
-        function showMsg(title, text, type) {
+        /* --- 1. RESTAURANDO AS ANIMAÇÕES (IMPORTANTE!) --- */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    // Se quiser que suma ao sair da tela, mantenha a linha abaixo.
+                    // Se quiser que fique visível pra sempre depois da primeira vez, apague a linha abaixo.
+                    entry.target.classList.remove('active'); 
+                }
+            });
+        });
+        // Aplica o observador em tudo que tem a classe .reveal
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        function flipCard(element) { element.classList.toggle('flipped'); }
+
+        // --- 2. SISTEMA DE MODAIS E PAGAMENTO ---
+
+        function showMsg(title, text) {
             const modal = document.getElementById('msgModal');
             document.getElementById('msgTitle').innerText = title;
             document.getElementById('msgText').innerText = text;
@@ -811,11 +829,12 @@
             switchStep(step === 'login' ? 'step-login' : 'step-signup');
         }
 
-        // [CORREÇÃO 1] O botão X agora funciona e cancela o cadastro se estiver pendente
+        // LÓGICA DO BOTÃO X (FECHAR) E DESISTÊNCIA
         function closeModal() {
             const paymentStep = document.getElementById('step-payment');
-            // Se estiver na tela de pagamento e fechar, considera desistência
+            // Se fechar na tela de pagamento e tiver um ID gerado, cancela o cadastro
             if (paymentStep.classList.contains('active') && currentUserId) {
+                console.log("Fechando modal na etapa de pagamento. Cancelando cadastro...");
                 cancelRegistration(); 
             }
             document.getElementById('authModal').style.display = 'none';
@@ -825,8 +844,9 @@
             document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
             document.getElementById(stepId).classList.add('active');
             
-            // [CORREÇÃO] Garante que o botão X (close-modal) esteja sempre visível
-            document.querySelector('.close-modal').style.display = 'block';
+            // Garante que o botão X esteja visível
+            const closeBtn = document.querySelector('.close-modal');
+            if(closeBtn) closeBtn.style.display = 'block';
         }
 
         function openLegalModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -838,19 +858,22 @@
             document.getElementById('tab-card').classList.remove('active');
             document.getElementById('pay-content-pix').style.display = type === 'pix' ? 'block' : 'none';
             document.getElementById('pay-content-card').style.display = type === 'card' ? 'block' : 'none';
+            
             if(type === 'pix') document.getElementById('tab-pix').classList.add('active');
             else document.getElementById('tab-card').classList.add('active');
         }
 
         function togglePixButton() {
-            document.getElementById('btn-finish-pix').disabled = !document.getElementById('legalCheck').checked;
+            const check = document.getElementById('legalCheck');
+            const btn = document.getElementById('btn-finish-pix');
+            if(check && btn) btn.disabled = !check.checked;
         }
 
         // --- LOGIN ---
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
-            if(!email || !password) return showMsg('Erro', 'Preencha tudo.');
+            if(!email || !password) return showMsg('Erro', 'Preencha todos os campos.');
 
             try {
                 const res = await fetch(`${API_URL}/login`, {
@@ -861,23 +884,24 @@
 
                 if (res.ok) {
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
                 } else if (res.status === 403 && data.payment_required) {
-                    showMsg('Atenção', 'Pagamento não identificado. Realize o cadastro novamente para gerar um novo PIX.');
+                    showMsg('Atenção', 'Pagamento pendente. Cadastre-se novamente para gerar um novo código.');
                 } else {
-                    showMsg('Erro', data.error);
+                    showMsg('Erro', data.error || 'Falha no login');
                 }
-            } catch (e) { showMsg('Erro', 'Sem conexão com servidor.'); }
+            } catch (e) { showMsg('Erro', 'Servidor offline ou erro de conexão.'); }
         }
 
-        // --- CADASTRO (Passo 1: Cria pendente) ---
+        // --- CADASTRO ---
         async function validateAndGoToPayment() {
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPass').value;
             const whatsapp = document.getElementById('whatsappInput').value;
 
-            if(!name || !email || !password) return showMsg('Erro', 'Preencha todos os campos.');
+            if(!name || !email || !password) return showMsg('Erro', 'Preencha todos os dados.');
 
             const btn = document.querySelector('#step-signup .btn-main');
             btn.innerHTML = 'Processando...'; btn.disabled = true;
@@ -892,8 +916,8 @@
                 if (res.ok) {
                     currentUserId = data.userId;
                     currentUserEmail = data.email;
-                    switchStep('step-payment'); // Vai para pagamento
-                    generatePixPayment();       // Gera QR Code
+                    switchStep('step-payment'); // Avança para pagamento
+                    generatePixPayment();       // Chama o PIX
                 } else {
                     showMsg('Erro', data.error);
                 }
@@ -901,7 +925,7 @@
             finally { btn.innerHTML = 'IR PARA PAGAMENTO &rarr;'; btn.disabled = false; }
         }
 
-        // --- GERAR PIX (Passo 2) ---
+        // --- GERAR PIX ---
         async function generatePixPayment() {
             const container = document.getElementById('pay-content-pix');
             container.innerHTML = '<p style="color:#888;">Gerando QR Code...</p>';
@@ -922,27 +946,28 @@
                         <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="font-size:0.8rem; padding:5px;">COPIAR CÓDIGO</button>
                     `;
                 } else {
-                    container.innerHTML = `<p style="color:#cc0000">Erro no Pagamento: ${data.error || 'Tente novamente.'}</p>`;
+                    container.innerHTML = `<p style="color:#cc0000">Erro: ${data.error || 'Falha ao gerar.'}</p>`;
                 }
             } catch (e) { container.innerHTML = '<p style="color:#cc0000">Erro de conexão.</p>'; }
         }
 
-        // --- CANCELAR E LIMPAR BANCO (Correção do "Usuário Fantasma") ---
+        // --- CANCELAR E LIMPAR ---
         async function cancelRegistration() {
             if (currentUserId) {
-                // Tenta limpar o usuário pendente no servidor silenciosamente
+                // Chama a rota que apaga o usuário PENDING
                 fetch(`${API_URL}/cancel-register`, {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: currentUserId })
                 }).catch(e => console.error(e));
             }
-            
-            // Reseta front-end
+            // Limpa dados locais
             currentUserId = null;
-            switchStep('step-login');
+            currentUserEmail = null;
+            // Volta pro inicio (Login)
+            setTimeout(() => { switchStep('step-login'); }, 300);
         }
 
-        // --- VERIFICAÇÃO DE STATUS ---
+        // --- VERIFICAR PAGAMENTO ---
         async function checkPaymentAndFinish() {
             const btn = document.getElementById('btn-finish-pix');
             btn.innerHTML = 'Verificando...'; btn.disabled = true;
@@ -952,11 +977,11 @@
                 const data = await res.json();
                 
                 if (data.status === 'active') {
-                    showMsg('Sucesso!', 'Conta ativada! Faça login.', 'success');
+                    showMsg('Sucesso!', 'Acesso liberado! Faça login.', 'success');
                     document.getElementById('authModal').style.display = 'none';
                     switchStep('step-login');
                 } else {
-                    showMsg('Pendente', 'Pagamento ainda não confirmado pelo banco.', 'info');
+                    showMsg('Pendente', 'Pagamento ainda não confirmado.', 'info');
                 }
             } catch (e) { console.error(e); }
             finally { btn.innerHTML = 'JÁ FIZ O PAGAMENTO'; btn.disabled = false; }
@@ -964,9 +989,23 @@
 
         // Helpers visuais
         function clearError(input) { input.classList.remove('input-invalid'); }
-        // Minigame simplificado para não dar erro se faltar
-        function resetLuckySection() {} 
-        function chooseSide(side) { openModal('signup'); }
+        // Minigame placeholder (para nao dar erro se nao tiver a logica completa)
+        function resetLuckySection() {
+            const display = document.getElementById('prizeDisplay');
+            if(display) display.classList.remove('active');
+            document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '1');
+        } 
+        function chooseSide(side) { 
+            const display = document.getElementById('prizeDisplay');
+            const coins = document.querySelectorAll('.hand-coin');
+            if (side === 'left' && display) {
+                coins.forEach(c => c.style.opacity = '0');
+                display.classList.add('active');
+            } else {
+                openModal('signup');
+                resetLuckySection();
+            }
+        }
     </script>
 </body>
 </html>
