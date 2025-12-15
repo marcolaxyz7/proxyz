@@ -320,6 +320,11 @@
             font-family: 'Roboto', sans-serif;
         }
         .btn-cancel:hover { color: #cc0000; }
+
+        /* ESTILO NOVO: BOTÕES DE OPÇÃO DE PAGAMENTO */
+        .pay-option-btn { width: 100%; padding: 15px; margin-bottom: 15px; background: #111; border: 1px solid #333; color: white; cursor: pointer; font-family: 'Oswald'; font-size: 1.1rem; transition: 0.3s; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .pay-option-btn:hover { background: #222; border-color: #cc0000; }
+        .pay-option-btn i { font-size: 1.5rem; color: #cc0000; }
     </style>
 </head>
 <body>
@@ -724,9 +729,7 @@
 
                 <div class="input-wrapper">
                     <span class="field-error" id="err-whats">Número inválido</span>
-                    <input type="tel" id="whatsappInput" class="auth-input" 
-                           placeholder="WhatsApp (Ex: +55 11 99999-9999)" 
-                           oninput="formatGlobalPhone(this); clearError(this)">
+                    <input type="tel" id="whatsappInput" class="auth-input" placeholder="WhatsApp (Ex: +55...)" oninput="formatGlobalPhone(this); clearError(this)">
                 </div>
 
                 <div class="input-wrapper">
@@ -740,147 +743,124 @@
                 </div>
 
                 <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPayment()">IR PARA PAGAMENTO &rarr;</button>
-                
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-login')">Já tenho conta.</button>
             </div>
 
             <div class="modal-step" id="step-forgot">
                 <h2>RECUPERAR SENHA</h2>
-                <p style="color:#666; margin-bottom:20px;">Digite seu e-mail para receber o link.</p>
-                
-                <div class="input-wrapper">
-                    <span class="field-error" id="err-forgot-email">E-mail inválido</span>
-                    <input type="email" id="forgotEmail" class="auth-input" placeholder="Seu e-mail cadastrado" oninput="clearError(this)">
-                </div>
-
+                <div class="input-wrapper"><span class="field-error">E-mail inválido</span><input type="email" id="forgotEmail" class="auth-input" placeholder="Seu e-mail cadastrado" oninput="clearError(this)"></div>
                 <button class="btn-main" id="btn-forgot" style="width:100%; margin-top:10px;" onclick="requestPasswordReset()">ENVIAR LINK</button>
-                
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-login')">Voltar para Login</button>
             </div>
 
             <div class="modal-step" id="step-payment">
-                <h2>FINALIZAR ACESSO</h2>
-                <p style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR SIMBÓLICO: R$ 19,90</p>
+                <h2>ESCOLHA O PAGAMENTO</h2>
+                <p style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR: R$ 19,90</p>
                 
-                <div class="pay-tabs">
-                    <button class="pay-tab-btn active" onclick="selectPayment('pix')" id="tab-pix">🇧🇷 PIX</button>
-                    <button class="pay-tab-btn" onclick="selectPayment('card')" id="tab-card">💳 CARTÃO / INT.</button>
+                <div id="pay-options">
+                    <button class="pay-option-btn" onclick="showPixView()">
+                        <i class="fa-brands fa-pix"></i> PAGAR COM PIX
+                        <span style="font-size:0.7rem; color:#888;">Liberação Imediata</span>
+                    </button>
+                    
+                    <button class="pay-option-btn" onclick="showCardView()">
+                        <i class="fa-regular fa-credit-card"></i> CARTÃO DE CRÉDITO
+                        <span style="font-size:0.7rem; color:#888;">À Vista</span>
+                    </button>
+                    
+                    <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
                 </div>
 
-                <div id="pay-content-pix">
-                    <div class="pix-box">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" width="150" height="150" alt="QR Pix">
+                <div id="pay-pix" style="display:none;">
+                    <div id="pay-content-pix" style="margin: 20px 0;">
+                        <p style="color:#888;">Gerando QR Code...</p>
                     </div>
-                    <p style="color:#666; font-size:0.8rem; margin-bottom:20px;">Escaneie o QR Code acima com seu banco.</p>
-                </div>
-
-            <div id="pay-content-card" style="display: none; padding: 10px 0;">
-                <p style="color:#ccc; font-size:0.9rem; margin-bottom:15px;">Cartão de Crédito ou Débito (À Vista)</p>
-                
-                <div class="input-wrapper">
-                    <input type="text" id="cardNumber" class="auth-input" placeholder="Número do Cartão">
-                </div>
-
-                <div style="display:flex; gap:10px;">
-                    <div class="input-wrapper">
-                        <input type="text" id="cardExpiration" class="auth-input" placeholder="MM/YY">
+                    <div class="legal-check-wrapper">
+                        <input type="checkbox" id="legalCheckPix" onchange="document.getElementById('btn-finish-pix').disabled = !this.checked">
+                        <label for="legalCheckPix">Concordo com os termos.</label>
                     </div>
-                    <div class="input-wrapper">
-                        <input type="text" id="cardCvv" class="auth-input" placeholder="CVV">
-                    </div>
+                    <button class="btn-main" id="btn-finish-pix" style="background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
+                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
                 </div>
 
-                <div class="input-wrapper">
-                    <input type="text" id="cardHolderName" class="auth-input" placeholder="Nome impresso no cartão">
+                <div id="pay-card" style="display:none;">
+                    <form id="form-checkout" style="text-align:left; margin-top:15px;">
+                        <div class="input-wrapper"><input type="text" id="form-checkout__cardNumber" class="auth-input" placeholder="Número do Cartão" /></div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><input type="text" id="form-checkout__expirationDate" class="auth-input" placeholder="MM/YY" /></div>
+                            <div class="input-wrapper"><input type="text" id="form-checkout__securityCode" class="auth-input" placeholder="CVV" /></div>
+                        </div>
+                        <div class="input-wrapper"><input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Nome no Cartão" /></div>
+                        
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><select id="form-checkout__issuer" class="auth-input"></select></div>
+                            <div class="input-wrapper" style="display:none;"><select id="form-checkout__installments" class="auth-input"></select></div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><select id="form-checkout__identificationType" class="auth-input" style="width:80px;"></select></div>
+                            <div class="input-wrapper"><input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="Documento" /></div>
+                        </div>
+                        <input type="email" id="form-checkout__cardholderEmail" style="display:none;"/>
+
+                        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;">PAGAR AGORA</button>
+                    </form>
+                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
                 </div>
-
-                <div style="display:flex; gap:10px;">
-                    <div class="input-wrapper">
-                        <select id="docType" class="auth-input" style="width:80px;"><option value="CPF">CPF</option></select>
-                    </div>
-                    <div class="input-wrapper">
-                        <input type="text" id="docNumber" class="auth-input" placeholder="CPF do Titular">
-                    </div>
-                </div>
-
-                <button class="btn-main" id="btn-pay-card" style="width:100%; background:#fff; color:#000; border-color:#fff;" onclick="processCardPayment()">
-                    PAGAR R$ 19,90
-                </button>
-            </div>
-                
-                <div class="legal-check-wrapper">
-                    <input type="checkbox" id="legalCheck" onchange="togglePixButton()">
-                    <label for="legalCheck">Entendo que este é um serviço digital de acesso imediato e concordo com os <a onclick="openLegalModal('modalTermos')">Termos de Uso</a>.</label>
-                </div>
-
-                <button class="btn-main" id="btn-finish-pix" style="width:100%; background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
-                
-                <button class="btn-cancel" onclick="cancelRegistration()">Desistir da compra e apagar cadastro</button>
-            </div>
-        </div>
-
-        <div class="modal-overlay" id="msgModal" style="display: none;">
-            <div class="auth-card" style="max-width: 400px; border-color: #333;">
-                <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
-                
-                <h2 id="msgTitle">ATENÇÃO</h2>
-                <p id="msgText">Mensagem do sistema aqui.</p>
-                
-                <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
             </div>
         </div>
     </div>
 
- <script>
+    <div class="modal-overlay" id="msgModal" style="display: none;">
+        <div class="auth-card" style="max-width: 400px; border-color: #333;">
+            <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
+            <h2 id="msgTitle">ATENÇÃO</h2>
+            <p id="msgText">Mensagem do sistema.</p>
+            <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
+        </div>
+    </div>
+
+    <script>
         const API_URL = 'http://localhost:3000/api';
         let currentUserId = null;
         let currentUserEmail = null;
         let mp = null;
+        let cardForm = null;
 
-        // --- 1. VISUAL (Animação de Scroll) ---
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
+        // 1. INICIALIZAÇÃO
+        async function initApp() {
+            // Animações
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
             });
-        });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            
+            // Mercado Pago (Pega Chave Pública do Backend)
+            try {
+                const res = await fetch(`${API_URL}/config`);
+                const data = await res.json();
+                if(data.publicKey) mp = new MercadoPago(data.publicKey);
+            } catch(e) { console.error("Erro MP Config", e); }
+        }
+        initApp();
 
-        function flipCard(element) { element.classList.toggle('flipped'); }
-
-        // --- 2. SISTEMA DE MODAL ---
-        function showMsg(title, text, type = 'info') {
-            const modal = document.getElementById('msgModal');
-            const icon = document.getElementById('msgIcon');
+        // 2. FUNÇÕES DE MODAL
+        function showMsg(title, text, type='info') {
             document.getElementById('msgTitle').innerText = title;
             document.getElementById('msgText').innerText = text;
-
-            icon.className = 'msg-icon fa-solid';
-            if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
-            else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
-            else icon.classList.add('fa-circle-exclamation', 'msg-info');
-
-            modal.style.display = 'flex';
+            const icon = document.getElementById('msgIcon');
+            icon.className = 'msg-icon fa-solid ' + (type === 'success' ? 'fa-check-circle msg-success' : type === 'error' ? 'fa-circle-xmark msg-error' : 'fa-circle-exclamation msg-info');
+            document.getElementById('msgModal').style.display = 'flex';
         }
         function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
-
-        function openModal(step) {
-            document.getElementById('authModal').style.display = 'flex';
-            switchStep(step === 'login' ? 'step-login' : 'step-signup');
-        }
-
-        // LÓGICA DO BOTÃO X (FECHAR) - Agora chama o cancelamento corretamente
+        function openModal(step) { document.getElementById('authModal').style.display = 'flex'; switchStep(step==='login'?'step-login':'step-signup'); }
+        
         function closeModal() {
-            const paymentStep = document.getElementById('step-payment');
-            
-            // Se estiver na tela de pagamento (tem a classe active) E tivermos um usuário criado
-            if (paymentStep.classList.contains('active') && currentUserId) {
-                console.log("Fechando pelo X na tela de pagamento -> Cancelando...");
-                cancelRegistration(); 
-                return; // O cancelRegistration já fecha o modal no final
+            if (document.getElementById('step-payment').classList.contains('active') && currentUserId) {
+                cancelRegistration(); // Limpa se fechar no meio
+                return;
             }
-            
             document.getElementById('authModal').style.display = 'none';
         }
 
@@ -893,325 +873,193 @@
         function openLegalModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // --- ABAS DE PAGAMENTO ---
-        function selectPayment(type) {
-        document.getElementById('pay-content-pix').style.display = type === 'pix' ? 'block' : 'none';
-        document.getElementById('pay-content-card').style.display = type === 'card' ? 'block' : 'none';
-        
-        // Botão PIX
-        const btnPix = document.getElementById('btn-finish-pix');
-        if(btnPix) btnPix.style.display = type === 'pix' ? 'block' : 'none';
-
-        // Abas
-        const btnPixTab = document.getElementById('tab-pix');
-        const btnCardTab = document.getElementById('tab-card');
-        
-        if(type === 'pix') {
-            btnPixTab.classList.add('active');
-            btnCardTab.classList.remove('active');
-        } else {
-            btnCardTab.classList.add('active');
-            btnPixTab.classList.remove('active');
+        // 3. NAVEGAÇÃO DE PAGAMENTO
+        function resetPaymentView() {
+            document.getElementById('pay-options').style.display = 'block';
+            document.getElementById('pay-pix').style.display = 'none';
+            document.getElementById('pay-card').style.display = 'none';
         }
-    }
-    
-        function togglePixButton() {
-            const check = document.getElementById('legalCheck');
-            const btn = document.getElementById('btn-finish-pix');
-            if(check && btn) btn.disabled = !check.checked;
+        function showPixView() {
+            document.getElementById('pay-options').style.display = 'none';
+            document.getElementById('pay-pix').style.display = 'block';
+            generatePixPayment();
         }
-
-        // --- 3. VALIDAÇÕES & FORMATAÇÃO ---
-        function formatGlobalPhone(input) {
-            let value = input.value.replace(/[^0-9+]/g, ''); 
-            if (value.includes('+')) {
-                const parts = value.split('+');
-                value = '+' + parts.join('');
-            }
-            input.value = value;
+        function showCardView() {
+            document.getElementById('pay-options').style.display = 'none';
+            document.getElementById('pay-card').style.display = 'block';
+            if(mp && !cardForm) mountCardForm();
         }
+        function togglePixButton() { document.getElementById('btn-finish-pix').disabled = !document.getElementById('legalCheckPix').checked; }
 
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        function showError(inputId, msg) {
-            const input = document.getElementById(inputId);
-            const span = input.previousElementSibling;
-            input.classList.add('input-invalid');
-            if (span && span.classList.contains('field-error')) {
-                span.innerText = msg;
-                span.style.display = 'block';
-            }
-        }
-
-        function clearError(input) {
-            input.classList.remove('input-invalid');
-            const span = input.previousElementSibling;
-            if (span && span.classList.contains('field-error')) {
-                span.style.display = 'none';
-            }
-        }
-
-        // --- LOGIN ---
+        // 4. LÓGICA DE USUÁRIO
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
-            if(!email || !password) return showMsg('Erro', 'Preencha todos os campos.', 'error');
-
             try {
-                const res = await fetch(`${API_URL}/login`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ email, password })
-                });
+                const res = await fetch(`${API_URL}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
                 const data = await res.json();
-
-                if (res.ok) {
+                if(res.ok) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
-                    window.location.href = 'dashboard.html';
-                } else if (res.status === 403 && data.payment_required) {
-                    currentUserId = data.userId;
-                    currentUserEmail = data.email;
-                    showMsg('Pagamento Pendente', 'Falta confirmar o pagamento. Vamos gerar o código novamente.', 'info');
-                    setTimeout(() => { closeMsgModal(); openModal('signup'); switchStep('step-payment'); generatePixPayment(); }, 2000);
-                } else {
-                    showMsg('Erro', data.error || 'Falha no login', 'error');
-                }
-            } catch (e) { showMsg('Erro', 'Servidor offline ou erro de conexão.', 'error'); }
+                    window.location.href='dashboard.html';
+                } else if(res.status===403) {
+                    currentUserId = data.userId; currentUserEmail = data.email;
+                    showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
+                    openModal('signup'); switchStep('step-payment'); resetPaymentView();
+                } else showMsg('Erro', data.error, 'error');
+            } catch(e) { showMsg('Erro', 'Falha na conexão.', 'error'); }
         }
 
-        // --- CADASTRO ---
         async function validateAndGoToPayment() {
-            const nameInput = document.getElementById('regName');
-            const emailInput = document.getElementById('regEmail');
-            const passInput = document.getElementById('regPass');
-            const whatsInput = document.getElementById('whatsappInput');
-
-            const name = nameInput.value.trim();
-            const email = emailInput.value.trim();
-            const password = passInput.value;
-            const whatsapp = whatsInput.value.trim();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value;
+            const whatsapp = document.getElementById('whatsappInput').value.replace(/\D/g,'');
 
             let hasError = false;
-
-            if (!name) { showError('regName', 'Nome obrigatório'); hasError = true; }
-            if (!validateEmail(email)) { showError('regEmail', 'E-mail inválido'); hasError = true; }
-            if (password.length < 8) { showError('regPass', 'Mínimo 8 caracteres'); hasError = true; }
-            const cleanPhone = whatsapp.replace(/\D/g, ''); 
-            if (cleanPhone.length < 8 || cleanPhone.length > 15) {
-                showError('whatsappInput', 'Número inválido (use DDI+DDD)');
-                hasError = true;
-            }
-
-            if (hasError) return;
+            if(!name) { showError('regName', 'Nome obrigatório'); hasError=true; }
+            if(!validateEmail(email)) { showError('regEmail', 'Inválido'); hasError=true; }
+            if(pass.length < 8) { showError('regPass', 'Mínimo 8'); hasError=true; }
+            if(whatsapp.length < 8) { showError('whatsappInput', 'Inválido'); hasError=true; }
+            if(hasError) return;
 
             const btn = document.querySelector('#step-signup .btn-main');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...'; 
-            btn.disabled = true;
+            const txt = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...'; btn.disabled = true;
 
             try {
-                const res = await fetch(`${API_URL}/register`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name, email, password, whatsapp })
-                });
+                const res = await fetch(`${API_URL}/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password:pass,whatsapp})});
                 const data = await res.json();
-
-                if (res.ok) {
-                    currentUserId = data.userId;
-                    currentUserEmail = data.email;
-                    console.log("Usuário criado temporariamente ID:", currentUserId); // DEBUG
-                    switchStep('step-payment'); 
-                    generatePixPayment();       
-                } else {
-                    showMsg('Erro', data.error, 'error');
-                }
-            } catch (e) { showMsg('Erro', 'Falha ao conectar.', 'error'); }
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+                if(res.ok) {
+                    currentUserId = data.userId; currentUserEmail = data.email;
+                    switchStep('step-payment'); resetPaymentView();
+                } else showMsg('Erro', data.error, 'error');
+            } catch(e) { showMsg('Erro', 'Falha ao criar conta.', 'error'); }
+            finally { btn.innerHTML = txt; btn.disabled = false; }
         }
 
-        // --- GERAR PIX ---
-        async function generatePixPayment() {
-            const container = document.getElementById('pay-content-pix');
-            container.innerHTML = '<p style="color:#888;">Gerando QR Code...</p>';
-
-            try {
-                const res = await fetch(`${API_URL}/create-payment`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: currentUserId, email: currentUserEmail })
-                });
-                const data = await res.json();
-
-                if (res.ok && data.qr_code_base64) {
-                    container.innerHTML = `
-                        <div style="background:#fff; padding:10px; border-radius:8px; margin:15px 0; display:inline-block;">
-                            <img src="data:image/png;base64,${data.qr_code_base64}" width="180" alt="QR Pix">
-                        </div>
-                        <textarea readonly style="width:100%; background:#111; color:#ccc; border:1px solid #333; font-size:0.7rem; margin:10px 0; height:60px;">${data.qr_code}</textarea>
-                        <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="font-size:0.8rem; padding:5px;">COPIAR CÓDIGO</button>
-                    `;
-                } else {
-                    container.innerHTML = `<p style="color:#cc0000">Erro MP: ${data.error || 'Falha ao gerar.'}</p>`;
-                }
-            } catch (e) { container.innerHTML = '<p style="color:#cc0000">Erro de conexão.</p>'; }
-        }
-
-        // --- CANCELAR E LIMPAR (ESSA É A FUNÇÃO IMPORTANTE) ---
         async function cancelRegistration() {
-            console.log("Iniciando cancelamento para ID:", currentUserId); // DEBUG NO CONSOLE
-
-            if (currentUserId) {
-                // Usamos await para tentar garantir que o comando saia antes de fechar visualmente
-                try {
-                    await fetch(`${API_URL}/cancel-register`, {
-                        method: 'POST', 
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ userId: currentUserId })
-                    });
-                    console.log("Comando de cancelamento enviado.");
-                } catch (e) {
-                    console.error("Erro ao enviar cancelamento:", e);
-                }
-            } else {
-                console.log("Nenhum usuário para cancelar.");
+            if(currentUserId) {
+                try { await fetch(`${API_URL}/cancel-register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUserId}) }); }
+                catch(e){}
             }
-
-            // Limpa dados locais e reseta tela
             currentUserId = null;
-            currentUserEmail = null;
             document.getElementById('authModal').style.display = 'none';
             switchStep('step-login');
         }
 
-        // --- VERIFICAR PAGAMENTO ---
+        // 5. PIX
+        async function generatePixPayment() {
+            const container = document.getElementById('pay-content-pix');
+            container.innerHTML = '<p>Gerando Pix...</p>';
+            try {
+                const res = await fetch(`${API_URL}/create-payment`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUserId, email:currentUserEmail, type:'pix'})});
+                const data = await res.json();
+                if(data.qr_code_base64) {
+                    container.innerHTML = `<div class="pix-box"><img src="data:image/png;base64,${data.qr_code_base64}" width="180"></div><textarea readonly style="width:100%; background:#111; color:#ccc; border:1px solid #333; font-size:0.7rem;">${data.qr_code}</textarea><button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="padding:5px;">COPIAR</button>`;
+                }
+            } catch(e) { container.innerHTML = '<p style="color:#cc0000">Erro ao gerar Pix.</p>'; }
+        }
+
         async function checkPaymentAndFinish() {
             const btn = document.getElementById('btn-finish-pix');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...'; 
-            btn.disabled = true;
+            btn.innerHTML = 'Verificando...';
+            const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
+            const data = await res.json();
+            if(data.status === 'active') {
+                showMsg('Sucesso!', 'Conta ativada!', 'success');
+                currentUserId = null; 
+                document.getElementById('authModal').style.display = 'none';
+                switchStep('step-login');
+            } else { showMsg('Aguardando', 'Pagamento ainda não confirmado.', 'info'); }
+            btn.innerHTML = 'JÁ FIZ O PAGAMENTO';
+        }
+
+        // 6. CARTÃO (BRICK/FORM)
+        function mountCardForm() {
+            document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
             
+            cardForm = mp.cardForm({
+                amount: "19.90",
+                iframe: true,
+                form: {
+                    id: "form-checkout",
+                    cardNumber: { id: "form-checkout__cardNumber" },
+                    expirationDate: { id: "form-checkout__expirationDate" },
+                    securityCode: { id: "form-checkout__securityCode" },
+                    cardholderName: { id: "form-checkout__cardholderName" },
+                    issuer: { id: "form-checkout__issuer" },
+                    installments: { id: "form-checkout__installments" },
+                    identificationType: { id: "form-checkout__identificationType" },
+                    identificationNumber: { id: "form-checkout__identificationNumber" },
+                    cardholderEmail: { id: "form-checkout__cardholderEmail" },
+                },
+                callbacks: {
+                    onFormMounted: error => { if (error) console.warn("Form Error", error); },
+                    onSubmit: event => {
+                        event.preventDefault();
+                        // Pega os dados seguros
+                        const { paymentMethodId, issuerId, amount, token, identificationNumber, identificationType } = cardForm.getCardFormData();
+                        
+                        // Envia para o backend
+                        processCardBackend({
+                            token, issuerId, paymentMethodId, amount, 
+                            payer: { identification: { type: identificationType, number: identificationNumber } }
+                        });
+                    },
+                    onFetching: (resource) => {
+                        const btn = document.getElementById('form-checkout__submit');
+                        const txt = btn.innerHTML;
+                        btn.innerHTML = 'Processando...'; btn.disabled = true;
+                        return () => { btn.disabled = false; btn.innerHTML = txt; };
+                    }
+                },
+            });
+        }
+
+        async function processCardBackend(data) {
             try {
-                const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
-                const data = await res.json();
+                const res = await fetch(`${API_URL}/create-payment`, {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId: currentUserId, 
+                        email: currentUserEmail, 
+                        type: 'card',
+                        installments: 1, // Força à vista
+                        ...data 
+                    })
+                });
                 
-                if (data.status === 'active') {
-                    showMsg('Sucesso!', 'Acesso liberado! Faça login.', 'success');
-                    // Aqui limpamos as variáveis MAS NÃO CHAMAMOS CANCELAR
-                    // porque o usuário pagou de verdade.
-                    currentUserId = null;
+                const result = await res.json();
+                
+                if (result.status === 'approved') {
+                    showMsg('Sucesso!', 'Pagamento Aprovado! Bem-vindo.', 'success');
+                    currentUserId = null; 
                     document.getElementById('authModal').style.display = 'none';
                     switchStep('step-login');
                 } else {
-                    showMsg('Pendente', 'Pagamento ainda não confirmado.', 'info');
+                    showMsg('Recusado', 'Pagamento negado pelo banco.', 'error');
                 }
-            } catch (e) { console.error(e); }
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+            } catch (e) {
+                showMsg('Erro', 'Falha ao processar cartão.', 'error');
+            }
         }
 
-        // Minigame
+        // Helpers
+        function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }
+        function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+        function showError(id, msg) { const el=document.getElementById(id); el.classList.add('input-invalid'); const sp=el.previousElementSibling; if(sp) {sp.innerText=msg; sp.style.display='block';} }
+        function clearError(i) { i.classList.remove('input-invalid'); i.previousElementSibling.style.display='none'; }
+        
+        function flipCard(el) { el.classList.toggle('flipped'); }
         function resetLuckySection() {
-            const display = document.getElementById('prizeDisplay');
-            if(display) display.classList.remove('active');
+            document.getElementById('prizeDisplay').classList.remove('active');
             document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '1');
         } 
         function chooseSide(side) { 
-            const display = document.getElementById('prizeDisplay');
-            const coins = document.querySelectorAll('.hand-coin');
-            if (side === 'left' && display) {
-                coins.forEach(c => c.style.opacity = '0');
-                display.classList.add('active');
-            } else {
-                openModal('signup');
-                resetLuckySection();
-            }
+            if (side === 'left') { document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '0'); document.getElementById('prizeDisplay').classList.add('active'); } 
+            else { openModal('signup'); resetLuckySection(); }
         }
-
-        // INICIALIZA O MERCADO PAGO AO CARREGAR A PÁGINA
-    async function initMP() {
-        try {
-            const res = await fetch(`${API_URL}/config`);
-            const data = await res.json();
-            if(data.publicKey) {
-                mp = new MercadoPago(data.publicKey);
-            }
-        } catch(e) { console.error("Erro ao carregar MP", e); }
-    }
-    initMP(); // Chama a função
-
-    // --- PROCESSAR PAGAMENTO COM CARTÃO ---
-    async function processCardPayment() {
-        if (!mp) return showMsg('Erro', 'Sistema de pagamento indisponível.');
-
-        const btn = document.getElementById('btn-pay-card');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...'; 
-        btn.disabled = true;
-
-        try {
-            // 1. Cria o Token do Cartão (Isso envia os dados pro Mercado Pago, não pro seu server)
-            const cardToken = await mp.createCardToken({
-                cardNumber: document.getElementById('cardNumber').value.replace(/\D/g,''),
-                cardholderName: document.getElementById('cardHolderName').value,
-                cardExpirationMonth: document.getElementById('cardExpiration').value.split('/')[0],
-                cardExpirationYear: '20' + document.getElementById('cardExpiration').value.split('/')[1],
-                securityCode: document.getElementById('cardCvv').value,
-                identification: {
-                    type: document.getElementById('docType').value,
-                    number: document.getElementById('docNumber').value.replace(/\D/g,'')
-                }
-            });
-
-            // 2. Se deu erro no token (dados inválidos)
-            if (!cardToken || !cardToken.id) {
-                throw new Error("Dados do cartão inválidos. Verifique e tente novamente.");
-            }
-
-            // 3. Descobre a bandeira e banco (Issuer)
-            const paymentMethods = await mp.getPaymentMethods({ bin: cardToken.first_six_digits });
-            const paymentMethodId = paymentMethods.results[0].id;
-            const issuers = await mp.getIssuers({ paymentMethodId: paymentMethodId, bin: cardToken.first_six_digits });
-            const issuerId = issuers[0].id;
-
-            // 4. Envia tudo para o SEU Backend
-            const res = await fetch(`${API_URL}/create-payment`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: currentUserId,
-                    email: currentUserEmail,
-                    type: 'card', // Indica que é cartão
-                    token: cardToken.id,
-                    paymentMethodId: paymentMethodId,
-                    issuerId: issuerId,
-                    payer: {
-                        docType: document.getElementById('docType').value,
-                        docNumber: document.getElementById('docNumber').value.replace(/\D/g,'')
-                    }
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.status === 'approved') {
-                showMsg('Sucesso!', 'Pagamento Aprovado! Bem-vindo.', 'success');
-                // Limpa variáveis locais e fecha
-                currentUserId = null;
-                document.getElementById('authModal').style.display = 'none';
-                switchStep('step-login');
-            } else {
-                showMsg('Recusado', 'O pagamento não foi autorizado pelo banco.', 'error');
-            }
-
-        } catch (e) {
-            console.error(e);
-            showMsg('Erro', e.message || 'Erro ao processar cartão.', 'error');
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
     </script>
 </body>
 </html>
