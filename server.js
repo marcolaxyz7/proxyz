@@ -3,7 +3,6 @@ const cors = require('cors');
 const pool = require('./db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 require('dotenv').config();
 
@@ -12,100 +11,55 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('.'));
 
-// --- CONFIGURAÇÕES ---
-// Verificação de segurança ao iniciar
-if (!process.env.MP_ACCESS_TOKEN) {
-    console.error("CRÍTICO: Token do Mercado Pago não encontrado no .env!");
-}
-
+// Configuração MP
+if (!process.env.MP_ACCESS_TOKEN) console.error("⚠️  FALTA O TOKEN DO MERCADO PAGO NO .ENV");
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
-
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-});
 
 // --- ROTAS ---
 
-// 1. CADASTRO
+// 1. REGISTER
 app.post('/api/register', async (req, res) => {
     const { name, email, whatsapp, password } = req.body;
     try {
-        const [userCheck] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (userCheck.length > 0) return res.status(400).json({ error: 'E-mail já cadastrado.' });
+        const [exists] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (exists.length > 0) return res.status(400).json({ error: 'E-mail já cadastrado.' });
 
-        const salt = await bcrypt.genSalt(10);
-        const hashPass = await bcrypt.hash(password, salt);
-
+        const hash = await bcrypt.hash(password, 10);
         const [result] = await pool.query(
-            'INSERT INTO users (name, email, whatsapp, password_hash) VALUES (?, ?, ?, ?)',
-            [name, email, whatsapp, hashPass]
+            'INSERT INTO users (name, email, whatsapp, password_hash, status) VALUES (?, ?, ?, ?, "pending")',
+            [name, email, whatsapp, hash]
         );
-        res.json({ message: 'Usuário criado!', userId: result.insertId, email: email });
-    } catch (err) {
-        console.error("Erro Cadastro:", err);
-        res.status(500).json({ error: 'Erro ao cadastrar.' });
-    }
+        res.json({ userId: result.insertId, email });
+    } catch (err) { res.status(500).json({ error: 'Erro no banco de dados.' }); }
 });
 
-// 2. LOGIN
-app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if (users.length === 0) return res.status(400).json({ error: 'Usuário não encontrado.' });
-
-        const user = users[0];
-        const validPass = await bcrypt.compare(password, user.password_hash);
-        if (!validPass) return res.status(400).json({ error: 'Senha incorreta.' });
-
-        if (user.status !== 'active') {
-            return res.status(403).json({ 
-                error: 'Pagamento pendente.', 
-                payment_required: true, 
-                userId: user.id,
-                email: user.email
-            });
-        }
-
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '2h' });
-        res.json({ message: 'Logado!', token, user: { name: user.name, email: user.email } });
-    } catch (err) {
-        res.status(500).json({ error: 'Erro no login.' });
-    }
-});
-
-// 3. GERAR PIX (Com Logs de Debug)
+// 2. CREATE PAYMENT (Onde dá o erro do QR Code)
 app.post('/api/create-payment', async (req, res) => {
     const { userId, email } = req.body;
-    console.log(`🚀 Iniciando criação de PIX para: ${email} (ID: ${userId})`);
-
+    
+    // Log para você ver no terminal
+    console.log(`💳 Gerando PIX para ID: ${userId}, Email: ${email}`);
+    
     try {
         const payment = new Payment(client);
-        
-        const requestBody = {
-            transaction_amount: 19.90,
-            description: 'Acesso Próxyz',
-            payment_method_id: 'pix',
-            payer: { email: email },
-            notification_url: process.env.WEBHOOK_URL
-        };
+        const result = await payment.create({
+            body: {
+                transaction_amount: 19.90,
+                description: 'Acesso Próxyz',
+                payment_method_id: 'pix',
+                payer: { email: email },
+                notification_url: process.env.WEBHOOK_URL // Tem que estar correto no .env!
+            }
+        });
 
-        console.log("📦 Dados enviados para o MP:", JSON.stringify(requestBody, null, 2));
-
-        const result = await payment.create({ body: requestBody });
-
-        console.log("✅ Resposta do MP recebida. Status:", result.status);
-
+        // Se não tiver QR code na resposta, mostra o erro
         if (!result.point_of_interaction) {
-            console.error("❌ ERRO: Mercado Pago não devolveu o QR Code. Resposta completa:", result);
-            return res.status(500).json({ error: 'Mercado Pago não gerou o QR Code.' });
+            console.error("❌ Erro MP:", result);
+            return res.status(500).json({ error: 'Falha ao obter QR Code do Mercado Pago.' });
         }
 
-        await pool.query(
-            'INSERT INTO sales (user_id, amount, status, pix_code, transaction_id) VALUES (?, ?, ?, ?, ?)',
-            [userId, 19.90, 'pending', result.point_of_interaction.transaction_data.qr_code, result.id]
-        );
+        // Salva venda
+        await pool.query('INSERT INTO sales (user_id, amount, status, transaction_id) VALUES (?, 19.90, "pending", ?)', [userId, result.id]);
 
         res.json({
             qr_code: result.point_of_interaction.transaction_data.qr_code,
@@ -113,72 +67,61 @@ app.post('/api/create-payment', async (req, res) => {
         });
 
     } catch (error) {
-        console.error("🔥 ERRO FATAL AO CRIAR PIX:", error);
-        // Tenta mostrar a mensagem de erro específica do MP, se houver
-        const msg = error.cause ? JSON.stringify(error.cause) : error.message;
-        res.status(500).json({ error: 'Erro ao gerar PIX: ' + msg });
+        console.error("🔥 Erro Fatal MP:", error);
+        res.status(500).json({ error: 'Erro na integração com Mercado Pago. Verifique o terminal.' });
     }
 });
 
-// 4. CANCELAR CADASTRO (NOVO)
-// Se o usuário desistir de pagar, chamamos isso para limpar o banco
+// 3. CANCEL REGISTER (Apaga usuário se desistir - Resolve o erro 2)
 app.post('/api/cancel-register', async (req, res) => {
     const { userId } = req.body;
-    try {
-        // Só deleta se estiver pendente (segurança)
-        const [user] = await pool.query('SELECT status FROM users WHERE id = ?', [userId]);
-        
-        if (user.length > 0 && user[0].status === 'pending') {
-            await pool.query('DELETE FROM users WHERE id = ?', [userId]);
-            console.log(`🗑️ Usuário pendente ${userId} deletado por desistência.`);
-            res.json({ message: 'Cancelado com sucesso.' });
-        } else {
-            res.status(400).json({ error: 'Não foi possível cancelar.' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Erro ao cancelar.' });
-    }
+    // Só apaga se estiver pendente, por segurança
+    await pool.query('DELETE FROM users WHERE id = ? AND status = "pending"', [userId]);
+    console.log(`🗑️ Usuário ${userId} cancelado e removido.`);
+    res.json({ ok: true });
 });
 
-// 5. WEBHOOK
+// 4. CHECK STATUS (Botão "Já paguei")
+app.get('/api/check-status/:id', async (req, res) => {
+    const [rows] = await pool.query('SELECT status FROM users WHERE id = ?', [req.params.id]);
+    res.json({ status: rows.length ? rows[0].status : 'unknown' });
+});
+
+// 5. LOGIN
+app.post('/api/login', async (req, res) => {
+    const { email, password } = req.body;
+    const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    
+    if (users.length === 0 || !(await bcrypt.compare(password, users[0].password_hash))) {
+        return res.status(400).json({ error: 'Credenciais inválidas.' });
+    }
+    
+    if (users[0].status !== 'active') {
+        return res.status(403).json({ error: 'Pagamento pendente.', payment_required: true });
+    }
+
+    const token = jwt.sign({ id: users[0].id }, process.env.JWT_SECRET);
+    res.json({ token, user: { name: users[0].name } });
+});
+
+// 6. WEBHOOK (Recebe confirmação do MP)
 app.post('/api/webhook', async (req, res) => {
     const { type, data } = req.body;
-    try {
-        if (type === 'payment' || (req.body.action === 'payment.created')) {
-            const id = data?.id || req.body.data?.id;
-            const payment = new Payment(client);
-            const paymentInfo = await payment.get({ id: id });
-
-            if (paymentInfo.status === 'approved') {
-                console.log(`💰 Pagamento Aprovado: ${id}`);
-                await pool.query('UPDATE sales SET status = "paid" WHERE transaction_id = ?', [id]);
-                const [sale] = await pool.query('SELECT user_id FROM sales WHERE transaction_id = ?', [id]);
-                if (sale.length > 0) {
+    if (type === 'payment') {
+        const payment = new Payment(client);
+        try {
+            const info = await payment.get({ id: data.id });
+            if (info.status === 'approved') {
+                console.log(`💰 Pagamento Aprovado: ${data.id}`);
+                const [sale] = await pool.query('SELECT user_id FROM sales WHERE transaction_id = ?', [data.id]);
+                if (sale.length) {
                     await pool.query('UPDATE users SET status = "active" WHERE id = ?', [sale[0].user_id]);
                 }
             }
-        }
-    } catch (e) { console.error("Erro Webhook:", e); }
+        } catch (e) { console.error(e); }
+    }
     res.sendStatus(200);
 });
 
-// 6. CHECK STATUS
-app.get('/api/check-status/:userId', async (req, res) => {
-    try {
-        const [users] = await pool.query('SELECT status FROM users WHERE id = ?', [req.params.userId]);
-        if (users.length > 0) res.json({ status: users[0].status });
-        else res.status(404).json({ error: 'User not found' });
-    } catch (error) { res.status(500).json({ error: 'Erro ao verificar' }); }
-});
-
-// 7. RECUPERAÇÃO DE SENHA E LISTAR PROMPTS (Mantenha as outras rotas iguais...)
-// (Vou resumir aqui para não ficar gigante, mas mantenha as rotas de forgot-password, reset-password e prompts que já funcionavam)
-app.post('/api/forgot-password', async (req, res) => {
-    // ... (Código do Nodemailer que fizemos antes) ...
-    // Copie do arquivo anterior se precisar, ou me avise.
-    res.json({ message: 'Funcionalidade resumida para caber na resposta.' }); 
-});
-
 const PORT = 3000;
-app.listen(PORT, () => console.log(`🔥 Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`🔥 Servidor ON na porta ${PORT}`));

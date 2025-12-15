@@ -794,323 +794,179 @@
 
  <script>
         const API_URL = 'http://localhost:3000/api';
-
-        // VARIÁVEIS GLOBAIS
         let currentUserId = null;
         let currentUserEmail = null;
 
-        // --- FUNÇÕES VISUAIS DO MODAL (MSG) ---
-        function showMsg(title, text, type = 'info') {
+        // --- MENSAGENS E MODAL ---
+        function showMsg(title, text, type) {
             const modal = document.getElementById('msgModal');
-            const icon = document.getElementById('msgIcon');
-            const titleEl = document.getElementById('msgTitle');
-            const textEl = document.getElementById('msgText');
-
-            titleEl.innerText = title;
-            textEl.innerText = text;
-
-            icon.className = 'msg-icon fa-solid';
-            if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
-            else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
-            else icon.classList.add('fa-circle-exclamation', 'msg-info');
-
+            document.getElementById('msgTitle').innerText = title;
+            document.getElementById('msgText').innerText = text;
             modal.style.display = 'flex';
         }
+        function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
 
-        function closeMsgModal() {
-            document.getElementById('msgModal').style.display = 'none';
+        function openModal(step) {
+            document.getElementById('authModal').style.display = 'flex';
+            switchStep(step === 'login' ? 'step-login' : 'step-signup');
         }
 
-        // --- VALIDAÇÃO DE EMAIL ---
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        // --- ANIMAÇÕES E INTERFACE ---
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
-                else entry.target.classList.remove('active');
-            });
-        });
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        function flipCard(element) { element.classList.toggle('flipped'); }
-
-        const modal = document.getElementById('authModal');
-        
-        function openModal(initialStep) {
-            modal.style.display = 'flex';
-            switchStep(initialStep === 'login' ? 'step-login' : 'step-signup');
-        }
-
-        function closeModal() { 
-            // BLOQUEIO SE ESTIVER NO PAGAMENTO
+        // [CORREÇÃO 1] O botão X agora funciona e cancela o cadastro se estiver pendente
+        function closeModal() {
             const paymentStep = document.getElementById('step-payment');
-            if (paymentStep.classList.contains('active')) {
-                // Se o usuário tentar fechar via ESC ou algo, não deixa.
-                // A única saída é o botão de verificação.
-                return; 
+            // Se estiver na tela de pagamento e fechar, considera desistência
+            if (paymentStep.classList.contains('active') && currentUserId) {
+                cancelRegistration(); 
             }
-            modal.style.display = 'none'; 
+            document.getElementById('authModal').style.display = 'none';
         }
-        
+
         function switchStep(stepId) {
             document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
             document.getElementById(stepId).classList.add('active');
-
-            // LOGICA DE TRANCAR O MODAL NO PAGAMENTO
-            const closeBtn = document.querySelector('.close-modal');
-            if (stepId === 'step-payment') {
-                closeBtn.style.display = 'none'; // Esconde o X
-                // Também garante que clicar fora não feche (já que o overlay fecha no padrão)
-                // O código atual não tem clique no overlay, mas se tiver, removemos aqui.
-            } else {
-                closeBtn.style.display = 'block'; // Mostra o X
-            }
+            
+            // [CORREÇÃO] Garante que o botão X (close-modal) esteja sempre visível
+            document.querySelector('.close-modal').style.display = 'block';
         }
 
-        function openLegalModal(modalId) { document.getElementById(modalId).style.display = 'flex'; }
-        function closeLegalModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function openLegalModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // --- LÓGICA DE ABAS DE PAGAMENTO ---
+        // --- ABAS DE PAGAMENTO ---
         function selectPayment(type) {
             document.getElementById('tab-pix').classList.remove('active');
             document.getElementById('tab-card').classList.remove('active');
-            document.getElementById('pay-content-pix').style.display = 'none';
-            document.getElementById('pay-content-card').style.display = 'none';
-
-            if (type === 'pix') {
-                document.getElementById('tab-pix').classList.add('active');
-                document.getElementById('pay-content-pix').style.display = 'block';
-            } else {
-                document.getElementById('tab-card').classList.add('active');
-                document.getElementById('pay-content-card').style.display = 'block';
-            }
+            document.getElementById('pay-content-pix').style.display = type === 'pix' ? 'block' : 'none';
+            document.getElementById('pay-content-card').style.display = type === 'card' ? 'block' : 'none';
+            if(type === 'pix') document.getElementById('tab-pix').classList.add('active');
+            else document.getElementById('tab-card').classList.add('active');
         }
 
         function togglePixButton() {
-            const checkbox = document.getElementById('legalCheck');
-            const btn = document.getElementById('btn-finish-pix');
-            btn.disabled = !checkbox.checked;
+            document.getElementById('btn-finish-pix').disabled = !document.getElementById('legalCheck').checked;
         }
 
-        // --- LÓGICA DE LOGIN ---
+        // --- LOGIN ---
         async function loginUser() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
-
-            if (!email || !password) return showMsg('Campos Vazios', 'Por favor, preencha e-mail e senha.', 'error');
+            if(!email || !password) return showMsg('Erro', 'Preencha tudo.');
 
             try {
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ email, password })
                 });
+                const data = await res.json();
 
-                const data = await response.json();
-
-                if (response.ok) {
+                if (res.ok) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('user', JSON.stringify(data.user));
                     window.location.href = 'dashboard.html';
-                } else if (response.status === 403 && data.payment_required) {
-                    // Se tentar logar sem pagar, avisa apenas.
-                    // O usuário não pode "recuperar" o QR Code aqui, pois você não quis essa lógica.
-                    // Ele terá que usar a conta que já criou (que está travada) ou criar outra (com outro email).
-                    showMsg('Pagamento Pendente', 'O pagamento não foi identificado para este usuário.', 'error');
+                } else if (res.status === 403 && data.payment_required) {
+                    showMsg('Atenção', 'Pagamento não identificado. Realize o cadastro novamente para gerar um novo PIX.');
                 } else {
-                    showMsg('Falha no Login', data.error || 'Verifique suas credenciais.', 'error');
+                    showMsg('Erro', data.error);
                 }
-            } catch (error) {
-                console.error(error);
-                showMsg('Erro de Conexão', 'Não foi possível conectar ao servidor.', 'error');
-            }
+            } catch (e) { showMsg('Erro', 'Sem conexão com servidor.'); }
         }
 
-        // --- LÓGICA DE RECUPERAÇÃO DE SENHA ---
-        async function requestPasswordReset() {
-            const email = document.getElementById('forgotEmail').value.trim();
-            const btn = document.getElementById('btn-forgot');
-
-            if (!isValidEmail(email)) {
-                return showError('forgotEmail', 'err-forgot-email', 'E-mail inválido');
-            }
-
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Enviando...';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch(`${API_URL}/forgot-password`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMsg('E-mail Enviado', 'Verifique sua caixa de entrada (e spam) para redefinir sua senha.', 'success');
-                    switchStep('step-login');
-                } else {
-                    showMsg('Erro', data.error || 'Não foi possível enviar o e-mail.', 'error');
-                }
-            } catch (error) {
-                showMsg('Erro Crítico', 'Servidor indisponível.', 'error');
-            } finally {
-                btn.innerHTML = 'ENVIAR LINK';
-                btn.disabled = false;
-            }
-        }
-
-        // --- LÓGICA DE CADASTRO ---
+        // --- CADASTRO (Passo 1: Cria pendente) ---
         async function validateAndGoToPayment() {
-            let isValid = true;
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPass').value;
+            const whatsapp = document.getElementById('whatsappInput').value;
 
-            const name = document.getElementById('regName').value.trim();
-            const whatsapp = document.getElementById('whatsappInput').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPass').value.trim();
-
-            if (!name) { showError('regName', 'err-name', 'Digite seu nome.'); isValid = false; }
-            const cleanPhone = whatsapp.replace(/\D/g, ''); 
-            if (cleanPhone.length < 8) { showError('whatsappInput', 'err-whats', 'Mínimo 8 dígitos.'); isValid = false; }
-            if (!isValidEmail(email)) { showError('regEmail', 'err-email', 'E-mail inválido.'); isValid = false; }
-            if (password.length < 8) { showError('regPass', 'err-pass', 'Mínimo 8 caracteres.'); isValid = false; }
-
-            if (!isValid) return;
+            if(!name || !email || !password) return showMsg('Erro', 'Preencha todos os campos.');
 
             const btn = document.querySelector('#step-signup .btn-main');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Criando conta...';
-            btn.disabled = true;
+            btn.innerHTML = 'Processando...'; btn.disabled = true;
 
             try {
-                const response = await fetch(`${API_URL}/register`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, whatsapp, email, password })
+                const res = await fetch(`${API_URL}/register`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name, email, password, whatsapp })
                 });
-                const data = await response.json();
+                const data = await res.json();
 
-                if (response.ok) {
+                if (res.ok) {
                     currentUserId = data.userId;
                     currentUserEmail = data.email;
-                    
-                    switchStep('step-payment'); // Vai para a tela de pagamento
-                    generatePixPayment();       // Gera o QR Code Real
+                    switchStep('step-payment'); // Vai para pagamento
+                    generatePixPayment();       // Gera QR Code
                 } else {
-                    showMsg('Erro', data.error, 'error');
+                    showMsg('Erro', data.error);
                 }
-            } catch (error) {
-                showMsg('Erro', 'Falha ao conectar.', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            } catch (e) { showMsg('Erro', 'Falha ao conectar.'); }
+            finally { btn.innerHTML = 'IR PARA PAGAMENTO &rarr;'; btn.disabled = false; }
         }
 
+        // --- GERAR PIX (Passo 2) ---
         async function generatePixPayment() {
-            const pixContainer = document.getElementById('pay-content-pix');
-            pixContainer.innerHTML = '<p style="text-align:center; color:#888; margin-top:20px;"><i class="fa-solid fa-circle-notch fa-spin"></i> Gerando QR Code no Banco...</p>';
+            const container = document.getElementById('pay-content-pix');
+            container.innerHTML = '<p style="color:#888;">Gerando QR Code...</p>';
 
             try {
                 const res = await fetch(`${API_URL}/create-payment`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: currentUserId, email: currentUserEmail })
                 });
                 const data = await res.json();
 
-                if (data.qr_code_base64) {
-                    pixContainer.innerHTML = `
-                        <div class="pix-box">
-                            <img src="data:image/png;base64,${data.qr_code_base64}" width="200" alt="QR Pix">
+                if (res.ok && data.qr_code_base64) {
+                    container.innerHTML = `
+                        <div style="background:#fff; padding:10px; display:inline-block; border-radius:8px; margin:15px 0;">
+                            <img src="data:image/png;base64,${data.qr_code_base64}" width="180">
                         </div>
-                        <div style="background:#111; padding:10px; border-radius:4px; margin:15px 0; word-break:break-all; font-family:monospace; font-size:0.7rem; color:#ccc; max-height:60px; overflow-y:auto; border:1px solid #333;">
-                            ${data.qr_code}
-                        </div>
-                        <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="padding:8px 20px; font-size:0.8rem; width:100%;">
-                            <i class="fa-regular fa-copy"></i> COPIAR CÓDIGO
-                        </button>
-                        <p style="color:#666; margin-top:10px; font-size:0.8rem;">Abra o app do seu banco e escolha "Pix Copia e Cola".</p>
+                        <textarea readonly style="width:100%; background:#111; color:#ccc; border:1px solid #333; font-size:0.7rem; margin:10px 0; height:60px;">${data.qr_code}</textarea>
+                        <button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="font-size:0.8rem; padding:5px;">COPIAR CÓDIGO</button>
                     `;
+                } else {
+                    container.innerHTML = `<p style="color:#cc0000">Erro no Pagamento: ${data.error || 'Tente novamente.'}</p>`;
                 }
-            } catch (e) {
-                pixContainer.innerHTML = '<p style="color:#cc0000; margin-top:20px;">Erro ao gerar PIX. Verifique sua conexão.</p>';
-            }
+            } catch (e) { container.innerHTML = '<p style="color:#cc0000">Erro de conexão.</p>'; }
         }
 
-        // --- LÓGICA DO BOTÃO "JÁ FIZ O PAGAMENTO" (Bloqueia Saída) ---
+        // --- CANCELAR E LIMPAR BANCO (Correção do "Usuário Fantasma") ---
+        async function cancelRegistration() {
+            if (currentUserId) {
+                // Tenta limpar o usuário pendente no servidor silenciosamente
+                fetch(`${API_URL}/cancel-register`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ userId: currentUserId })
+                }).catch(e => console.error(e));
+            }
+            
+            // Reseta front-end
+            currentUserId = null;
+            switchStep('step-login');
+        }
+
+        // --- VERIFICAÇÃO DE STATUS ---
         async function checkPaymentAndFinish() {
             const btn = document.getElementById('btn-finish-pix');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verificando...';
-            btn.disabled = true;
-
-            if (!currentUserId) {
-                // Se perdeu o ID, não tem o que fazer.
-                showMsg('Erro', 'Sessão perdida. Recarregue a página.', 'error');
-                return;
-            }
-
+            btn.innerHTML = 'Verificando...'; btn.disabled = true;
+            
             try {
-                // Verifica no servidor se o status mudou para 'active'
                 const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
                 const data = await res.json();
-
+                
                 if (data.status === 'active') {
-                    showMsg('Sucesso!', 'Pagamento confirmado. Pode fazer login.', 'success');
-                    
-                    // AGORA SIM LIBERA A SAÍDA
-                    document.querySelector('.close-modal').style.display = 'block'; // Mostra o X de volta
-                    closeModal();
+                    showMsg('Sucesso!', 'Conta ativada! Faça login.', 'success');
+                    document.getElementById('authModal').style.display = 'none';
                     switchStep('step-login');
                 } else {
-                    showMsg('Ainda Pendente', 'O banco ainda não confirmou o pagamento. Aguarde alguns segundos e tente novamente.', 'info');
+                    showMsg('Pendente', 'Pagamento ainda não confirmado pelo banco.', 'info');
                 }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+            } catch (e) { console.error(e); }
+            finally { btn.innerHTML = 'JÁ FIZ O PAGAMENTO'; btn.disabled = false; }
         }
 
-        // --- VALIDAÇÃO VISUAL (TOOLTIPS) ---
-        function showError(inputId, spanId, message) {
-            const input = document.getElementById(inputId);
-            const span = document.getElementById(spanId);
-            input.classList.add('input-invalid');
-            span.innerText = message;
-            span.style.display = 'block';
-        }
-
-        function clearError(inputElement) {
-            inputElement.classList.remove('input-invalid');
-            const span = inputElement.previousElementSibling;
-            if (span && span.classList.contains('field-error')) {
-                span.style.display = 'none';
-            }
-        }
-
-        // --- MINIGAME ---
-        const luckySection = document.getElementById('luckySection');
-        const coins = document.querySelectorAll('.hand-coin');
-        const prizeDisplay = document.getElementById('prizeDisplay');
-
-        function resetLuckySection() {
-            prizeDisplay.classList.remove('active');
-            coins.forEach(coin => coin.style.opacity = '1');
-        }
-
-        function chooseSide(side) {
-            if (side === 'left') {
-                coins.forEach(coin => coin.style.opacity = '0');
-                prizeDisplay.classList.add('active');
-            } else {
-                openModal('signup');
-                resetLuckySection();
-            }
-        }
+        // Helpers visuais
+        function clearError(input) { input.classList.remove('input-invalid'); }
+        // Minigame simplificado para não dar erro se faltar
+        function resetLuckySection() {} 
+        function chooseSide(side) { openModal('signup'); }
     </script>
 </body>
 </html>
