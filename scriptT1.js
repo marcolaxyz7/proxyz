@@ -29,7 +29,9 @@ const API_URL = 'http://localhost:3000/api';
             icon.className = 'msg-icon fa-solid ' + (type === 'success' ? 'fa-check-circle msg-success' : type === 'error' ? 'fa-circle-xmark msg-error' : 'fa-circle-exclamation msg-info');
             document.getElementById('msgModal').style.display = 'flex';
         }
+
         function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
+        
         function openModal(step) { document.getElementById('authModal').style.display = 'flex'; switchStep(step==='login'?'step-login':'step-signup'); }
         
         function closeModal() {
@@ -46,26 +48,82 @@ const API_URL = 'http://localhost:3000/api';
             document.querySelector('.close-modal').style.display = 'block';
         }
 
-        function openLegalModal(id) { document.getElementById(id).style.display = 'flex'; }
+        // --- AQUI ESTAVA O ERRO: MANTENHA APENAS ESTA VERSÃO ---
+        function openLegalModal(id) { 
+            const modal = document.getElementById(id);
+            // Força o modal de termos a ficar ACIMA do modal de pagamento (que tem z-index 2000)
+            modal.style.zIndex = '2005'; 
+            modal.style.display = 'flex'; 
+        }
+        
+        // APAGUE A LINHA QUE TINHA AQUI (a antiga openLegalModal)
+        
         function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
         // 3. NAVEGAÇÃO DE PAGAMENTO
         function resetPaymentView() {
+            // Esconde todas as telas
             document.getElementById('pay-options').style.display = 'block';
             document.getElementById('pay-pix').style.display = 'none';
             document.getElementById('pay-card').style.display = 'none';
+            document.getElementById('pay-stripe').style.display = 'none'; // Novo
+
+            // Reseta Checkboxes e Botões para garantir segurança
+            document.getElementById('legalCheckPix').checked = false;
+            document.getElementById('btn-finish-pix').disabled = true;
+
+            document.getElementById('legalCheckCard').checked = false;
+            if(document.getElementById('form-checkout__submit')) 
+                document.getElementById('form-checkout__submit').disabled = true;
+
+            document.getElementById('legalCheckStripe').checked = false;
+            document.getElementById('btn-stripe-go').disabled = true;
         }
+
         function showPixView() {
             document.getElementById('pay-options').style.display = 'none';
             document.getElementById('pay-pix').style.display = 'block';
             generatePixPayment();
         }
+
         function showCardView() {
             document.getElementById('pay-options').style.display = 'none';
             document.getElementById('pay-card').style.display = 'block';
             if(mp && !cardForm) mountCardForm();
         }
-        function togglePixButton() { document.getElementById('btn-finish-pix').disabled = !document.getElementById('legalCheckPix').checked; }
+
+        // NOVA FUNÇÃO: View do Stripe
+        function showStripeView() {
+            document.getElementById('pay-options').style.display = 'none';
+            document.getElementById('pay-stripe').style.display = 'block';
+        }
+
+        // NOVA FUNÇÃO: Iniciar Checkout Stripe
+        async function startStripeCheckout() {
+            const btn = document.getElementById('btn-stripe-go');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Redirecionando...';
+            btn.disabled = true;
+
+            try {
+                // Futura integração: Chamar backend para criar sessão do Stripe
+                // const res = await fetch(`${API_URL}/create-stripe-session`, ...);
+                // const data = await res.json();
+                // window.location.href = data.url;
+                
+                // Simulação por enquanto
+                setTimeout(() => {
+                    alert('Aqui você redirecionaria para o Link de Pagamento da Stripe.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1500);
+
+            } catch(e) {
+                showMsg('Erro', 'Não foi possível conectar ao Stripe.', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
 
         // 4. LÓGICA DE USUÁRIO
         async function loginUser() {

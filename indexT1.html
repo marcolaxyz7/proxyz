@@ -456,8 +456,13 @@
                     </button>
                     
                     <button class="pay-option-btn" onclick="showCardView()">
-                        <i class="fa-regular fa-credit-card"></i> CARTÃO DE CRÉDITO
-                        <span style="font-size:0.7rem; color:#888;">À Vista</span>
+                        <i class="fa-regular fa-credit-card"></i> CRÉDITO / DÉBITO
+                        <span style="font-size:0.7rem; color:#888;">Nacional</span>
+                    </button>
+
+                    <button class="pay-option-btn" onclick="showStripeView()">
+                        <i class="fa-brands fa-stripe-s"></i> INTERNACIONAL (STRIPE)
+                        <span style="font-size:0.7rem; color:#888;">USD / EUR / Global</span>
                     </button>
                     
                     <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
@@ -467,10 +472,12 @@
                     <div id="pay-content-pix" style="margin: 20px 0;">
                         <p style="color:#888;">Gerando QR Code...</p>
                     </div>
+                    
                     <div class="legal-check-wrapper">
                         <input type="checkbox" id="legalCheckPix" onchange="document.getElementById('btn-finish-pix').disabled = !this.checked">
-                        <label for="legalCheckPix">Concordo com os termos.</label>
+                        <label for="legalCheckPix">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
                     </div>
+
                     <button class="btn-main" id="btn-finish-pix" style="background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
                     <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
                 </div>
@@ -478,26 +485,50 @@
                 <div id="pay-card" style="display:none;">
                     <form id="form-checkout" style="text-align:left; margin-top:15px;">
                         <div class="input-wrapper"><input type="text" id="form-checkout__cardNumber" class="auth-input" placeholder="Número do Cartão" /></div>
+                        
                         <div style="display:flex; gap:10px;">
                             <div class="input-wrapper"><input type="text" id="form-checkout__expirationDate" class="auth-input" placeholder="MM/YY" /></div>
                             <div class="input-wrapper"><input type="text" id="form-checkout__securityCode" class="auth-input" placeholder="CVV" /></div>
                         </div>
+
                         <div class="input-wrapper"><input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Nome no Cartão" /></div>
                         
                         <div style="display:flex; gap:10px;">
-                            <div class="input-wrapper"><select id="form-checkout__issuer" class="auth-input"></select></div>
+                            <div class="input-wrapper" style="display:none;"><select id="form-checkout__issuer" class="auth-input"></select></div>
                             <div class="input-wrapper" style="display:none;"><select id="form-checkout__installments" class="auth-input"></select></div>
                         </div>
+
                         <div style="display:flex; gap:10px;">
                             <div class="input-wrapper"><select id="form-checkout__identificationType" class="auth-input" style="width:80px;"></select></div>
                             <div class="input-wrapper"><input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="Documento" /></div>
                         </div>
                         <input type="email" id="form-checkout__cardholderEmail" style="display:none;"/>
 
-                        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;">PAGAR AGORA</button>
+                        <div class="legal-check-wrapper">
+                            <input type="checkbox" id="legalCheckCard" onchange="document.getElementById('form-checkout__submit').disabled = !this.checked">
+                            <label for="legalCheckCard">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
+                        </div>
+
+                        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;" disabled>PAGAR AGORA</button>
                     </form>
                     <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
                 </div>
+
+                <div id="pay-stripe" style="display:none;">
+                    <div style="margin: 30px 0; text-align: center;">
+                        <i class="fa-brands fa-stripe fa-3x" style="color: #635bff; margin-bottom: 15px;"></i>
+                        <p style="color:#ccc; font-size: 0.9rem;">Você será redirecionado para a página segura de pagamento internacional.</p>
+                    </div>
+
+                    <div class="legal-check-wrapper">
+                        <input type="checkbox" id="legalCheckStripe" onchange="document.getElementById('btn-stripe-go').disabled = !this.checked">
+                        <label for="legalCheckStripe">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
+                    </div>
+
+                    <button class="btn-main" id="btn-stripe-go" style="background:#635bff; border-color:#635bff;" onclick="startStripeCheckout()" disabled>IR PARA PAGAMENTO &rarr;</button>
+                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
+                </div>
+
             </div>
         </div>
     </div>
