@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Próxyz - Prompt Library</title>
+    
+    <link rel="icon" href="./l.png" type="image/png">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <script src="https://sdk.mercadopago.com/js/v2"></script>
+
+    <link rel="stylesheet" href="styleT1.css">
+</head>
+<body>
+
+    <div class="stars-bg"></div>
+    <div class="comet"></div>
+
+    <div id="landing-page-content">
+        
+        <header>
+            <div class="logo-container">
+                <img src="l.png" alt="Logo Próxyz" class="logo-img">
+                <span class="logo-text">PRÓXYZ</span>
+            </div>
+            
+            <nav>
+                <ul>
+                    <li><a href="#biblioteca">Biblioteca</a></li>
+                    <li><a href="#sobre">Sobre</a></li>
+                    <li><a href="#faq">Suporte</a></li> 
+                    <li><button class="btn-login" onclick="openModal('login')">LOGIN</button></li>
+                </ul>
+            </nav>
+        </header>
+
+        <div class="hero">
+            <div class="hero-info reveal">
+                <img src="l.png" alt="Logo Próxyz" class="hero-logo">
+                <h1>DOMINE A <br>INTELIGÊNCIA <span style="color:#cc0000">ARTIFICIAL</span></h1>
+                <p>A maior biblioteca de prompts premium. Desbloqueie o verdadeiro potencial dos melhores modelos generativos do mercado.</p>
+                <button class="btn-main" onclick="openModal('signup')">COMEÇAR AGORA</button>
+            </div>
+
+            <div class="card-3d-container" id="card3d">
+                <div class="card-3d-bg">
+                    <model-viewer 
+                        src="l3d.glb" 
+                        alt="Modelo 3D" 
+                        auto-rotate camera-controls disable-zoom shadow-intensity="2" 
+                        style="width: 100%; height: 100%;" interaction-prompt="none">
+                    </model-viewer>
+                    <div class="floating-badge">V 2.0</div>
+                </div>
+            </div>
+        </div>
+
+        <section id="biblioteca">
+            <div class="section-header reveal">
+                <h2>SETORES DISPONÍVEIS</h2>
+                <p style="color:#666; margin-top:10px;">Escolha sua área de atuação</p>
+            </div>
+            
+            <div class="grid">
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-bullhorn card-icon"></i>
+                                    <h3>MARKETING</h3>
+                                    <p>Copywriting, Ads e Estratégia.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=MARKETING" alt="Info">
+                            <div class="flip-back-title">VER DETALHES</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.1s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper"> 
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-code card-icon" style="color:#cc0000;"></i>
+                                    <h3>FULL STACK</h3>
+                                    <p>Debugging e Refatoração.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=CODE" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.2s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-palette card-icon"></i>
+                                    <h3>DESIGN & ART</h3>
+                                    <p>Geração de Assets Visuais.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=DESIGN" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.3s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-rocket card-icon"></i>
+                                    <h3>PRODUTIVIDADE</h3>
+                                    <p>Organização e Resumos.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=PROD" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.4s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-chart-line card-icon"></i>
+                                    <h3>DATA SCIENCE</h3>
+                                    <p>Análise e Python.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=DADOS" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.5s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-language card-icon"></i>
+                                    <h3>TRADUÇÃO</h3>
+                                    <p>Localização e Contexto.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=TRAD" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.6s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-scale-balanced card-icon"></i>
+                                    <h3>JURÍDICO</h3>
+                                    <p>Contratos e Petições.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=LAW" alt="Info">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-container reveal" onclick="flipCard(this)" style="transition-delay: 0.7s;">
+                    <div class="flip-inner">
+                        <div class="flip-front">
+                            <div class="shine-wrapper">
+                                <div class="shine-content">
+                                    <i class="fa-solid fa-user-doctor card-icon"></i>
+                                    <h3>SAÚDE</h3>
+                                    <p>Resumos e Triagem.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flip-back">
+                            <img src="https://placehold.co/300x300/111111/ffffff?text=MED" alt="Info">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="more-sectors">E MUITO MAIS!</p>
+        </section>
+
+        <section id="sobre">
+            <div class="about-layout">
+                <div class="about-visual reveal">
+                    <div class="code-snippet">
+                        > system.check_status()<br>
+                        > library_integrity: <span class="code-highlight">100%</span><br>
+                        > user_access: verified<br>
+                        > loading_modules...<br>
+                        > [PROMPTS]: loaded<br>
+                        > [UPDATES]: daily<br>
+                        > ready_to_deploy.
+                    </div>
+                </div>
+                <div class="about-text reveal">
+                    <h2>EFICIÊNCIA PROFISSIONAL</h2>
+                    <p style="color: #999; line-height: 1.6;">
+                        O <strong>Próxyz</strong> é uma ferramenta de produtividade para quem não tem tempo a perder. Nossa biblioteca é uma curadoria técnica de comandos otimizados para extrair o melhor das ferramentas de IA atuais.
+                    </p>
+                    <br>
+                    <ul style="color:#ccc; line-height: 2;">
+                        <li><i class="fa-solid fa-check" style="color:#cc0000; margin-right:10px;"></i> Organização por categorias técnicas.</li>
+                        <li><i class="fa-solid fa-check" style="color:#cc0000; margin-right:10px;"></i> Testado nos principais modelos de linguagem e imagem.</li>
+                        <li><i class="fa-solid fa-check" style="color:#cc0000; margin-right:10px;"></i> Foco em usabilidade e resultados diretos.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="reveal">
+            <div class="section-header">
+                <h2>DÚVIDAS FREQUENTES</h2>
+                <p style="color:#666;">Tudo o que você precisa saber</p>
+            </div>
+
+            <div class="faq-container">
+                <details class="faq-item">
+                    <summary>Como recebo o acesso?</summary>
+                    <div class="faq-content">
+                        O acesso é imediato e enviado para o seu e-mail assim que o pagamento via PIX for confirmado pelo sistema.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Funciona para quais IAs?</summary>
+                    <div class="faq-content">
+                        Nossos prompts são testados nos principais modelos de linguagem e geração de imagem do mercado, garantindo versatilidade.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>Preciso instalar algum programa?</summary>
+                    <div class="faq-content">
+                        Não. A biblioteca é 100% online. Você só precisa acessar nossa plataforma e copiar os comandos para usar na sua IA de preferência.
+                    </div>
+                </details>
+                <details class="faq-item">
+                    <summary>O pagamento é mensal?</summary>
+                    <div class="faq-content">
+                        Não! O valor de R$ 19,90 é taxa única para acesso vitalício à versão atual da biblioteca.
+                    </div>
+                </details>
+            </div>
+
+            <div class="support-btn-area">
+                <button class="btn-main" onclick="alert('Redirecionando para o WhatsApp...')" style="border-radius:50px;">
+                    <i class="fa-brands fa-whatsapp"></i> FALE COM O SUPORTE
+                </button>
+            </div>
+        </section>
+
+        <section class="vip-section reveal" id="login-fast">
+            <div class="vip-card-wrapper">
+                <div class="shine-wrapper">
+                    <div class="shine-content vip-box">
+                        <h2>ACESSE A <span style="color:#cc0000">PRÓXYZ</span></h2>
+                        <p style="color:#777; margin: 15px 0;">Digite seu e-mail para criar sua conta ou fazer login.</p>
+                        <div class="input-group">
+                            <input type="email" placeholder="Digite seu e-mail..." class="vip-input">
+                            <button class="btn-input" onclick="openModal('signup')">CONTINUAR &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lucky-section reveal" id="luckySection">
+            <div class="lucky-stage">
+                <div class="char-container char-left" onclick="chooseSide('left')">
+                     <img src="p1.png" alt="Personagem Esquerda"> 
+                </div>
+                <div class="hand-coin coin-left">
+                    <img src="lmoeda.png" alt="Sorteio" class="spinning-coin">
+                </div>
+                <div class="char-container char-right" onclick="chooseSide('right')">
+                    <img src="p2.png" alt="Personagem Direita">
+                </div>
+                 <div class="hand-coin coin-right">
+                    <img src="lmoeda.png" alt="Sorteio" class="spinning-coin">
+                </div>
+                <div class="prize-display" id="prizeDisplay">
+                    <div class="prize-box">
+                        <h2 style="color:#ffd700; font-family:'Oswald'; margin-bottom:15px;">VOCÊ GANHOU!</h2>
+                        <p style="color:#ccc;">Prompt Premium de Amostra:</p>
+                        <div style="background:#222; border:1px dashed #666; padding:15px; margin:15px 0; color:#ffd700; font-family:monospace; text-align:left;">
+                            "Atue como um Especialista. Crie uma sequência de e-mails usando gatilhos mentais de escassez..."
+                        </div>
+                        <button class="btn-main" onclick="resetLuckySection()" style="font-size:0.8rem;">FECHAR</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-left">
+                <i class="fa-regular fa-envelope"></i>
+                suporte@proxyz.com
+            </div>
+            <div class="footer-center">
+                &copy; 2025 PRÓXYZ LIBRARY. <br>Todos os direitos reservados.
+                <div class="legal-links">
+                    <span onclick="openLegalModal('modalTermos')">Termos de Uso</span>
+                    <span onclick="openLegalModal('modalPrivacidade')">Política de Privacidade</span>
+                </div>
+            </div>
+            <div class="social-box">
+                <a href="#"><i class="fa-brands fa-discord"></i></a>
+                <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <div class="modal-overlay" id="modalTermos">
+        <div class="auth-card legal-card">
+            <span class="close-modal" onclick="closeLegalModal('modalTermos')">&times;</span>
+            <div class="legal-title">TERMOS DE USO</div>
+            <div class="legal-content">
+                <h2>1. ACEITE DOS TERMOS</h2>
+                <p>Ao acessar e adquirir o acesso à biblioteca Próxyz, você concorda expressamente com os termos aqui descritos. O serviço consiste na disponibilização de uma base de dados de comandos textuais (prompts).</p>
+                <h2>2. NATUREZA DO SERVIÇO</h2>
+                <p>Nós vendemos o acesso à organização e curadoria intelectual dos prompts. Não vendemos softwares de IA, nem garantimos o funcionamento perpétuo de ferramentas de terceiros. Os prompts são testados na data de sua publicação, mas atualizações nos modelos generativos externos podem alterar os resultados.</p>
+                <h2>3. LICENÇA DE USO</h2>
+                <p>O acesso é <strong>pessoal, intransferível e revogável</strong>. É estritamente proibido:</p>
+                <ul>
+                    <li>Compartilhar login e senha com terceiros.</li>
+                    <li>Revender ou distribuir gratuitamente o conteúdo da biblioteca.</li>
+                    <li>Utilizar scripts automatizados para extrair dados do site (Scraping).</li>
+                </ul>
+                <p>O descumprimento resultará no bloqueio imediato da conta sem direito a reembolso, além das medidas judiciais cabíveis por violação de propriedade intelectual.</p>
+                <h2>4. LIMITAÇÃO DE RESPONSABILIDADE</h2>
+                <p>O Próxyz não se responsabiliza pelo conteúdo gerado pelo usuário utilizando os prompts. O usuário é o único responsável legal e ético pelas imagens ou textos criados em plataformas de IA.</p>
+                <h2>5. POLÍTICA DE REEMBOLSO</h2>
+                <p>Em conformidade com o Art. 49 do CDC, o usuário tem 7 dias para arrependimento. No entanto, o download em massa ou consumo total da biblioteca pode caracterizar má-fé e abuso de direito, sujeitando o pedido à análise.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalPrivacidade">
+        <div class="auth-card legal-card">
+            <span class="close-modal" onclick="closeLegalModal('modalPrivacidade')">&times;</span>
+            <div class="legal-title">POLÍTICA DE PRIVACIDADE</div>
+            <div class="legal-content">
+                <h2>1. COLETA DE DADOS</h2>
+                <p>Coletamos apenas os dados essenciais para a prestação do serviço, em conformidade com a Lei Geral de Proteção de Dados (LGPD):</p>
+                <ul>
+                    <li><strong>Cadastro:</strong> Nome, E-mail e WhatsApp (para login e suporte).</li>
+                    <li><strong>Segurança:</strong> Endereço IP e Logs de acesso (para prevenir fraudes e compartilhamento de conta).</li>
+                </ul>
+                <h2>2. USO DAS INFORMAÇÕES</h2>
+                <p>Seus dados são utilizados exclusivamente para:</p>
+                <ul>
+                    <li>Liberar e gerenciar seu acesso à área de membros.</li>
+                    <li>Confirmar pagamentos e emitir comprovantes.</li>
+                    <li>Enviar atualizações críticas sobre o produto.</li>
+                </ul>
+                <p><strong>Nós NÃO vendemos, alugamos ou compartilhamos seus dados pessoais com terceiros para fins de marketing.</strong></p>
+                <h2>3. ARMAZENAMENTO E SEGURANÇA</h2>
+                <p>Adotamos medidas técnicas de segurança, como criptografia de senhas e conexão segura (SSL), para proteger seus dados contra acesso não autorizado.</p>
+                <h2>4. SEUS DIREITOS</h2>
+                <p>Você pode solicitar a visualização, correção ou exclusão definitiva dos seus dados de nossa base a qualquer momento, entrando em contato com nosso suporte. A exclusão dos dados implicará no cancelamento do acesso à plataforma.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="authModal">
+        <div class="auth-card">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+
+            <div class="modal-step active" id="step-login">
+                <h2>ACESSE SUA CONTA</h2>
+                <p style="color:#666; margin-bottom:20px;">Bem-vindo de volta.</p>
+                <input type="email" id="loginEmail" class="auth-input" placeholder="Seu e-mail">
+                <input type="password" id="loginPass" class="auth-input" placeholder="Sua senha">
+                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="loginUser()">ENTRAR</button>
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-signup')">Não tenho conta. Cadastrar.</button>
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-forgot')" style="color:#cc0000;">Esqueci minha senha</button>
+            </div>
+
+            <div class="modal-step" id="step-signup">
+                <h2>CRIAR CONTA</h2>
+                <p style="color:#666; margin-bottom:20px;">Preencha para liberar o acesso.</p>
+                
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-name">Nome obrigatório</span>
+                    <input type="text" id="regName" class="auth-input" placeholder="Nome completo" oninput="clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-whats">Número inválido</span>
+                    <input type="tel" id="whatsappInput" class="auth-input" placeholder="WhatsApp (Ex: +55...)" oninput="formatGlobalPhone(this); clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-email">E-mail inválido</span>
+                    <input type="email" id="regEmail" class="auth-input" placeholder="Melhor e-mail" oninput="clearError(this)">
+                </div>
+
+                <div class="input-wrapper">
+                    <span class="field-error" id="err-pass">Mínimo 8 caracteres</span>
+                    <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha" oninput="clearError(this)">
+                </div>
+
+                <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPayment()">IR PARA PAGAMENTO &rarr;</button>
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-login')">Já tenho conta.</button>
+            </div>
+
+            <div class="modal-step" id="step-forgot">
+                <h2>RECUPERAR SENHA</h2>
+                <div class="input-wrapper"><span class="field-error">E-mail inválido</span><input type="email" id="forgotEmail" class="auth-input" placeholder="Seu e-mail cadastrado" oninput="clearError(this)"></div>
+                <button class="btn-main" id="btn-forgot" style="width:100%; margin-top:10px;" onclick="requestPasswordReset()">ENVIAR LINK</button>
+                <br>
+                <button class="switch-btn" onclick="switchStep('step-login')">Voltar para Login</button>
+            </div>
+
+            <div class="modal-step" id="step-payment">
+                <h2>ESCOLHA O PAGAMENTO</h2>
+                <p style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR: R$ 19,90</p>
+                
+                <div id="pay-options">
+                    <button class="pay-option-btn" onclick="showPixView()">
+                        <i class="fa-brands fa-pix"></i> PAGAR COM PIX
+                        <span style="font-size:0.7rem; color:#888;">Liberação Imediata</span>
+                    </button>
+                    
+                    <button class="pay-option-btn" onclick="showCardView()">
+                        <i class="fa-regular fa-credit-card"></i> CARTÃO DE CRÉDITO
+                        <span style="font-size:0.7rem; color:#888;">À Vista</span>
+                    </button>
+                    
+                    <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
+                </div>
+
+                <div id="pay-pix" style="display:none;">
+                    <div id="pay-content-pix" style="margin: 20px 0;">
+                        <p style="color:#888;">Gerando QR Code...</p>
+                    </div>
+                    <div class="legal-check-wrapper">
+                        <input type="checkbox" id="legalCheckPix" onchange="document.getElementById('btn-finish-pix').disabled = !this.checked">
+                        <label for="legalCheckPix">Concordo com os termos.</label>
+                    </div>
+                    <button class="btn-main" id="btn-finish-pix" style="background:#cc0000; border-color:#cc0000;" onclick="checkPaymentAndFinish()" disabled>JÁ FIZ O PAGAMENTO</button>
+                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
+                </div>
+
+                <div id="pay-card" style="display:none;">
+                    <form id="form-checkout" style="text-align:left; margin-top:15px;">
+                        <div class="input-wrapper"><input type="text" id="form-checkout__cardNumber" class="auth-input" placeholder="Número do Cartão" /></div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><input type="text" id="form-checkout__expirationDate" class="auth-input" placeholder="MM/YY" /></div>
+                            <div class="input-wrapper"><input type="text" id="form-checkout__securityCode" class="auth-input" placeholder="CVV" /></div>
+                        </div>
+                        <div class="input-wrapper"><input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Nome no Cartão" /></div>
+                        
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><select id="form-checkout__issuer" class="auth-input"></select></div>
+                            <div class="input-wrapper" style="display:none;"><select id="form-checkout__installments" class="auth-input"></select></div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <div class="input-wrapper"><select id="form-checkout__identificationType" class="auth-input" style="width:80px;"></select></div>
+                            <div class="input-wrapper"><input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="Documento" /></div>
+                        </div>
+                        <input type="email" id="form-checkout__cardholderEmail" style="display:none;"/>
+
+                        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;">PAGAR AGORA</button>
+                    </form>
+                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="msgModal" style="display: none;">
+        <div class="auth-card" style="max-width: 400px; border-color: #333;">
+            <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
+            <h2 id="msgTitle">ATENÇÃO</h2>
+            <p id="msgText">Mensagem do sistema.</p>
+            <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
+        </div>
+    </div>
+
+    <script src="scriptT1.js"></script>
+</body>
+</html>

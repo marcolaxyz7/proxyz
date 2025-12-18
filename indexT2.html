@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Próxyz - Área do Membro</title>
+    
+    <link rel="icon" href="./l.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="stylesT2.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="l.png" alt="Logo">
+            <span>PRÓXYZ</span>
+        </div>
+
+        <button class="nav-btn active" onclick="switchView('indexT2', this)">
+            <i class="fa-solid fa-layer-group"></i> Dashboard
+        </button>
+        <button class="nav-btn" onclick="switchView('tutorial', this)">
+            <i class="fa-solid fa-play-circle"></i> Como Usar (Vídeo)
+        </button>
+
+        <div class="divider"></div>
+        <div class="cat-title">Categorias</div>
+
+        <button class="nav-btn"><i class="fa-solid fa-bullhorn"></i> Marketing</button>
+        <button class="nav-btn"><i class="fa-solid fa-code"></i> Dev / Code</button>
+        <button class="nav-btn"><i class="fa-solid fa-palette"></i> Design IA</button>
+        </aside>
+
+    <main class="main-content">
+        <div class="header-bar">
+            <h2 id="page-title">MEUS PROMPTS</h2>
+            <div class="user-info">
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <span>Membro Pro</span>
+                <button class="logout-btn" onclick="window.location.href='index.html'">SAIR</button>
+            </div>
+        </div>
+
+        <div id="view-indexT2" class="view-section active">
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <span class="card-badge">MARKETING</span>
+                    <h3>Copy AIDA Vendas</h3>
+                    <p style="color:#888; font-size:0.9rem;">Framework clássico de Atenção, Interesse, Desejo e Ação.</p>
+                    <button class="copy-btn"><i class="fa-solid fa-copy"></i> Copiar Prompt</button>
+                </div>
+                
+                <div class="dash-card">
+                    <span class="card-badge">DEV</span>
+                    <h3>Refatorador Clean Code</h3>
+                    <p style="color:#888; font-size:0.9rem;">Otimiza funções complexas para legibilidade.</p>
+                    <button class="copy-btn"><i class="fa-solid fa-copy"></i> Copiar Prompt</button>
+                </div>
+
+                </div>
+        </div>
+
+        <div id="view-tutorial" class="view-section">
+            <div class="video-wrapper">
+                <div style="text-align:center;">
+                    <i class="fa-brands fa-youtube" style="font-size:3rem; margin-bottom:10px;"></i>
+                    <p>Vídeo Tutorial em Breve</p>
+                </div>
+            </div>
+            <div style="max-width:800px; margin: 30px auto; color:#ccc; line-height:1.6;">
+                <h3>Passo a Passo Rápido:</h3>
+                <ol>
+                    <li>Escolha a categoria no menu lateral.</li>
+                    <li>Clique em "Copiar Prompt".</li>
+                    <li>Cole na sua IA de preferência e substitua os [colchetes] pelos seus dados.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="msgModal" style="display: none;">
+    <div class="auth-card" style="max-width: 400px; border-color: #333;">
+        <i id="msgIcon" class="fa-solid fa-circle-exclamation msg-icon msg-info"></i>
+        
+        <h2 id="msgTitle">ATENÇÃO</h2>
+        <p id="msgText">Mensagem do sistema aqui.</p>
+        
+        <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
+    </div>
+</div>
+
+    </main>
+    <script src="scriptT2.js"></script>
+</body>
+</html>

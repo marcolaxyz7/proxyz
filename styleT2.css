@@ -1,0 +1,67 @@
+ * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #050505; color: #ffffff; font-family: 'Roboto', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background: #000; border-right: 1px solid #222;
+            display: flex; flex-direction: column; padding: 20px;
+            flex-shrink: 0;
+        }
+        .sidebar-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        .sidebar-logo img { height: 30px; }
+        .sidebar-logo span { font-family: 'Oswald'; font-size: 1.2rem; letter-spacing: 2px; }
+
+        .nav-btn {
+            background: transparent; border: none; color: #888; text-align: left;
+            padding: 12px 15px; width: 100%; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; gap: 10px; border-radius: 6px;
+            transition: 0.3s; margin-bottom: 5px;
+        }
+        .nav-btn:hover { background: #111; color: white; }
+        .nav-btn.active { background: #cc0000; color: white; }
+        .nav-btn i { width: 20px; text-align: center; }
+
+        .divider { height: 1px; background: #222; margin: 20px 0; }
+        .cat-title { color: #555; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 10px; padding-left: 15px; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
+        
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 35px; height: 35px; background: #222; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #333; }
+        .logout-btn { background: none; border: 1px solid #333; color: #888; padding: 5px 15px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; transition: 0.3s; }
+        .logout-btn:hover { border-color: #cc0000; color: white; }
+
+        /* VIEWS */
+        .view-section { display: none; animation: fadeIn 0.5s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARD GRID (Igual ao anterior) */
+        .dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .dash-card { background: #0a0a0a; border: 1px solid #222; padding: 25px; border-radius: 8px; position: relative; transition: 0.3s; }
+        .dash-card:hover { border-color: #cc0000; transform: translateY(-3px); }
+        .card-badge { position: absolute; top: 15px; right: 15px; font-size: 0.7rem; color: #cc0000; border: 1px solid #cc0000; padding: 2px 6px; border-radius: 4px; }
+        .copy-btn { width: 100%; padding: 10px; margin-top: 20px; background: #111; border: 1px solid #222; color: white; cursor: pointer; transition: 0.3s; }
+        .copy-btn:hover { background: #cc0000; border-color: #cc0000; }
+
+        /* VIDEO CONTAINER */
+        .video-wrapper { 
+            width: 100%; max-width: 800px; aspect-ratio: 16/9; background: #000; 
+            border: 1px solid #333; display: flex; align-items: center; justify-content: center; 
+            margin: 0 auto; color: #555;
+        }
+
+                /* --- MODAL DE MENSAGEM (Custom Alert) --- */
+        #msgModal { z-index: 9999; } /* Fica acima de tudo, inclusive do login */
+
+        .msg-icon { 
+            font-size: 3rem; margin-bottom: 20px; display: block; 
+        }
+        .msg-success { color: #00ff00; text-shadow: 0 0 15px rgba(0, 255, 0, 0.5); }
+        .msg-error { color: #cc0000; text-shadow: 0 0 15px rgba(204, 0, 0, 0.5); }
+        .msg-info { color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+
+        #msgTitle { font-family: 'Oswald'; font-size: 1.5rem; margin-bottom: 10px; text-transform: uppercase; }
+        #msgText { color: #ccc; margin-bottom: 30px; font-size: 1rem; }
