@@ -6,9 +6,32 @@ const jwt = require('jsonwebtoken');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 require('dotenv').config();
 
+const rateLimit = require('express-rate-limit');
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 10, // Limite de 10 tentativas por IP
+    message: "Muitas tentativas de login. Tente novamente mais tarde."
+});
+
+app.use('/api/login', loginLimiter);
+
 const app = express();
 app.use(express.json());
 app.use(cors());
+// Defina quais arquivos podem ser acessados publicamente
+app.use(express.static('public')); // O ideal seria mover o front para uma pasta 'public'
+// OU, se não quiser mover arquivos agora, use uma lista de bloqueio:
+
+app.use((req, res, next) => {
+    if (req.url.endsWith('.js') && (req.url.includes('server') || req.url.includes('db'))) {
+        return res.status(403).send('Acesso Negado');
+    }
+    if (req.url.includes('.env') || req.url.includes('.git')) {
+        return res.status(403).send('Acesso Negado');
+    }
+    next();
+});
 app.use(express.static('.'));
 
 // --- CONFIGURAÇÃO MERCADO PAGO ---
