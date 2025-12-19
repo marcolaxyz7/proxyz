@@ -4,45 +4,46 @@ const pool = require('./db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
+const path = require('path');
+const rateLimit = require('express-rate-limit'); // Importa a proteção
 require('dotenv').config();
 
-const rateLimit = require('express-rate-limit');
+// 1. CRIA O APP (Isso tem que vir antes de tudo)
+const app = express();
 
+// 2. CONFIGURAÇÕES BÁSICAS
+app.use(express.json());
+app.use(cors()); // Em produção, restrinja isso: app.use(cors({ origin: 'seusite.com' }));
+
+// 3. SEGURANÇA: RATE LIMIT (Proteção contra força bruta)
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 10, // Limite de 10 tentativas por IP
     message: "Muitas tentativas de login. Tente novamente mais tarde."
 });
-
+// Aplica a proteção apenas na rota de login
 app.use('/api/login', loginLimiter);
 
-const app = express();
-app.use(express.json());
-app.use(cors());
-// Defina quais arquivos podem ser acessados publicamente
-app.use(express.static('public')); // O ideal seria mover o front para uma pasta 'public'
-// OU, se não quiser mover arquivos agora, use uma lista de bloqueio:
+// 4. ARQUIVOS PÚBLICOS (FRONTEND)
+// Define que a pasta 'public' é a única acessível pelo navegador
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.use((req, res, next) => {
-    if (req.url.endsWith('.js') && (req.url.includes('server') || req.url.includes('db'))) {
-        return res.status(403).send('Acesso Negado');
-    }
-    if (req.url.includes('.env') || req.url.includes('.git')) {
-        return res.status(403).send('Acesso Negado');
-    }
-    next();
+// 5. ROTA INICIAL (Garante que ao entrar no site, abra o indexT1.html)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'indexT1.html'));
 });
-app.use(express.static('.'));
 
 // --- CONFIGURAÇÃO MERCADO PAGO ---
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
-// 1. ROTA DE CONFIGURAÇÃO (Para o Front pegar a Public Key)
+// --- ROTAS DA API ---
+
+// ROTA DE CONFIGURAÇÃO
 app.get('/api/config', (req, res) => {
     res.json({ publicKey: process.env.MP_PUBLIC_KEY });
 });
 
-// 2. REGISTRAR USUÁRIO (Cria PENDING)
+// REGISTRAR USUÁRIO
 app.post('/api/register', async (req, res) => {
     const { name, email, whatsapp, password } = req.body;
     try {
@@ -50,7 +51,6 @@ app.post('/api/register', async (req, res) => {
         if (user.length > 0 && user[0].status === 'active') {
             return res.status(400).json({ error: 'E-mail já cadastrado.' });
         }
-        // Se existir pendente antigo, remove para recriar limpo
         if (user.length > 0 && user[0].status === 'pending') {
             await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]);
             await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]);
@@ -68,10 +68,9 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// 3. PROCESSAR PAGAMENTO (PIX OU CARTÃO)
+// PROCESSAR PAGAMENTO
 app.post('/api/create-payment', async (req, res) => {
     const { userId, email, type, token, issuerId, paymentMethodId, payer } = req.body;
-    
     console.log(`💳 Processando ${type} para: ${email}`);
 
     try {
@@ -79,22 +78,17 @@ app.post('/api/create-payment', async (req, res) => {
         let body = {};
 
         if (type === 'card') {
-            // LÓGICA DO CARTÃO (CRÉDITO/DÉBITO À VISTA)
             body = {
                 transaction_amount: 19.90,
                 token: token,
                 description: 'Acesso Próxyz Library',
                 payment_method_id: paymentMethodId,
                 issuer_id: issuerId,
-                installments: 1, // FORÇA À VISTA
-                payer: {
-                    email: email,
-                    identification: payer.identification
-                },
+                installments: 1,
+                payer: { email: email, identification: payer.identification },
                 notification_url: process.env.WEBHOOK_URL
             };
         } else {
-            // LÓGICA DO PIX
             body = {
                 transaction_amount: 19.90,
                 description: 'Acesso Próxyz Library',
@@ -105,8 +99,6 @@ app.post('/api/create-payment', async (req, res) => {
         }
 
         const result = await payment.create({ body });
-        
-        // Salva a venda no banco
         const statusVenda = result.status === 'approved' ? 'paid' : 'pending';
         const pixInfo = type === 'pix' ? result.point_of_interaction.transaction_data.qr_code : 'CARD';
 
@@ -115,13 +107,11 @@ app.post('/api/create-payment', async (req, res) => {
             [userId, statusVenda, result.id, pixInfo]
         );
 
-        // SE APROVOU NA HORA (CARTÃO), ATIVA O USUÁRIO
         if (result.status === 'approved') {
             await pool.query('UPDATE users SET status = "active" WHERE id = ?', [userId]);
             return res.json({ status: 'approved' });
         }
 
-        // RETORNA DADOS (PIX ou Pendente)
         res.json({
             status: result.status,
             qr_code: type === 'pix' ? pixInfo : null,
@@ -134,26 +124,20 @@ app.post('/api/create-payment', async (req, res) => {
     }
 });
 
-// 4. CANCELAR / LIMPAR (CORREÇÃO DO BUG DO BANCO)
+// CANCELAR / LIMPAR
 app.post('/api/cancel-register', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.json({ ok: true });
-
     try {
-        // PRIMEIRO: Deleta a venda (filho)
         await pool.query('DELETE FROM sales WHERE user_id = ?', [userId]);
-        // SEGUNDO: Deleta o usuário (pai)
         await pool.query('DELETE FROM users WHERE id = ?', [userId]);
-        
-        console.log(`🗑️ Cadastro limpo para ID: ${userId}`);
         res.json({ success: true });
     } catch (err) {
-        console.error("Erro ao cancelar:", err);
         res.status(500).json({ error: 'Erro ao limpar dados.' });
     }
 });
 
-// 5. LOGIN E STATUS
+// LOGIN E STATUS
 app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
@@ -172,7 +156,30 @@ app.get('/api/check-status/:id', async (req, res) => {
     res.json({ status: rows.length ? rows[0].status : 'unknown' });
 });
 
-// 6. WEBHOOK
+// ROTA DE PROMPTS (PROTEGIDA)
+app.get('/api/prompts', async (req, res) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
+        if (err) return res.sendStatus(403);
+        try {
+            // AQUI VOCÊ PODE BUSCAR DO BANCO DE DADOS FUTURAMENTE
+            // Por enquanto, retorna a lista estática
+            const prompts = [
+                { category: 'MARKETING', title: 'Copy AIDA Vendas', description: 'Framework clássico de Atenção, Interesse, Desejo e Ação.', content: 'Atue como um especialista em Copywriting. Escreva um texto de vendas seguindo a estrutura AIDA para o produto [PRODUTO] focado no público [PÚBLICO]...' },
+                { category: 'DEV', title: 'Refatorador Clean Code', description: 'Otimiza funções complexas para legibilidade.', content: 'Analise o seguinte código e refatore aplicando princípios de Clean Code e SOLID: [CÓDIGO]' },
+                { category: 'DESIGN', title: 'Prompt Midjourney V6', description: 'Gera imagens fotorrealistas.', content: '/imagine prompt: cinematic shot of [SUBJECT], 8k, hyper-realistic, dramatic lighting --v 6.0' }
+            ];
+            res.json(prompts);
+        } catch (e) {
+            res.sendStatus(500);
+        }
+    });
+});
+
+// WEBHOOK
 app.post('/api/webhook', async (req, res) => {
     const { type, data } = req.body;
     res.sendStatus(200);
