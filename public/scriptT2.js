@@ -1,108 +1,190 @@
 const API_URL = 'http://localhost:3000/api';
+let allPrompts = []; 
 
-        // --- FUNÇÕES DO MODAL (PRECISAM ESTAR AQUI TAMBÉM) ---
-        function showMsg(title, text, type = 'info') {
-            const modal = document.getElementById('msgModal');
-            const icon = document.getElementById('msgIcon');
-            const titleEl = document.getElementById('msgTitle');
-            const textEl = document.getElementById('msgText');
+// --- MAPA DE ÍCONES (Configuração Visual) ---
+const categoryIcons = {
+    'Prompts Universais': 'fa-earth-americas',
+    'Habilidades Práticas': 'fa-toolbox',
+    'Eng. Software & Full Stack': 'fa-code',
+    'Data Science & Analytics': 'fa-chart-pie',
+    'Mkt Digital & Creator': 'fa-hashtag',
+    'Engajamento': 'fa-comments',
+    'Carreira & Idiomas': 'fa-briefcase',
+    'Alta Performance': 'fa-bolt',
+    'Futurismo & Inovação': 'fa-robot',
+    'Ciências Exatas & Lógica': 'fa-calculator',
+    'Ciências Naturais': 'fa-leaf',
+    'Biologia & Saúde': 'fa-heart-pulse',
+    'Linguagens & Comunicação': 'fa-language',
+    'Humanas & Sociedade': 'fa-users',
+    'Direito & Política': 'fa-scale-balanced',
+    'Economia & Negócios': 'fa-chart-line',
+    'Tecnologia & Digital': 'fa-microchip',
+    'Artes & Cultura': 'fa-palette',
+    'Criação de Games': 'fa-gamepad'
+};
 
-            titleEl.innerText = title;
-            textEl.innerText = text;
+// --- FUNÇÕES DE MENSAGEM ---
+function showMsg(title, text, type = 'info') {
+    const modal = document.getElementById('msgModal');
+    const icon = document.getElementById('msgIcon');
+    document.getElementById('msgTitle').innerText = title;
+    document.getElementById('msgText').innerText = text;
 
-            icon.className = 'msg-icon fa-solid';
-            if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
-            else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
-            else icon.classList.add('fa-circle-exclamation', 'msg-info');
+    icon.className = 'msg-icon fa-solid';
+    if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
+    else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
+    else icon.classList.add('fa-circle-exclamation', 'msg-info');
 
-            modal.style.display = 'flex';
-        }
+    modal.style.display = 'flex';
+}
+function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
 
-        function closeMsgModal() {
-            document.getElementById('msgModal').style.display = 'none';
-        }
+// --- LOGOUT ---
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'indexT1.html';
+}
 
-        // --- VERIFICAÇÃO DE SEGURANÇA ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            
-            if (!token) {
-                alert('Acesso Negado: Você precisa estar logado.');
-                window.location.href = 'indexT1.html';
-                return;
-            }
+// --- INICIALIZAÇÃO ---
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('Acesso Negado.');
+        window.location.href = 'indexT1.html';
+        return;
+    }
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) document.getElementById('userName').innerText = user.name;
 
-            // Carrega nome do usuário
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (user) {
-                document.querySelector('.user-info span').innerText = user.name;
-            }
+    loadPrompts(token);
+});
 
-            // Carrega os Prompts
-            loadPrompts(token);
+// --- CORE: CARREGAR DADOS ---
+async function loadPrompts(token) {
+    try {
+        const res = await fetch(`${API_URL}/prompts`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!res.ok) throw new Error('Falha ao buscar prompts');
+        
+        allPrompts = await res.json();
+        
+        renderSidebarCategories();
+        renderPrompts(allPrompts);
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'indexT1.html';
-        }
+    } catch (err) {
+        console.error(err);
+        if (err.message.includes('403') || err.message.includes('401')) logout();
+    }
+}
 
-        // --- LÓGICA DO DASHBOARD ---
-        async function loadPrompts(token) {
-            try {
-                const res = await fetch(`${API_URL}/prompts`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                if (!res.ok) throw new Error('Falha ao buscar prompts');
-                
-                const prompts = await res.json();
-                renderPrompts(prompts);
+// --- RENDERIZAÇÃO DA SIDEBAR (ATUALIZADA) ---
+function renderSidebarCategories() {
+    const container = document.getElementById('category-list');
+    container.innerHTML = ''; 
 
-            } catch (err) {
-                console.error(err);
-                if (err.message.includes('403') || err.message.includes('401')) {
-                    logout();
-                }
-            }
-        }
+    // 1. Pega categorias e ordena (Mantém o número "01.", "02." para a ordem ficar certa)
+    const categories = [...new Set(allPrompts.map(p => p.category))].sort();
 
-        function renderPrompts(prompts) {
-            const grid = document.querySelector('.dash-grid');
-            grid.innerHTML = ''; 
+    categories.forEach(cat => {
+        // 2. Limpa o nome para exibição (Remove "01. ", "02. ")
+        const cleanName = cat.replace(/^\d+\.\s+/, ''); 
+        
+        // 3. Escolhe o ícone certo
+        const iconClass = categoryIcons[cleanName] || 'fa-folder';
 
-            prompts.forEach(prompt => {
-                const card = document.createElement('div');
-                card.className = 'dash-card';
-                card.style.userSelect = 'none'; 
-                
-                card.innerHTML = `
-                    <span class="card-badge">${prompt.category.toUpperCase()}</span>
-                    <h3>${prompt.title}</h3>
-                    <p style="color:#888; font-size:0.9rem; height:40px; overflow:hidden;">${prompt.description}</p>
-                    <button class="copy-btn" onclick="copyToClipboard(this, '${prompt.content.replace(/'/g, "\\'")}')">
-                        <i class="fa-solid fa-copy"></i> Copiar Prompt
-                    </button>
-                `;
-                grid.appendChild(card);
-            });
-        }
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        // Exibe o Ícone Personalizado + Nome Limpo
+        btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
+        
+        // O filtro continua usando a categoria original (cat) para achar os itens certos
+        btn.onclick = () => filterByCategory(cat, btn); 
+        container.appendChild(btn);
+    });
+}
 
-        function copyToClipboard(btn, text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showMsg('Copiado!', 'Prompt transferido para a área de transferência.', 'success');
-            });
-        }
+function renderPrompts(promptsList) {
+    const grid = document.getElementById('promptsGrid');
+    const countSpan = document.getElementById('prompt-count');
+    
+    grid.innerHTML = ''; 
+    countSpan.innerText = `${promptsList.length} Prompts`;
 
-        function switchView(viewId, btnElement) {
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+    if(promptsList.length === 0) {
+        grid.innerHTML = '<p style="color:#666; grid-column: 1/-1; text-align:center; padding: 40px;">Nenhum prompt encontrado.</p>';
+        return;
+    }
 
-            if(btnElement) btnElement.classList.add('active');
-            document.getElementById('view-' + viewId).classList.add('active');
+    promptsList.forEach(prompt => {
+        const card = document.createElement('div');
+        card.className = 'dash-card'; 
+        
+        const safeContent = prompt.content.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
+        // Remove número também no badge do card para ficar bonito
+        const cleanBadge = prompt.category.replace(/^\d+\.\s+/, '');
 
-            const title = document.getElementById('page-title');
-            if(viewId === 'dashboard') title.innerText = 'MEUS PROMPTS';
-            if(viewId === 'tutorial') title.innerText = 'COMO USAR';
-        }
+        card.innerHTML = `
+            <span class="card-badge">${cleanBadge}</span>
+            <h3>${prompt.title}</h3>
+            <p style="color:#888; font-size:0.9rem; margin-bottom:15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${prompt.description}</p>
+            <button class="copy-btn" onclick="copyToClipboard('${safeContent}')">
+                <i class="fa-solid fa-copy"></i> Copiar Prompt
+            </button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// --- FILTROS ---
+function filterByCategory(category, btnElement) {
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    if(btnElement) btnElement.classList.add('active');
+
+    // Atualiza o Título da Página (Sem o número também)
+    const displayTitle = category === 'all' ? 'TODOS OS PROMPTS' : category.replace(/^\d+\.\s+/, '').toUpperCase();
+    document.getElementById('page-title').innerText = displayTitle;
+    
+    if (category === 'all') {
+        renderPrompts(allPrompts);
+    } else {
+        const filtered = allPrompts.filter(p => p.category === category);
+        renderPrompts(filtered);
+    }
+    
+    document.getElementById('searchInput').value = '';
+}
+
+function searchPrompts() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    
+    const filtered = allPrompts.filter(p => 
+        p.title.toLowerCase().includes(term) || 
+        p.description.toLowerCase().includes(term) ||
+        p.content.toLowerCase().includes(term)
+    );
+    
+    renderPrompts(filtered);
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('page-title').innerText = 'RESULTADOS DA BUSCA';
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showMsg('Sucesso', 'Copiado para a área de transferência!', 'success');
+    });
+}
+
+function switchView(viewId, btn) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    
+    if(btn) {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+}
