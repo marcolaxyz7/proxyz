@@ -123,19 +123,28 @@ function renderPrompts(promptsList) {
         const card = document.createElement('div');
         card.className = 'dash-card'; 
         
-        const safeContent = prompt.content.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        
-        // Remove número também no badge do card para ficar bonito
+        // Remove número da categoria para o badge
         const cleanBadge = prompt.category.replace(/^\d+\.\s+/, '');
 
+        // 1. Criamos o HTML do card SEM o botão
         card.innerHTML = `
             <span class="card-badge">${cleanBadge}</span>
             <h3>${prompt.title}</h3>
             <p style="color:#888; font-size:0.9rem; margin-bottom:15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${prompt.description}</p>
-            <button class="copy-btn" onclick="copyToClipboard('${safeContent}')">
-                <i class="fa-solid fa-copy"></i> Copiar Prompt
-            </button>
         `;
+
+        // 2. Criamos o botão via DOM (Isso resolve o problema das aspas e quebras de linha)
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Prompt';
+        
+        // AQUI ESTÁ A MÁGICA: O conteúdo vai direto para a função, sem passar por HTML string
+        btn.onclick = function() {
+            copyToClipboard(prompt.content);
+        };
+
+        // 3. Adicionamos o botão ao card e o card ao grid
+        card.appendChild(btn);
         grid.appendChild(card);
     });
 }
