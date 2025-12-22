@@ -123,27 +123,30 @@ function renderPrompts(promptsList) {
         const card = document.createElement('div');
         card.className = 'dash-card'; 
         
-        // Remove número da categoria para o badge
-        const cleanBadge = prompt.category.replace(/^\d+\.\s+/, '');
+        // 1. Limpa o nome da categoria para achar o ícone certo
+        const cleanCategoryName = prompt.category.replace(/^\d+\.\s+/, '');
 
-        // 1. Criamos o HTML do card SEM o botão
+        // 2. Busca o ícone no mapa
+        const iconClass = categoryIcons[cleanCategoryName] || 'fa-folder';
+
+        // 3. Monta o HTML: SEM badge, COM ícone no título
+        // Adicionei uma cor (color: #e50914) no ícone para dar destaque, mas você pode tirar se quiser.
         card.innerHTML = `
-            <span class="card-badge">${cleanBadge}</span>
-            <h3>${prompt.title}</h3>
+            <h3 style="margin-top: 10px;">
+                <i class="fa-solid ${iconClass}" style="margin-right: 8px; color: #e50914;"></i>
+                ${prompt.title}
+            </h3>
             <p style="color:#888; font-size:0.9rem; margin-bottom:15px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${prompt.description}</p>
         `;
 
-        // 2. Criamos o botão via DOM (Isso resolve o problema das aspas e quebras de linha)
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
         btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Prompt';
         
-        // AQUI ESTÁ A MÁGICA: O conteúdo vai direto para a função, sem passar por HTML string
         btn.onclick = function() {
             copyToClipboard(prompt.content);
         };
 
-        // 3. Adicionamos o botão ao card e o card ao grid
         card.appendChild(btn);
         grid.appendChild(card);
     });

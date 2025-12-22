@@ -95,3 +95,45 @@ body { margin: 0; padding: 0; background-color: #050505; color: #ffffff; font-fa
 .msg-success { color: #00ff00; } .msg-info { color: #ffd700; } .msg-error { color: #cc0000; }
 .btn-main { background: transparent; border: 1px solid #fff; color: white; padding: 10px 30px; cursor: pointer; font-family: 'Oswald'; transition: 0.3s; margin-top: 15px; }
 .btn-main:hover { background: #cc0000; border-color: #cc0000; }
+
+/* --- RODAPÉ (FOOTER) --- */
+footer {
+    margin-top: 60px; /* Garante espaço entre o conteúdo e o rodapé */
+    padding-top: 30px;
+    padding-bottom: 10px;
+    border-top: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 0.85rem;
+    width: 100%;
+}
+
+.footer-left, .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-center {
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Destaque para o WhatsApp */
+.footer-right {
+    color: #ccc;
+    font-weight: bold;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+}
+
+/* Responsividade para celulares */
+@media (max-width: 768px) {
+    footer {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+}
