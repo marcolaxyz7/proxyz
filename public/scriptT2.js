@@ -154,6 +154,9 @@ function renderPrompts(promptsList) {
 
 // --- FILTROS ---
 function filterByCategory(category, btnElement) {
+
+    switchView('indexT2');
+
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
 
