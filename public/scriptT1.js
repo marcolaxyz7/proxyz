@@ -21,6 +21,25 @@ const API_URL = 'http://localhost:3000/api';
         }
         initApp();
 
+        // --- TABELA DE PREÇOS (Mesma do Backend) ---
+const PRICING_DISPLAY = {
+    'BRL': { text: 'R$ 97,97', val: 97.97 },
+    'USD': { text: '$ 19.90', val: 19.90 },
+    'EUR': { text: '€ 19.90', val: 19.90 },
+    'JPY': { text: '¥ 3000', val: 3000 },
+    'GBP': { text: '£ 14.90', val: 14.90 },
+    'CAD': { text: 'C$ 29.90', val: 29.90 },
+    'AUD': { text: 'A$ 29.90', val: 29.90 }
+};
+
+function updatePriceUI() {
+    const currency = getUserCurrency();
+    const priceInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
+    
+    const el = document.getElementById('price-display');
+    if(el) el.innerText = `VALOR: ${priceInfo.text}`;
+}
+
         // 2. FUNÇÕES DE MODAL
         function showMsg(title, text, type='info') {
             document.getElementById('msgTitle').innerText = title;
@@ -98,28 +117,29 @@ const API_URL = 'http://localhost:3000/api';
             document.getElementById('pay-stripe').style.display = 'block';
         }
 
-        // Substitua a função startStripeCheckout inteira por esta:
         async function startStripeCheckout() {
             const btn = document.getElementById('btn-stripe-go');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
             btn.disabled = true;
 
+            // Pega a moeda detectada
+            const myCurrency = getUserCurrency();
+
             try {
-                // 1. Pede ao backend para criar a sessão
                 const res = await fetch(`${API_URL}/create-stripe-session`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         userId: currentUserId, 
-                        email: currentUserEmail 
+                        email: currentUserEmail,
+                        countryCode: myCurrency // <--- ENVIA A MOEDA AQUI
                     })
                 });
 
                 const data = await res.json();
 
                 if (data.url) {
-                    // 2. Redireciona o usuário para a página segura da Stripe
                     window.location.href = data.url;
                 } else {
                     alert('Erro ao iniciar pagamento.');
@@ -192,7 +212,7 @@ const API_URL = 'http://localhost:3000/api';
                 const data = await res.json();
                 if(res.ok) {
                     currentUserId = data.userId; currentUserEmail = data.email;
-                    switchStep('step-payment'); resetPaymentView();
+                    switchStep('step-payment'); resetPaymentView(); updatePriceUI();
                 } else showMsg('Erro', data.error, 'error');
             } catch(e) { showMsg('Erro', 'Falha ao criar conta.', 'error'); }
             finally { btn.innerHTML = txt; btn.disabled = false; }
@@ -240,7 +260,7 @@ const API_URL = 'http://localhost:3000/api';
             document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
             
             cardForm = mp.cardForm({
-                amount: "19.90",
+                amount: "97.97",
                 iframe: true,
                 form: {
                     id: "form-checkout",
@@ -371,6 +391,25 @@ const API_URL = 'http://localhost:3000/api';
             })
             .catch(err => console.error(err));
     }
+
+    // --- DETECTOR DE MOEDA ---
+function getUserCurrency() {
+    const lang = navigator.language || navigator.userLanguage; // Ex: 'pt-BR', 'en-US'
+    
+    // Mapeamento simples de Região -> Moeda
+    if (lang.includes('pt')) return 'BRL'; // Brasil, Portugal (cuidado, Portugal usa EUR, ver ajuste abaixo)
+    if (lang === 'pt-PT') return 'EUR';    // Correção para Portugal
+    
+    if (lang.includes('ja')) return 'JPY'; // Japão
+    if (lang.includes('en-GB')) return 'GBP'; // Reino Unido
+    if (lang.includes('en-CA')) return 'CAD'; // Canadá
+    if (lang.includes('en-AU')) return 'AUD'; // Austrália
+    
+    // Europa (Simplificado - pega principais línguas do Euro)
+    if (['es', 'fr', 'de', 'it', 'nl'].some(l => lang.startsWith(l))) return 'EUR';
+
+    return 'USD'; // Resto do mundo
+}
 
         // Helpers
         function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }

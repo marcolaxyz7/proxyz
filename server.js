@@ -7,7 +7,7 @@ const { MercadoPagoConfig, Payment } = require('mercadopago');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
-const stripe = require('stripe')('sk_test_51Sf1znJnXb2ue08w8ryqf1DAgxMzjufMjzXCiBWsnZQjsQI6JSG25T9rHZ92g3ORVvnroJzO58eOznhDQ6Z9SvNs00WmspQXC8');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 require('dotenv').config();
 
 // IMPORTA OS PROMPTS DO OUTRO ARQUIVO
@@ -75,10 +75,13 @@ app.post('/api/create-payment', async (req, res) => {
     try {
         const payment = new Payment(client);
         let body = {};
+        
+        // 1. DEFINA O VALOR AQUI (Para usar em tudo)
+        const AMOUNT_BRL = 97.97; 
 
         if (type === 'card') {
             body = {
-                transaction_amount: 19.90,
+                transaction_amount: AMOUNT_BRL, // Usa a constante
                 token: token,
                 description: 'Acesso Próxyz Library',
                 payment_method_id: paymentMethodId,
@@ -89,7 +92,7 @@ app.post('/api/create-payment', async (req, res) => {
             };
         } else {
             body = {
-                transaction_amount: 19.90,
+                transaction_amount: AMOUNT_BRL, // Usa a constante
                 description: 'Acesso Próxyz Library',
                 payment_method_id: 'pix',
                 payer: { email: email },
@@ -101,9 +104,11 @@ app.post('/api/create-payment', async (req, res) => {
         const statusVenda = result.status === 'approved' ? 'paid' : 'pending';
         const pixInfo = type === 'pix' ? result.point_of_interaction.transaction_data.qr_code : 'CARD';
 
+        // 2. CORREÇÃO NO BANCO DE DADOS
+        // Note que troquei o '19.90' por '?' e adicionei o AMOUNT_BRL na lista de valores
         await pool.query(
-            'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, 19.90, ?, ?, ?)',
-            [userId, statusVenda, result.id, pixInfo]
+            'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, ?, ?, ?)',
+            [userId, AMOUNT_BRL, statusVenda, result.id, pixInfo]
         );
 
         if (result.status === 'approved') {
@@ -281,30 +286,43 @@ app.post('/api/reset-password/:id/:token', async (req, res) => {
     }
 });
 
-// --- ROTA: CRIA O CHECKOUT DA STRIPE ---
+// --- TABELA DE PREÇOS (Hardcoded) ---
+const PRICING_TABLE = {
+    'BRL': { amount: 9797, currency: 'brl' }, // R$ 97,97
+    'USD': { amount: 1990, currency: 'usd' }, // $ 19.90
+    'EUR': { amount: 1990, currency: 'eur' }, // € 19.90
+    'JPY': { amount: 3000, currency: 'jpy' }, // ¥ 3000 (Sem centavos)
+    'GBP': { amount: 1490, currency: 'gbp' }, // £ 14.90
+    'CAD': { amount: 2990, currency: 'cad' }, // C$ 29.90
+    'AUD': { amount: 2990, currency: 'aud' }, // A$ 29.90
+};
+
 app.post('/api/create-stripe-session', async (req, res) => {
-    const { userId, email } = req.body;
+    const { userId, email, countryCode } = req.body; // Recebemos o countryCode do front
 
     try {
+        // 1. Define a moeda (Se não tiver na lista, usa USD como padrão internacional)
+        // Você pode mudar o 'fallback' para 'BRL' se preferir.
+        const selectedPrice = PRICING_TABLE[countryCode] || PRICING_TABLE['USD'];
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
                 price_data: {
-                    currency: 'brl',
+                    currency: selectedPrice.currency,
                     product_data: {
                         name: 'Acesso Próxyz Library',
                         description: 'Acesso vitalício à biblioteca de prompts.',
-                        // images: ['https://seusite.com/logo.png'], // Opcional
                     },
-                    unit_amount: 1990, // R$ 19,90 (em centavos)
+                    unit_amount: selectedPrice.amount,
                 },
                 quantity: 1,
             }],
             mode: 'payment',
             success_url: `http://localhost:3000/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `http://localhost:3000/indexT1.html?payment=canceled`,
-            client_reference_id: userId.toString(), // Para sabermos quem pagou
-            customer_email: email, // Já preenche o e-mail do usuário lá
+            client_reference_id: userId.toString(),
+            customer_email: email,
         });
 
         res.json({ url: session.url });
