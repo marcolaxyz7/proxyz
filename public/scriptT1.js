@@ -98,27 +98,37 @@ const API_URL = 'http://localhost:3000/api';
             document.getElementById('pay-stripe').style.display = 'block';
         }
 
-        // NOVA FUNÇÃO: Iniciar Checkout Stripe
+        // Substitua a função startStripeCheckout inteira por esta:
         async function startStripeCheckout() {
             const btn = document.getElementById('btn-stripe-go');
             const originalText = btn.innerHTML;
-            btn.innerHTML = 'Redirecionando...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
             btn.disabled = true;
 
             try {
-                // Futura integração: Chamar backend para criar sessão do Stripe
-                // const res = await fetch(`${API_URL}/create-stripe-session`, ...);
-                // const data = await res.json();
-                // window.location.href = data.url;
-                
-                // Simulação por enquanto
-                setTimeout(() => {
-                    alert('Aqui você redirecionaria para o Link de Pagamento da Stripe.');
+                // 1. Pede ao backend para criar a sessão
+                const res = await fetch(`${API_URL}/create-stripe-session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        userId: currentUserId, 
+                        email: currentUserEmail 
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.url) {
+                    // 2. Redireciona o usuário para a página segura da Stripe
+                    window.location.href = data.url;
+                } else {
+                    alert('Erro ao iniciar pagamento.');
                     btn.innerHTML = originalText;
                     btn.disabled = false;
-                }, 1500);
+                }
 
             } catch(e) {
+                console.error(e);
                 showMsg('Erro', 'Não foi possível conectar ao Stripe.', 'error');
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -130,17 +140,34 @@ const API_URL = 'http://localhost:3000/api';
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPass').value;
             try {
-                const res = await fetch(`${API_URL}/login`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email,password})});
+                const res = await fetch(`${API_URL}/login`, { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify({email,password})
+                });
+                
                 const data = await res.json();
+                
                 if(res.ok) {
+                    // 1. Salva o Token
                     localStorage.setItem('token', data.token);
+                    
+                    // 2. SALVA O NOME DO USUÁRIO (Essa era a linha que faltava)
+                    localStorage.setItem('user', JSON.stringify(data.user)); 
+
+                    // 3. Redireciona
                     window.location.href='indexT2.html';
+                
                 } else if(res.status===403) {
                     currentUserId = data.userId; currentUserEmail = data.email;
                     showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
                     openModal('signup'); switchStep('step-payment'); resetPaymentView();
-                } else showMsg('Erro', data.error, 'error');
-            } catch(e) { showMsg('Erro', 'Falha na conexão.', 'error'); }
+                } else {
+                    showMsg('Erro', data.error, 'error');
+                }
+            } catch(e) { 
+                showMsg('Erro', 'Falha na conexão.', 'error'); 
+            }
         }
 
         async function validateAndGoToPayment() {
@@ -278,6 +305,72 @@ const API_URL = 'http://localhost:3000/api';
                 showMsg('Erro', 'Falha ao processar cartão.', 'error');
             }
         }
+
+        async function sendRecoveryEmail() {
+    // Substitua 'recoverEmailInput' pelo ID real do input de e-mail no seu modal de recuperação
+    // Substitua 'btn-recover' pelo ID do botão que envia
+    const emailInput = document.getElementById('recoverEmailInput'); 
+    const btn = document.getElementById('btn-recover');
+    
+    if(!emailInput || !emailInput.value) {
+        alert('Por favor, digite seu e-mail.');
+        return;
+    }
+
+    const originalText = btn.innerText;
+    btn.innerText = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_URL}/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailInput.value })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            alert('E-mail enviado! Verifique sua caixa de entrada (e spam).');
+            // Opcional: fechar modal ou limpar input
+            emailInput.value = '';
+            closeModal(); 
+        } else {
+            alert(data.error || 'Erro ao enviar.');
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Erro de conexão.');
+    } finally {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+}
+
+// VERIFICA SE VOLTOU DO STRIPE
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    const paymentStatus = urlParams.get('payment');
+
+    if (paymentStatus === 'success' && sessionId) {
+        // Abre o modal de carregamento ou feedback
+        showMsg('Processando...', 'Validando seu pagamento...', 'info');
+        
+        // Chama o backend para confirmar e liberar o acesso
+        fetch(`${API_URL}/check-stripe-payment/${sessionId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'paid') {
+                    showMsg('Sucesso!', 'Pagamento confirmado! Faça login.', 'success');
+                    // Remove os parâmetros da URL para ficar limpo
+                    window.history.replaceState({}, document.title, "indexT1.html");
+                    openModal('login');
+                } else {
+                    showMsg('Atenção', 'Pagamento ainda não confirmado.', 'error');
+                }
+            })
+            .catch(err => console.error(err));
+    }
 
         // Helpers
         function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }

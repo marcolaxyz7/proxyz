@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const { MercadoPagoConfig, Payment } = require('mercadopago');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const nodemailer = require('nodemailer');
+const stripe = require('stripe')('sk_test_51Sf1znJnXb2ue08w8ryqf1DAgxMzjufMjzXCiBWsnZQjsQI6JSG25T9rHZ92g3ORVvnroJzO58eOznhDQ6Z9SvNs00WmspQXC8');
 require('dotenv').config();
 
 // IMPORTA OS PROMPTS DO OUTRO ARQUIVO
@@ -185,6 +187,158 @@ app.post('/api/webhook', async (req, res) => {
                 if (sale.length) await pool.query('UPDATE users SET status = "active" WHERE id = ?', [sale[0].user_id]);
             }
         } catch(e) {}
+    }
+});
+
+// --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
+// Substitua pelos dados do seu e-mail 'Proxyz'
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // Ou outro serviço (Outlook, SMTP da hospedagem, etc.)
+    auth: {
+        user: 'suporteproxyz@gmail.com', // SEU E-MAIL AQUI
+        pass: 'mxyzmxyz'       // SUA SENHA DE APP AQUI
+    }
+});
+
+// --- ROTA 1: SOLICITAR RECUPERAÇÃO (Envia o E-mail) ---
+app.post('/api/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    
+    try {
+        // 1. Verifica se usuário existe
+        const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'E-mail não encontrado.' });
+        }
+
+        const user = users[0];
+
+        // 2. Gera um Token Temporário (válido por 1 hora)
+        // Usamos o segredo do JWT + a senha atual do usuário (se ele mudar a senha, o token invalida)
+        const secret = process.env.JWT_SECRET + user.password_hash;
+        const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: '1h' });
+
+        // 3. Cria o Link de Recuperação
+        const link = `http://localhost:3000/reset-password.html?id=${user.id}&token=${token}`;
+
+        // 4. Envia o E-mail
+        const mailOptions = {
+            from: '"Suporte Próxyz" <seu_email_proxyz@gmail.com>',
+            to: email,
+            subject: 'Redefinição de Senha - PRÓXYZ',
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px;">
+                    <h2 style="color: #e50914; text-align: center;">PRÓXYZ</h2>
+                    <p>Olá, <strong>${user.name}</strong>.</p>
+                    <p>Recebemos uma solicitação para redefinir sua senha.</p>
+                    <p>Clique no botão abaixo para criar uma nova senha:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${link}" style="background-color: #e50914; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">REDEFINIR MINHA SENHA</a>
+                    </div>
+                    <p style="font-size: 12px; color: #777;">Se você não solicitou isso, ignore este e-mail. O link expira em 1 hora.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        res.json({ message: 'E-mail enviado com sucesso!' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao enviar e-mail.' });
+    }
+});
+
+// --- ROTA 2: SALVAR NOVA SENHA ---
+app.post('/api/reset-password/:id/:token', async (req, res) => {
+    const { id, token } = req.params;
+    const { password } = req.body;
+
+    try {
+        // 1. Busca o usuário para pegar a hash antiga (necessária para validar o token)
+        const [users] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+        if (users.length === 0) return res.status(404).json({ error: 'Usuário não existe.' });
+        
+        const user = users[0];
+        const secret = process.env.JWT_SECRET + user.password_hash;
+
+        // 2. Verifica se o Token é válido
+        try {
+            jwt.verify(token, secret);
+        } catch (err) {
+            return res.status(400).json({ error: 'Link inválido ou expirado.' });
+        }
+
+        // 3. Hash da nova senha e atualização no banco
+        const newHash = await bcrypt.hash(password, 10);
+        await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, id]);
+
+        res.json({ message: 'Senha alterada com sucesso!' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao redefinir senha.' });
+    }
+});
+
+// --- ROTA: CRIA O CHECKOUT DA STRIPE ---
+app.post('/api/create-stripe-session', async (req, res) => {
+    const { userId, email } = req.body;
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'brl',
+                    product_data: {
+                        name: 'Acesso Próxyz Library',
+                        description: 'Acesso vitalício à biblioteca de prompts.',
+                        // images: ['https://seusite.com/logo.png'], // Opcional
+                    },
+                    unit_amount: 1990, // R$ 19,90 (em centavos)
+                },
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: `http://localhost:3000/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://localhost:3000/indexT1.html?payment=canceled`,
+            client_reference_id: userId.toString(), // Para sabermos quem pagou
+            customer_email: email, // Já preenche o e-mail do usuário lá
+        });
+
+        res.json({ url: session.url });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Erro ao criar sessão Stripe' });
+    }
+});
+
+// --- ROTA: VERIFICA PAGAMENTO (QUANDO O USUÁRIO VOLTA) ---
+app.get('/api/check-stripe-payment/:sessionId', async (req, res) => {
+    const { sessionId } = req.params;
+    try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+        
+        if (session.payment_status === 'paid') {
+            const userId = session.client_reference_id;
+            
+            // Atualiza o banco de dados
+            await pool.query('UPDATE users SET status = "active" WHERE id = ?', [userId]);
+            
+            // Registra a venda (opcional, mas bom para histórico)
+            await pool.query(
+                'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, 19.90, "paid", ?, "Stripe")',
+                [userId, session.payment_intent] // payment_intent é o ID da transação
+            );
+
+            return res.json({ status: 'paid', userId });
+        }
+        
+        res.json({ status: 'pending' });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Erro ao verificar pagamento' });
     }
 });
 
