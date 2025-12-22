@@ -197,11 +197,12 @@ app.post('/api/webhook', async (req, res) => {
 
 // --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
 // Substitua pelos dados do seu e-mail 'Proxyz'
+// --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Ou outro serviço (Outlook, SMTP da hospedagem, etc.)
+    service: 'gmail',
     auth: {
-        user: 'suporteproxyz@gmail.com', // SEU E-MAIL AQUI
-        pass: 'mxyzmxyz'       // SUA SENHA DE APP AQUI
+        user: process.env.EMAIL_USER, // Lê do .env
+        pass: process.env.EMAIL_PASS  // Lê do .env (Seguro!)
     }
 });
 
