@@ -4,7 +4,7 @@ const prompts = [
     // --- 01. PROMPTS UNIVERSAIS (ATUALIZADO COM OS NOVOS DETALHES) ---
     { 
         category: '01. Prompts Universais', 
-        title: '17.1. O Super-Professor', 
+        title: 'O Super-Professor', 
         description: 'Aprenda qualquer assunto complexo (Pareto 80/20).', 
         content: `Atue como o maior especialista do mundo em [INSERIR TEMA]. Eu sou um iniciante inteligente, mas tenho pouco tempo.
 
@@ -16,7 +16,7 @@ Tarefa: Crie um Plano de Aprendizado Acelerado (Pareto 80/20).
     },
     { 
         category: '01. Prompts Universais', 
-        title: '17.2. O Consultor de Problemas', 
+        title: 'O Consultor de Problemas', 
         description: 'Resolva qualquer problema com lógica McKinsey.', 
         content: `Atue como um Consultor Estratégico de Elite. Estou enfrentando o problema: [INSERIR PROBLEMA].
 
@@ -31,7 +31,7 @@ Tarefa: Realize uma Análise de Causa Raiz e Plano de Solução.
     },
     { 
         category: '01. Prompts Universais', 
-        title: '17.3. O Arquiteto de Projetos', 
+        title: 'O Arquiteto de Projetos', 
         description: 'Transforme uma ideia em plano de execução.', 
         content: `Atue como um Gerente de Projetos Sênior. Quero criar: [INSERIR IDEIA].
 
@@ -43,7 +43,7 @@ Tarefa: Transforme minha ideia em um Plano de Execução.
     },
     { 
         category: '01. Prompts Universais', 
-        title: '17.4. O Juiz Imparcial', 
+        title: 'O Juiz Imparcial', 
         description: 'Tome decisões difíceis sem emoção.', 
         content: `Atue como um Mentor Sábio. Estou num dilema entre [OPÇÃO A] e [OPÇÃO B].
 
@@ -59,7 +59,7 @@ Tarefa: Conduza uma análise racional.
     // --- 02. HABILIDADES PRÁTICAS ---
     {
         category: '02. Habilidades Práticas',
-        title: '2.1. Culinária Básica',
+        title: 'Culinária Básica',
         description: 'Química e técnica profissional (Mise en Place, Maillard).',
         content: `Atue como um Chef Executivo e Instrutor de Gastronomia. Não quero apenas uma receita; quero aprender a técnica por trás do sabor.
 Tenho os seguintes ingredientes: [INSERIR INGREDIENTES].
@@ -72,7 +72,7 @@ Tarefa: Crie um plano de preparo aplicando técnicas profissionais.
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.2. Mecânica Automotiva',
+        title: 'Mecânica Automotiva',
         description: 'Diagnóstico de defeitos e manutenção preventiva.',
         content: `Atue como um Mecânico Chefe de Oficina. Meu carro [INSERIR MODELO/ANO] está apresentando o sintoma: [INSERIR SINTOMA].
 
@@ -84,7 +84,7 @@ Tarefa: Realize um diagnóstico passo a passo para um leigo.
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.3. Eletricidade Residencial',
+        title: 'Eletricidade Residencial',
         description: 'Instalação segura e normas (NR-10).',
         content: `Atue como um Eletricista Certificado (NR-10). Preciso realizar a troca de [INSERIR ITEM: ex: Chuveiro, Tomada] em uma instalação de [110v ou 220v].
 
@@ -96,7 +96,7 @@ Tarefa: Forneça o protocolo de segurança e instalação à prova de falhas.
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.4. Jardinagem Urbana',
+        title: 'Jardinagem Urbana',
         description: 'Cultivo em pequenos espaços (Luz, Água e Solo).',
         content: `Atue como um Engenheiro Agrônomo Urbano. Moro em [INSERIR LOCAL: ex: Apartamento] que recebe sol por [INSERIR HORAS]. Quero plantar [INSERIR PLANTA].
 
@@ -108,7 +108,7 @@ Tarefa: Monte o sistema de cultivo ideal.
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.5. Educação Física',
+        title: 'Educação Física',
         description: 'Fisiologia, biomecânica e periodização de treino.',
         content: `Atue como um Fisiologista do Exercício. Meu objetivo é [INSERIR OBJETIVO] e tenho [TEMPO] min/dia, [FREQUÊNCIA]x na semana.
 
@@ -120,7 +120,7 @@ Tarefa: Crie a estrutura lógica do meu treino (Periodização).
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.6. Meditação e Mindfulness',
+        title: 'Meditação e Mindfulness',
         description: 'Prática guiada baseada em neurociência.',
         content: `Atue como um Instrutor de Mindfulness e Pesquisador de Neurociência. Sinto-me constantemente [INSERIR SENSAÇÃO: ex: Ansioso, Sem foco].
 
@@ -132,7 +132,7 @@ Tarefa: Crie uma prática guiada baseada em ciência.
     },
     {
         category: '02. Habilidades Práticas',
-        title: '2.7. Técnicas de Estudo',
+        title: 'Técnicas de Estudo',
         description: 'Alta performance cognitiva e memorização.',
         content: `Atue como um Especialista em Aprendizagem Acelerada. Preciso aprender/memorizar [INSERIR ASSUNTO] em [TEMPO DISPONÍVEL].
 
@@ -147,7 +147,7 @@ Tarefa: Desenhe o sistema de estudos usando evidências científicas.
     // --- 03. ENG. SOFTWARE E FULL STACK ---
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.1. Front-end Moderno',
+        title: 'Front-end Moderno',
         description: 'Foco: Arquitetura e UX Engineering.',
         content: `Contexto: Atue como um Principal Frontend Engineer. Não quero apenas uma tela bonita; quero uma aplicação robusta, acessível e performática. Estou usando a stack [INSERIR STACK: ex: React com Next.js e Tailwind] para construir [INSERIR PROJETO: ex: Dashboard Financeiro]. Tarefa: Defina a arquitetura do front-end e a estratégia de renderização.
 
@@ -159,7 +159,7 @@ Acessibilidade (a11y) e Semântica: Como estruturar o HTML e os componentes ARIA
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.2. Back-end & Arquitetura',
+        title: 'Back-end & Arquitetura',
         description: 'Foco: Escalabilidade e Segurança.',
         content: `Contexto: Atue como um Arquiteto de Software Sênior. Preciso construir o "motor" de uma aplicação que deve ser segura e fácil de escalar. A linguagem escolhida é [INSERIR LINGUAGEM: ex: Node.js, Java Spring, Python] e o sistema lidará com [INSERIR CENÁRIO: ex: Alto volume de transações, Chat em tempo real]. Tarefa: Projete a arquitetura do back-end e a modelagem de dados.
 
@@ -171,7 +171,7 @@ Camada de Segurança: Como implementar Autenticação e Autorização robustas (
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.3. DevOps & Cloud',
+        title: 'DevOps & Cloud',
         description: 'Foco: Automação e Infraestrutura.',
         content: `Contexto: Atue como um Engenheiro DevOps/SRE. O código funciona na minha máquina, mas preciso de um pipeline profissional para levar isso à produção na [INSERIR CLOUD: AWS, Azure, Vercel]. Tarefa: Crie o fluxo de CI/CD e a estratégia de infraestrutura.
 
@@ -183,7 +183,7 @@ Observabilidade: Depois que o código está no ar, como monitorar a saúde da ap
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.4. Mobile Development',
+        title: 'Mobile Development',
         description: 'Foco: Experiência Nativa vs Híbrida.',
         content: `Contexto: Atue como um Lead Mobile Developer. Preciso criar um aplicativo para [INSERIR OBJETIVO: ex: Delivery, Rede Social] e tenho restrições de [INSERIR RESTRIÇÃO: ex: Orçamento limitado, Prazo curto, Necessidade de alta performance gráfica]. Tarefa: Defina a tecnologia e a arquitetura do app.
 
@@ -195,7 +195,7 @@ Publicação e Stores: Quais são os requisitos técnicos rígidos da Apple App 
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.5. Qualidade de Código',
+        title: 'Qualidade de Código',
         description: 'Foco: Manutenibilidade a Longo Prazo.',
         content: `Contexto: Atue como um Tech Lead focado em Clean Code. O projeto está crescendo e ficando difícil de manter. Preciso estabelecer padrões para garantir que o código seja legível por humanos, não apenas máquinas. Tarefa: Crie o guia de estilo e qualidade do projeto.
 
@@ -207,7 +207,7 @@ Refatoração Preventiva: Como identificar "Code Smells" (ex: Funções gigantes
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.6. Web3 e Blockchain',
+        title: 'Web3 e Blockchain',
         description: 'Foco: Descentralização e Segurança de Contratos.',
         content: `Contexto: Atue como um Desenvolvedor Blockchain e Auditor de Smart Contracts. Quero criar uma dApp (Aplicação Descentralizada) para [INSERIR CASO DE USO: ex: Sistema de Votação, Marketplace de NFT] na rede [INSERIR REDE: ex: Ethereum, Solana]. Tarefa: Projete a lógica do contrato inteligente e a integração.
 
@@ -219,7 +219,7 @@ Integração Web3: Como conectar o front-end (React) com a Wallet do usuário (M
     },
     {
         category: '03. Eng. Software & Full Stack',
-        title: '11.7. System Design',
+        title: 'System Design',
         description: 'Foco: Alta Escala e Trade-offs.',
         content: `Contexto: Atue como um Arquiteto de Soluções de uma Big Tech. Precisamos desenhar um sistema similar ao [INSERIR SISTEMA: ex: Uber, Twitter, Netflix] que suporte milhões de usuários simultâneos. Tarefa: Desenhe a arquitetura de alto nível focada em disponibilidade e escala.
 
@@ -234,7 +234,7 @@ Teorema CAP: Em caso de falha de rede entre data centers, o sistema deve prioriz
 // --- 04. DATA SCIENCE E ANALYTICS ---
     {
         category: '04. Data Science & Analytics',
-        title: '12.1. Python para Análise de Dados',
+        title: 'Python para Análise de Dados',
         description: 'Foco: Performance e Limpeza.',
         content: `Contexto: Atue como um Cientista de Dados Sênior. Tenho um dataset sujo e volumoso sobre [INSERIR TEMA: ex: Vendas de Varejo, Log de Servidor, Dados Financeiros]. O código atual cheio de loops for está lento e ilegível. Tarefa: Otimize o script de tratamento de dados e faça a Análise Exploratória (EDA).
 
@@ -246,7 +246,7 @@ Análise Exploratória (EDA): Quais perguntas devemos fazer aos dados primeiro? 
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.2. Machine Learning',
+        title: 'Machine Learning',
         description: 'Foco: Modelagem Preditiva e Generalização.',
         content: `Contexto: Atue como um Machine Learning Engineer. Precisamos prever [INSERIR OBJETIVO: ex: Churn de Clientes, Preço de Imóveis, Fraude] com base em dados históricos. Não quero apenas acurácia; quero um modelo que funcione no mundo real. Tarefa: Desenhe a estratégia de modelagem e validação.
 
@@ -258,7 +258,7 @@ Métricas de Negócio: A "Acurácia" pode enganar. Para este problema, devemos p
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.3. Visualização de Dados',
+        title: 'Visualização de Dados',
         description: 'Foco: Data Storytelling.',
         content: `Contexto: Atue como um Especialista em Data Visualization e BI. Tenho que apresentar os resultados da análise para [INSERIR PÚBLICO: ex: CEO, Time de Marketing, Investidores]. Eles não entendem estatística, apenas resultados. Tarefa: Crie o roteiro da apresentação (Data Storytelling).
 
@@ -270,7 +270,7 @@ Design de Dashboard: Se formos criar um painel interativo (PowerBI/Tableau), com
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.4. Engenharia de Dados',
+        title: 'Engenharia de Dados',
         description: 'Foco: Pipeline e Confiabilidade.',
         content: `Contexto: Atue como um Engenheiro de Dados Sênior. Os dados estão espalhados em [INSERIR FONTES: ex: Excel, API de CRM, Banco SQL] e precisam chegar limpos para o time de análise. Tarefa: Arquitetar o pipeline de dados (ETL/ELT).
 
@@ -282,7 +282,7 @@ Armazenamento (Lake vs Warehouse): Para este cenário, os dados devem ir para um
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.5. Estatística Aplicada a Negócios',
+        title: 'Estatística Aplicada a Negócios',
         description: 'Foco: Testes A/B e Decisão.',
         content: `Contexto: Atue como um Product Analyst. Lançamos uma nova funcionalidade/preço e queremos saber se ela realmente melhorou a conversão ou se foi sorte. Temos dados do Grupo Controle e Grupo Teste. Tarefa: Planejar e analisar o Teste A/B.
 
@@ -294,7 +294,7 @@ Correlação vs Causalidade: Observamos que usuários que usam a feature X gasta
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.6. Ética em IA e Dados',
+        title: 'Ética em IA e Dados',
         description: 'Foco: Responsabilidade e Viés.',
         content: `Contexto: Atue como um Especialista em Ética de IA. Estamos implementando um modelo para [INSERIR USO: ex: Aprovação de Crédito, Triagem de Currículos]. Precisamos garantir que ele seja justo e auditável. Tarefa: Realizar uma auditoria de risco algorítmico.
 
@@ -306,7 +306,7 @@ Privacidade (LGPD/GDPR): Como garantir a anonimização dos dados sensíveis dur
     },
     {
         category: '04. Data Science & Analytics',
-        title: '12.7. Big Data',
+        title: 'Big Data',
         description: 'Foco: Volume e Processamento Distribuído.',
         content: `Contexto: Atue como um Arquiteto de Big Data. O volume de dados cresceu para a casa dos Terabytes e o Pandas não carrega mais na memória. Precisamos processar logs de [INSERIR FONTE: ex: IoT, Cliques no Site]. Tarefa: Definir a estratégia de processamento massivo.
 
@@ -321,7 +321,7 @@ Particionamento: Como particionar os dados no armazenamento (ex: por Data, por R
     // --- 05. MARKETING DIGITAL & CREATOR ---
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.1. Branding Pessoal',
+        title: 'Branding Pessoal',
         description: 'Foco: Autoridade e Diferenciação.',
         content: `Contexto: Atue como um Estrategista de Personal Branding. Eu sou um profissional da área de [INSERIR ÁREA: ex: Nutrição, Design, Advocacia] e quero deixar de ser visto como uma "commodity" para me tornar uma autoridade premium. Tarefa: Desenvolva minha plataforma de marca e posicionamento.
 
@@ -333,7 +333,7 @@ Pilares de Conteúdo: Defina os 3 temas centrais (Editorias) que vão sustentar 
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.2. Copywriting',
+        title: 'Copywriting',
         description: 'Foco: Psicologia e Conversão.',
         content: `Contexto: Atue como um Copywriter de Resposta Direta (Direct Response). Preciso escrever a carta de vendas (ou script de vídeo/VSL) para vender [INSERIR PRODUTO: ex: Curso de Inglês, Consultoria Financeira]. O público está cético e cansado de promessas vazias. Tarefa: Estruture o texto persuasivo usando neurociência e gatilhos mentais.
 
@@ -345,7 +345,7 @@ Oferta Irresistível: Não venda apenas o produto. Construa a oferta. Como empil
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.3. Tráfego Pago e Orgânico',
+        title: 'Tráfego Pago e Orgânico',
         description: 'Foco: Aquisição e Distribuição.',
         content: `Contexto: Atue como um Gestor de Tráfego e Estrategista de Distribuição. Tenho uma verba de [INSERIR ORÇAMENTO] e meu objetivo é [INSERIR META: Leads Qualificados, Venda Direta, Seguidores]. Tarefa: Crie o plano de mídia e distribuição.
 
@@ -357,7 +357,7 @@ Segmentação e Retargeting: Não quero queimar dinheiro. Como estruturar os pú
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.4. Marketing de Conteúdo',
+        title: 'Marketing de Conteúdo',
         description: 'Foco: Retenção e Funil.',
         content: `Contexto: Atue como um Editor-Chefe e Estrategista de Conteúdo. Estou cansado de criar conteúdo que só gera likes mas não paga as contas. Quero crescer no [INSERIR CANAL: Instagram, YouTube, LinkedIn]. Tarefa: Crie um calendário editorial estratégico com foco em conversão.
 
@@ -369,7 +369,7 @@ Métricas de Vaidade vs. Negócio: Quais métricas devo ignorar e quais devo per
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.5. Funis de Venda Digitais',
+        title: 'Funis de Venda Digitais',
         description: 'Foco: Jornada do Cliente.',
         content: `Contexto: Atue como um Arquiteto de Funis. Vendo um produto de ticket [INSERIR VALOR: Baixo/Médio/Alto]. Preciso automatizar o processo de vendas. Tarefa: Desenhe o diagrama do funil de conversão.
 
@@ -381,7 +381,7 @@ Landing Page de Alta Conversão: Quais são os blocos obrigatórios da página (
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.6. Lançamentos de Infoprodutos',
+        title: 'Lançamentos de Infoprodutos',
         description: 'Foco: Picos de Venda.',
         content: `Contexto: Atue como um Estrategista de Lançamentos. Estamos preparando o lançamento do [NOME DO PRODUTO]. Temos uma audiência de [TAMANHO DA AUDIÊNCIA]. Tarefa: Planeje o cronograma e a estratégia do evento de lançamento.
 
@@ -393,7 +393,7 @@ Estratégia de Abertura de Carrinho: O que fazer nas primeiras 24h para garantir
     },
     {
         category: '05. Mkt Digital & Creator',
-        title: '13.7. Growth Hacking',
+        title: 'Growth Hacking',
         description: 'Foco: Crescimento Acelerado e Viralidade.',
         content: `Contexto: Atue como um Head of Growth. Temos um produto validado, mas o crescimento está linear. Preciso de estratégias para crescer exponencialmente (Growth Loops) com baixo custo. Tarefa: Proponha experimentos de Growth.
 
@@ -408,7 +408,7 @@ Testes de Alta Cadência (ICE Score): Liste 3 ideias de testes rápidos (mudanç
     // --- 06. ENGAJAMENTO ---
     {
         category: '06. Engajamento',
-        title: '3. Roteiro para Vídeos Curtos',
+        title: 'Roteiro para Vídeos Curtos',
         description: 'Foco: Viralidade e Retenção (TikTok/Reels).',
         content: `Contexto: Atue como um Roteirista de Vídeos Virais e Estrategista de Retenção. Quero promover meu produto/marca [INSERIR NICHOS: ex: Meu Jogo, Infoproduto, Loja de Roupas] no TikTok e Reels. O objetivo é parar o "scroll" e fazer a pessoa assistir até o final. Tarefa: Crie scripts baseados em estruturas de alta retenção.
 
@@ -420,7 +420,7 @@ CTA (Chamada para Ação) Disfarçada: Ninguém gosta de propaganda. Como pedir 
     },
     {
         category: '06. Engajamento',
-        title: '4. Engajamento e Algoritmo',
+        title: 'Engajamento e Algoritmo',
         description: 'Foco: Construção de Comunidade e Sinais.',
         content: `Contexto: Atue como um Especialista em Algoritmos de Social Media. Estou postando, mas meus números estagnaram. Meu nicho é [INSERIR NICHO]. Quero entender o que o algoritmo quer de mim para entregar meu conteúdo para mais pessoas (Efeito Bola de Neve). Tarefa: Audite minha estratégia e defina o plano de crescimento.
 
@@ -442,7 +442,7 @@ Análise de Métricas: Quando eu abrir o Insights, o que devo olhar? Ensine-me a
     // --- 07. CARREIRA & IDIOMAS ---
     {
         category: '07. Carreira & Idiomas',
-        title: '14.1. Inglês para Tech e Business',
+        title: 'Inglês para Tech e Business',
         description: 'Foco: Entrevistas e Dia a Dia.',
         content: `Contexto: Atue como um Tech English Coach especializado em preparar profissionais latinos para vagas na América do Norte e Europa. Meu nível de inglês é [INSERIR NÍVEL: Intermediário/Avançado] e estou me preparando para uma [INSERIR SITUAÇÃO: Entrevista Técnica / Daily Meeting / Apresentação de Projeto] para uma vaga de [INSERIR CARGO]. Tarefa: Prepare-me para a comunicação profissional de alto nível.
 
@@ -454,7 +454,7 @@ Suavização (Softening Language): Latinos tendem a ser muito diretos, o que pod
     },
     {
         category: '07. Carreira & Idiomas',
-        title: '14.2. Tradução e Localização',
+        title: 'Tradução e Localização',
         description: 'Foco: Adaptação de Produto.',
         content: `Contexto: Atue como um Gerente de Localização (L10n). Temos um produto digital (App/Site) criado no Brasil e queremos expandi-lo para [INSERIR PAÍS/REGIÃO: ex: EUA, França, China]. Não quero apenas traduzir palavras, quero adaptar a experiência. Tarefa: Crie o guia de localização e internacionalização (i18n).
 
@@ -466,7 +466,7 @@ Compliance Cultural e Legal: Existem leis específicas de privacidade ou exigên
     },
     {
         category: '07. Carreira & Idiomas',
-        title: '14.3. Cultura de Trabalho Remoto',
+        title: 'Cultura de Trabalho Remoto',
         description: 'Foco: Assincronicidade.',
         content: `Contexto: Atue como um Head of Remote. Acabei de ser contratado por uma empresa Remote-First com o time espalhado por [INSERIR FUSOS: ex: Europa, Ásia, Américas]. Preciso me adaptar para não trabalhar 24h por dia e manter a produtividade. Tarefa: Crie meu manual de etiqueta e produtividade remota.
 
@@ -478,7 +478,7 @@ Visibilidade e Confiança: Em um ambiente remoto, "quem não é visto, não é l
     },
     {
         category: '07. Carreira & Idiomas',
-        title: '14.4. Nomadismo Digital',
+        title: 'Nomadismo Digital',
         description: 'Foco: Logística e Legalidade.',
         content: `Contexto: Atue como um Consultor de Estilo de Vida Nômade e Advogado de Imigração. Quero passar [TEMPO: ex: 6 meses] viajando pela [REGIÃO: ex: Sudeste Asiático, Europa] enquanto trabalho remotamente. Tarefa: Planeje a logística e a estratégia legal.
 
@@ -490,7 +490,7 @@ Rotina e Solidão: O sonho pode virar pesadelo. Crie uma rotina semanal sugerida
     },
     {
         category: '07. Carreira & Idiomas',
-        title: '14.5. Networking Internacional',
+        title: 'Networking Internacional',
         description: 'Foco: LinkedIn Global.',
         content: `Contexto: Atue como um Estrategista de Carreira Internacional. Quero ser recrutado por empresas de fora. Meu perfil no LinkedIn precisa atrair recrutadores dos [PAÍS ALVO: ex: EUA, Canadá]. Tarefa: Otimize meu perfil e estratégia de conexão.
 
@@ -502,7 +502,7 @@ Prova Social Global: Como conseguir recomendações em inglês? Como exibir proj
     },
     {
         category: '07. Carreira & Idiomas',
-        title: '14.6. Recebimento Internacional',
+        title: 'Recebimento Internacional',
         description: 'Foco: Contabilidade e Câmbio.',
         content: `Contexto: Atue como um Consultor Financeiro para Exportação de Serviços (Brasil). Consegui um contrato PJ (Contractor) pagando em [MOEDA: Dólar/Euro]. Quero maximizar meu ganho líquido e estar 100% legal com a Receita Federal. Tarefa: Estruture meu fluxo financeiro internacional.
 
@@ -518,7 +518,7 @@ Impostos (Carnê-Leão vs PJ): Explique por que receber como Pessoa Física (Car
     // --- 08. ALTA PERFORMANCE E BIOHACKING ---
     {
         category: '08. Alta Performance',
-        title: '15.1. Higiene do Sono',
+        title: 'Higiene do Sono',
         description: 'Foco: Recuperação Profunda e Ciclo Circadiano.',
         content: `Contexto: Atue como um Sleep Coach e Especialista em Cronobiologia. Eu não quero apenas "dormir 8 horas"; quero otimizar a qualidade do meu sono profundo (Deep Sleep) e REM para acordar 100% restaurado. Tenho sentido [INSERIR SINTOMA: ex: Cansaço matinal, Insônia, Acordar no meio da noite]. Tarefa: Crie meu protocolo de otimização do sono.
 
@@ -530,7 +530,7 @@ Suplementação e Rotina Pré-Sono: Analise a eficácia de suplementos como Magn
     },
     {
         category: '08. Alta Performance',
-        title: '15.2. Nutrição Cognitiva',
+        title: 'Nutrição Cognitiva',
         description: 'Foco: Clareza Mental e Nootrópicos.',
         content: `Contexto: Atue como um Neuro-Nutricionista. Trabalho com [INSERIR TIPO DE TRABALHO: ex: Programação, Escrita Criativa] e sofro com "Brain Fog" (névoa mental) e queda de energia após o almoço. Quero alimentar meu cérebro, não apenas meu estômago. Tarefa: Desenvolva um plano nutricional para performance cognitiva.
 
@@ -542,7 +542,7 @@ Hidratação e Eletrólitos: A desidratação leve já derruba o QI. Crie uma es
     },
     {
         category: '08. Alta Performance',
-        title: '15.3. Gestão de Energia',
+        title: 'Gestão de Energia',
         description: 'Foco: Ritmos Ultradianos vs. Tempo.',
         content: `Contexto: Atue como um Coach de Alta Performance. Eu sei usar agenda, mas muitas vezes tenho tempo e não tenho vontade ou foco. Quero parar de gerenciar horas e começar a gerenciar minha energia biológica. Tarefa: Reestruture meu dia de trabalho com base na biologia.
 
@@ -554,7 +554,7 @@ Gestão de Decisões: A "Fadiga de Decisão" é real. Como sistematizar escolhas
     },
     {
         category: '08. Alta Performance',
-        title: '15.4. Controle de Dopamina',
+        title: 'Controle de Dopamina',
         description: 'Foco: Foco e Motivação (Detox).',
         content: `Contexto: Atue como um Neurocientista Comportamental. Sinto que meu sistema de recompensa está "quebrado" pelo excesso de redes sociais e estímulos rápidos. Tenho dificuldade em focar em tarefas longas e chatas. Tarefa: Crie um protocolo de "Dopamine Detox" e reabilitação do foco.
 
@@ -566,7 +566,7 @@ Design de Fricção: Como alterar meu ambiente digital (bloqueadores de app, mod
     },
     {
         category: '08. Alta Performance',
-        title: '15.5. Resiliência Mental',
+        title: 'Resiliência Mental',
         description: 'Foco: Antifragilidade e Estoicismo.',
         content: `Contexto: Atue como um Mentor de Liderança e Filósofo Estoico. Trabalho em um ambiente de alta pressão e incerteza. Fico ansioso com coisas que não controlo e me irrito facilmente. Tarefa: Treine minha mente para a antifragilidade.
 
@@ -578,7 +578,7 @@ Visualização Negativa (Premeditatio Malorum): Como usar a técnica de "imagina
     },
     {
         category: '08. Alta Performance',
-        title: '15.6. Ambiente de Alta Performance',
+        title: 'Ambiente de Alta Performance',
         description: 'Foco: Ergonomia e Flow no Workspace.',
         content: `Contexto: Atue como um Designer de Espaços de Trabalho e Ergonomista. Vou montar/reformar meu Home Office. Quero um ambiente que induza o estado de Flow e proteja minha saúde física a longo prazo. Tarefa: Projete o setup ideal.
 
@@ -594,7 +594,7 @@ Pistas Visuais e Minimalismo: Como organizar a mesa para que ela "grite" o que p
     // --- 09. FUTURISMO E INOVAÇÃO ---
     {
         category: '09. Futurismo & Inovação',
-        title: '16.1. ESG e Sustentabilidade',
+        title: 'ESG e Sustentabilidade',
         description: 'Foco: Estratégia Real vs Greenwashing.',
         content: `Contexto: Atue como um Chief Sustainability Officer (CSO) de uma multinacional. Quero implementar uma estratégia ESG (Environmental, Social, Governance) para minha empresa/projeto na área de [INSERIR SETOR: ex: Varejo de Moda, Tecnologia, Agronegócio]. Não quero marketing verde; quero viabilidade econômica e impacto real. Tarefa: Desenvolva o plano estratégico de sustentabilidade.
 
@@ -606,7 +606,7 @@ Governança e Transparência: Quais métricas (KPIs) devo reportar aos investido
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.2. Economia da Longevidade',
+        title: 'Economia da Longevidade',
         description: 'Foco: Viver e Trabalhar até os 100.',
         content: `Contexto: Atue como um Demógrafo e Planejador Financeiro de Longo Prazo. A expectativa de vida está indo para 90/100 anos. O modelo "Estudar -> Trabalhar -> Aposentar" quebrou. Tenho [IDADE] anos e atuo como [PROFISSÃO]. Tarefa: Crie meu plano de vida multi-estágio.
 
@@ -618,7 +618,7 @@ Oportunidades da Silver Economy: O envelhecimento global cria novos mercados. Id
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.3. Cidades Inteligentes (Smart Cities)',
+        title: 'Cidades Inteligentes (Smart Cities)',
         description: 'Foco: Urbanismo 5.0 e IoT.',
         content: `Contexto: Atue como um Urbanista Tecnológico e Arquiteto de IoT. Estamos projetando um bairro ou avaliando uma cidade para viver. O foco é qualidade de vida impulsionada por dados, não apenas gadgets espalhados. Tarefa: Analise a infraestrutura de uma Cidade Inteligente.
 
@@ -630,7 +630,7 @@ Privacidade e Vigilância: Existe uma linha tênue entre segurança e "Big Broth
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.4. Exploração Espacial (New Space)',
+        title: 'Exploração Espacial (New Space)',
         description: 'Foco: Economia Orbital.',
         content: `Contexto: Atue como um Analista da Indústria Aeroespacial. O espaço deixou de ser apenas governamental (NASA) e virou comercial (SpaceX, Blue Origin). Quero entender onde está o dinheiro nessa nova fronteira. Tarefa: Mapeie as oportunidades da Space Economy.
 
@@ -642,7 +642,7 @@ Turismo e Manufatura em Microgravidade: Quais produtos (ex: fibra óptica, órg�
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.5. Singularidade e Transhumanismo',
+        title: 'Singularidade e Transhumanismo',
         description: 'Foco: Fusão Homem-Máquina e Ética.',
         content: `Contexto: Atue como um Futurista e Bioeticista. Estamos vendo o avanço de interfaces cérebro-computador (como Neuralink) e IA Geral (AGI). Quero entender as implicações éticas e práticas da fusão biológica com a tecnológica. Tarefa: Explore o cenário da Singularidade.
 
@@ -654,7 +654,7 @@ Desigualdade Biológica: Se apenas os ricos puderem pagar por "upgrades" genéti
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.6. Futuro do Trabalho',
+        title: 'Futuro do Trabalho',
         description: 'Foco: Coexistência com IA e Renda.',
         content: `Contexto: Atue como um Estrategista de Força de Trabalho. Tenho medo que a automação torne minha profissão obsoleta. Quero me preparar para a era da "Economia sem Emprego" ou do trabalho híbrido IA-Humano. Tarefa: Desenhe o mapa de sobrevivência profissional.
 
@@ -666,7 +666,7 @@ De "Empregos" para "Tarefas": O conceito de "cargo fixo" está morrendo. Como se
     },
     {
         category: '09. Futurismo & Inovação',
-        title: '16.7. Geopolítica do Futuro',
+        title: 'Geopolítica do Futuro',
         description: 'Foco: Guerra Híbrida e Soberania Digital.',
         content: `Contexto: Atue como um Analista de Inteligência Geopolítica. O mundo não gira mais apenas em torno de petróleo e fronteiras físicas. Quero entender as novas guerras invisíveis. Tarefa: Analise o cenário de poder global.
 
@@ -681,7 +681,7 @@ Ciberguerra e Infraestrutura Crítica: Como nações podem "desligar" outras sem
     // --- 10. CIÊNCIAS EXATAS E LÓGICA ---
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.1. Aritmética Básica',
+        title: 'Aritmética Básica',
         description: 'Foco: Eficiência Algorítmica e Mental.',
         content: `Contexto: Atue como um Matemático Computacional e especialista em Otimização de Processos. Preciso desenvolver um método de cálculo mental rápido ou uma lógica de script para uma equipe de [INSERIR PROFISSÃO: ex: Comerciantes / Engenheiros de Obra / Traders].
 
@@ -697,7 +697,7 @@ Aplicação Prática: Demonstre o sistema resolvendo um problema complexo de [IN
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.2. Álgebra Elementar',
+        title: 'Álgebra Elementar',
         description: 'Foco: Modelagem de Negócios.',
         content: `Contexto: Atue como um Consultor de Modelagem de Negócios. Estou planejando a estrutura financeira de um novo empreendimento: [INSERIR TIPO DE NEGÓCIO: ex: SaaS de Assinatura / Loja de Roupas / Delivery de Comida].
 
@@ -713,7 +713,7 @@ Análise de Sensibilidade: Se eu aumentar o preço do produto em [INSERIR % DE A
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.3. Geometria Plana',
+        title: 'Geometria Plana',
         description: 'Foco: Otimização de Layout e Espaço.',
         content: `Contexto: Atue como um Arquiteto e Planejador Urbano. Tenho um terreno/espaço com formato [INSERIR FORMATO: ex: Retangular Irregular / Triangular / L-Shape] e área total de [INSERIR METRAGEM] m².
 
@@ -727,7 +727,7 @@ Comparativo Geométrico: Compare duas configurações diferentes (ex: disposiç�
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.4. Geometria Espacial',
+        title: 'Geometria Espacial',
         description: 'Foco: Design de Produto e Embalagem.',
         content: `Contexto: Atue como um Engenheiro de Embalagens e Logística. Minha empresa fabrica [INSERIR PRODUTO: ex: Perfumes Líquidos / Grãos a granel]. Precisamos redesenhar a embalagem para reduzir custos de material e transporte.
 
@@ -741,7 +741,7 @@ Eficiência de Paletização: Considerando um pallet padrão PBR (1,00 x 1,20m),
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.5. Trigonometria',
+        title: 'Trigonometria',
         description: 'Foco: Engenharia e Fenômenos Cíclicos.',
         content: `Contexto: Atue como um Engenheiro Civil ou Engenheiro de Som (escolha conforme a variável). Estou lidando com um problema de [INSERIR PROBLEMA: ex: Inclinação de Rampa de Acesso / Isolamento Acústico de Sala].
 
@@ -755,7 +755,7 @@ Conformidade Técnica: O resultado obtido respeita a norma técnica que exige [I
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.6. Probabilidade',
+        title: 'Probabilidade',
         description: 'Foco: Gestão de Risco e Decisão.',
         content: `Contexto: Atue como um Analista de Riscos e Estatístico. Estou diante de uma decisão crítica de investimento/estratégia: [INSERIR DECISÃO: ex: Lançar produto novo ou Melhorar o atual / Investir em Ação X ou Renda Fixa].
 
@@ -771,7 +771,7 @@ Veredito Matemático: Com base puramente nos números, qual caminho oferece a me
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.7. Matemática Financeira',
+        title: 'Matemática Financeira',
         description: 'Foco: Estratégia de Longo Prazo.',
         content: `Contexto: Atue como um Planejador Financeiro Patrimonial (CFP). Meu cliente tem o objetivo de [INSERIR OBJETIVO: ex: Aposentar com R$ 2 Milhões / Comprar uma Casa de R$ 500k] em [INSERIR TEMPO] anos.
 
@@ -787,7 +787,7 @@ Conclusão: Qual estratégia exige menor esforço mensal de aporte para atingir 
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.8. Lógica Formal',
+        title: 'Lógica Formal',
         description: 'Foco: Validação de Sistemas e Regras.',
         content: `Contexto: Atue como um Auditor de Sistemas e Especialista em Lógica Booleana. Estamos desenhando as regras de negócio para um sistema de [INSERIR SISTEMA: ex: Aprovação de Crédito / Triagem Médica Automatizada].
 
@@ -803,7 +803,7 @@ Simplificação Lógica: Transforme essa tabela em uma sentença lógica única 
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.9. Estatística Descritiva',
+        title: 'Estatística Descritiva',
         description: 'Foco: Análise de Dados e Tendências.',
         content: `Contexto: Atue como um Cientista de Dados (Data Scientist). Recebi um dataset com o histórico de [INSERIR DADOS: ex: Vendas Mensais dos últimos 5 anos / Notas de Alunos da Escola / Acidentes de Trânsito].
 
@@ -819,7 +819,7 @@ Storytelling com Dados: Escreva um parágrafo executivo resumindo a saúde desse
     },
     {
         category: '10. Ciências Exatas & Lógica',
-        title: '10.10. Cálculo I',
+        title: 'Cálculo I',
         description: 'Foco: Otimização e Taxas de Variação.',
         content: `Contexto: Atue como um Engenheiro de Produção Industrial. Temos um processo de fabricação ou uma campanha de marketing onde a função que descreve o [INSERIR VARIÁVEL: ex: Lucro / Eficiência / Custo] em relação ao tempo/recurso investido é dada por (ou se comporta como) uma parábola invertida (curva de rendimentos decrescentes).
 
@@ -836,7 +836,7 @@ Taxa de Variação Instantânea: Em um ponto específico x = [INSERIR VALOR], o 
 // --- 11. CIÊNCIAS NATURAIS ---
     {
         category: '11. Ciências Naturais',
-        title: '11.1. Termodinâmica',
+        title: 'Termodinâmica',
         description: 'Foco: Eficiência Energética Industrial.',
         content: `Contexto: Atue como um Consultor de Eficiência Energética. Fui contratado para auditar um sistema de [INSERIR SISTEMA: ex: Caldeira Industrial / Data Center / Motor a Combustão] que está superaquecendo ou gastando muita energia.
 
@@ -852,7 +852,7 @@ ROI Energético: Quanto de energia (em KWh ou Joules) economizaremos por mês co
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.2. Óptica',
+        title: 'Óptica',
         description: 'Foco: Design de Iluminação e Imagem.',
         content: `Contexto: Atue como um Designer de Iluminação (Lighting Designer) para um grande projeto: [INSERIR PROJETO: ex: Museu de Arte / Estufa Agrícola Indoor / Set de Filmagem].
 
@@ -868,7 +868,7 @@ Espectro Invisível: (Opcional) Devemos considerar filtros para bloquear UV ou I
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.3. Eletricidade Básica',
+        title: 'Eletricidade Básica',
         description: 'Foco: Projetos Off-Grid e Renováveis.',
         content: `Contexto: Atue como um Engenheiro Eletricista de Renováveis. O cliente quer instalar um sistema solar Off-Grid (fora da rede) em uma localidade remota: [INSERIR LOCAL: ex: Fazenda no Pantanal / Motorhome / Ilha].
 
@@ -884,7 +884,7 @@ Proteção: Especifique os disjuntores e fusíveis necessários para proteger o 
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.4. Magnetismo',
+        title: 'Magnetismo',
         description: 'Foco: Transporte e Indústria (Levitação/Blindagem).',
         content: `Contexto: Atue como um Engenheiro de Maglev (Levitação Magnética) ou Especialista em Ressonância Magnética. Estamos desenvolvendo um protótipo que utiliza supercondutores ou eletroímãs potentes.
 
@@ -898,7 +898,7 @@ Refrigeração: Como manteremos os supercondutores na temperatura crítica? Desc
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.5. Física Moderna',
+        title: 'Física Moderna',
         description: 'Foco: Tecnologia Quântica e Segurança.',
         content: `Contexto: Atue como um Consultor de Tecnologia Quântica. Um banco ou governo quer saber se seus dados estão seguros contra computadores quânticos ou se devem investir em criptografia pós-quântica.
 
@@ -914,7 +914,7 @@ Recomendação: O que o cliente deve fazer hoje? [INSERIR AÇÃO: Migrar chaves?
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.6. Química Geral',
+        title: 'Química Geral',
         description: 'Foco: Processos Industriais e Estequiometria.',
         content: `Contexto: Atue como um Engenheiro Químico Industrial. Precisamos escalar a produção de [INSERIR PRODUTO: ex: Sabão Biodegradável / Fertilizante / Combustível Sintético] de uma escala de laboratório para uma fábrica.
 
@@ -928,7 +928,7 @@ Gestão de Resíduos: O subproduto da reação é tóxico? Como neutralizá-lo q
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.7. Tabela Periódica',
+        title: 'Tabela Periódica',
         description: 'Foco: Engenharia de Materiais.',
         content: `Contexto: Atue como um Cientista de Materiais. Estamos projetando um componente para [INSERIR APLICAÇÃO EXTREMA: ex: Revestimento de Foguete / Implante Ósseo / Bateria de Longa Duração].
 
@@ -942,7 +942,7 @@ Durabilidade: Como esse material reage à oxidação ou corrosão no ambiente de
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.8. Bioquímica',
+        title: 'Bioquímica',
         description: 'Foco: Saúde e Performance Humana.',
         content: `Contexto: Atue como um Bioquímico Esportivo e Nutricionista. O cliente é um atleta de [INSERIR ESPORTE: ex: Fisiculturismo / Maratona / CrossFit] que estagnou nos resultados.
 
@@ -956,7 +956,7 @@ Hormônios: Como a dieta atual pode estar afetando a insulina e o cortisol, prej
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.9. Astronomia',
+        title: 'Astronomia',
         description: 'Foco: Colonização e Exploração Espacial.',
         content: `Contexto: Atue como um Engenheiro de Missão Espacial. Estamos planejando uma base permanente em [INSERIR CORPO CELESTE: ex: Marte / Lua / Europa (Lua de Júpiter)].
 
@@ -970,7 +970,7 @@ Radiação: Sem uma atmosfera densa ou campo magnético forte, como proteger a b
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.10. Geologia',
+        title: 'Geologia',
         description: 'Foco: Mineração e Construção.',
         content: `Contexto: Atue como um Geólogo de Exploração. Uma empresa quer comprar um terreno para [INSERIR FINALIDADE: ex: Mineração de Ouro / Construção de Represa / Condomínio de Luxo] em uma área de relevo acidentado.
 
@@ -984,7 +984,7 @@ Viabilidade Econômica: Se for mineração, explique como estimar o teor do min�
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.11. Meteorologia',
+        title: 'Meteorologia',
         description: 'Foco: Agronegócio e Aviação.',
         content: `Contexto: Atue como um Meteorologista Sinótico. Uma companhia aérea ou grande cooperativa agrícola precisa de um briefing para a próxima semana, onde há previsão de [INSERIR FENÔMENO: ex: Ciclone Extratropical / Geada Negra / Nevoeiro Denso].
 
@@ -998,7 +998,7 @@ Plano de Contingência: Recomende a ação imediata (ex: Desviar rotas / Acionar
     },
     {
         category: '11. Ciências Naturais',
-        title: '11.12. Mecânica Clássica',
+        title: 'Mecânica Clássica',
         description: 'Foco: Perícia e Dinâmica de Trânsito.',
         content: `Contexto: Atue como um Engenheiro Forense de Trânsito. Ocorreu um acidente envolvendo [INSERIR VEÍCULOS: ex: um Caminhão e um Carro de Passeio] em uma pista [INSERIR CONDIÇÃO: ex: Molhada / Declive Acentuado].
 
@@ -1018,7 +1018,7 @@ Laudo Técnico: Redija a conclusão do laudo explicando se houve falha mecânica
     // --- 12. BIOLOGIA E SAÚDE ---
     {
         category: '12. Biologia & Saúde',
-        title: '12.1. Citologia',
+        title: 'Citologia',
         description: 'Foco: Pesquisa e Biotecnologia.',
         content: `Contexto: Atue como um Pesquisador em Biologia Celular. Estamos investigando uma patologia ou desenvolvendo um tratamento que envolve a célula do tipo [INSERIR TIPO CELULAR: ex: Neurônio / Hepatócito / Célula-tronco].
 
@@ -1032,7 +1032,7 @@ Ciclo Celular: Se o objetivo for [INSERIR OBJETIVO: ex: Regenerar Tecido / Parar
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.2. Genética',
+        title: 'Genética',
         description: 'Foco: Medicina Personalizada e Hereditariedade.',
         content: `Contexto: Atue como um Geneticista Clínico. Um casal procura aconselhamento pois há histórico de [INSERIR DOENÇA GENÉTICA: ex: Fibrose Cística / Hemofilia / Huntington] na família e eles desejam ter filhos.
 
@@ -1046,7 +1046,7 @@ Tecnologia CRISPR/Edição: Explique, teoricamente, se essa condição seria can
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.3. Anatomia Humana',
+        title: 'Anatomia Humana',
         description: 'Foco: Lesões e Reabilitação.',
         content: `Contexto: Atue como um Cirurgião Ortopedista ou Fisioterapeuta. Um paciente sofreu uma lesão grave no [INSERIR REGIÃO: ex: Joelho / Ombro / Coluna Lombar] praticando [INSERIR ESPORTE/ATIVIDADE].
 
@@ -1060,7 +1060,7 @@ Plano Cirúrgico/Reabilitação: Descreva a abordagem para consertar a estrutura
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.4. Fisiologia Humana',
+        title: 'Fisiologia Humana',
         description: 'Foco: Performance e Homeostase.',
         content: `Contexto: Atue como um Fisiologista do Esporte. Estamos preparando um atleta de elite para competir em um ambiente de [INSERIR AMBIENTE EXTREMO: ex: Altitude Elevada / Deserto Quente / Frio Intenso].
 
@@ -1074,7 +1074,7 @@ Aclimatização: Quanto tempo o atleta precisa chegar antes da prova para que se
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.5. Imunologia',
+        title: 'Imunologia',
         description: 'Foco: Vacinas e Defesa.',
         content: `Contexto: Atue como um Imunologista. Surgiu um novo patógeno [INSERIR TIPO: ex: Vírus Respiratório / Bactéria Super-resistente] que ataca especificamente [INSERIR CÉLULAS ALVO: ex: Pulmões / Sistema Nervoso].
 
@@ -1088,7 +1088,7 @@ Memória Imunológica: Por que algumas pessoas podem ser reinfectadas? O patóge
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.6. Nutrição Básica',
+        title: 'Nutrição Básica',
         description: 'Foco: Dieta Clínica.',
         content: `Contexto: Atue como um Nutricionista Clínico. O paciente é [INSERIR PERFIL: ex: Diabético Tipo 2 / Hipertenso / Vegano com Anemia] e precisa mudar drasticamente a alimentação.
 
@@ -1102,7 +1102,7 @@ Micronutrientes Críticos: Identifique 3 vitaminas ou minerais que podem estar e
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.7. Botânica',
+        title: 'Botânica',
         description: 'Foco: Agricultura Sustentável.',
         content: `Contexto: Atue como um Engenheiro Agrônomo. Temos uma plantação de [INSERIR CULTURA: ex: Soja / Milho / Tomate] que está sofrendo com [INSERIR PROBLEMA: ex: Seca / Praga de Lagartas / Solo Ácido].
 
@@ -1116,7 +1116,7 @@ Controle Biológico vs Químico: Proponha uma solução para a praga que não ma
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.8. Zoologia',
+        title: 'Zoologia',
         description: 'Foco: Conservação e Manejo.',
         content: `Contexto: Atue como um Biólogo da Conservação. Uma espécie de [INSERIR ANIMAL: ex: Onça-Pintada / Tartaruga Marinha / Ave Rara] está ameaçada de extinção devido à [INSERIR CAUSA: ex: Fragmentação do Habitat / Caça Ilegal].
 
@@ -1130,7 +1130,7 @@ Corredores Ecológicos: Projete uma solução física para reconectar as popula�
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.9. Ecologia',
+        title: 'Ecologia',
         description: 'Foco: Impacto Ambiental.',
         content: `Contexto: Atue como um Consultor Ambiental. Uma empresa planeja construir [INSERIR EMPREENDIMENTO: ex: Uma Estrada / Uma Fábrica / Um Resort] em uma área de [INSERIR BIOMA: ex: Manguezal / Cerrado / Floresta Tropical].
 
@@ -1144,7 +1144,7 @@ Mitigação e Compensação: A obra é irreversível. Proponha 3 medidas obrigat
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.10. Neurociência Básica',
+        title: 'Neurociência Básica',
         description: 'Foco: Comportamento e Aprendizado.',
         content: `Contexto: Atue como um Neurocientista Cognitivo. Queremos desenvolver um método de ensino ou um produto para pessoas com [INSERIR CONDIÇÃO: ex: TDAH / Ansiedade / Dislexia].
 
@@ -1158,7 +1158,7 @@ Neuroplasticidade: Como nossa solução (seja um app, um jogo ou um método de e
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.11. Farmacologia Básica',
+        title: 'Farmacologia Básica',
         description: 'Foco: Segurança e Mecanismo.',
         content: `Contexto: Atue como um Farmacêutico Hospitalar. Um paciente idoso toma múltiplos remédios (polifarmácia) para [INSERIR CONDIÇÕES: ex: Pressão Alta e Diabetes] e agora precisa tomar um antibiótico/anti-inflamatório novo.
 
@@ -1172,7 +1172,7 @@ Orientação ao Paciente: Quais sinais de alerta (ex: tontura, sangramento, dor 
     },
     {
         category: '12. Biologia & Saúde',
-        title: '12.12. Primeiros Socorros',
+        title: 'Primeiros Socorros',
         description: 'Foco: Protocolo de Emergência.',
         content: `Contexto: Atue como um Socorrista do SAMU/Paramédico. Você chegou à cena de um acidente onde a vítima sofreu [INSERIR TRAUMA: ex: Queimadura de 3º Grau / Parada Cardíaca / Corte Profundo com Hemorragia].
 
@@ -1189,7 +1189,7 @@ Estabilização: O que fazer enquanto a ambulância não chega para evitar o Cho
     // --- 13. LINGUAGENS E COMUNICAÇÃO ---
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.1. Gramática Normativa',
+        title: 'Gramática Normativa',
         description: 'Foco: Revisão Editorial de Alto Nível.',
         content: `Contexto: Atue como um Editor-Chefe de uma Publicação de Prestígio (jurídica, acadêmica ou literária). Recebi um texto bruto que precisa ser elevado ao padrão da norma culta, mas sem perder a voz do autor. O texto é um [INSERIR TIPO: ex: Artigo de Opinião / Tese de Mestrado / Contrato Social].
 
@@ -1203,7 +1203,7 @@ Adequação de Registro: O texto está muito [INSERIR PROBLEMA: ex: coloquial / 
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.2. Interpretação de Texto',
+        title: 'Interpretação de Texto',
         description: 'Foco: Análise de Discurso e Mídia.',
         content: `Contexto: Atue como um Analista Político ou Investigativo. Tenho em mãos um [INSERIR TEXTO: ex: Discurso de um CEO / Notícia de Jornal / Manifesto Partidário] e preciso entender o que está nas entrelinhas.
 
@@ -1217,7 +1217,7 @@ O "Não-Dito" (Subtexto): O que o autor omitiu propositalmente? A quem esse text
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.3. Redação e Estilo',
+        title: 'Redação e Estilo',
         description: 'Foco: Copywriting e Ghostwriting.',
         content: `Contexto: Atue como um Ghostwriter Sênior. Preciso escrever um [INSERIR FORMATO: ex: E-mail de Vendas / Artigo para LinkedIn / Carta de Pedido de Desculpas] em nome de um [INSERIR PERFIL: ex: CEO de Startup / Político / Influenciador].
 
@@ -1231,7 +1231,7 @@ Ganchos e CTAs: Crie 3 opções de títulos/assuntos magnéticos e uma "Chamada 
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.4. Literatura Mundial',
+        title: 'Literatura Mundial',
         description: 'Foco: Análise Comparada e Relevância.',
         content: `Contexto: Atue como um Crítico Literário e Professor de Literatura Comparada. Estou estudando a obra [INSERIR LIVRO: ex: 1984 de Orwell / Dom Casmurro / A Metamorfose] e quero conectá-la com o mundo atual.
 
@@ -1245,7 +1245,7 @@ Arquétipos: Analise o protagonista sob a ótica da Jornada do Herói ou dos Arq
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.5. Inglês Instrumental',
+        title: 'Inglês Instrumental',
         description: 'Foco: Técnico e Acadêmico.',
         content: `Contexto: Atue como um Tradutor Técnico Especialista em [INSERIR ÁREA: ex: TI / Medicina / Engenharia]. Tenho um paper/manual em inglês com o título [INSERIR TÍTULO] e preciso extrair o conhecimento prático dele.
 
@@ -1259,7 +1259,7 @@ Tradução de Trecho Complexo: Traduza o seguinte parágrafo difícil [COLAR PAR
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.6. Oratória e Retórica',
+        title: 'Oratória e Retórica',
         description: 'Foco: Preparação de Discurso.',
         content: `Contexto: Atue como um Coach de Oratória e Speechwriter. Tenho que fazer uma apresentação de [INSERIR TEMPO: ex: 5 minutos / 1 hora] para uma plateia de [INSERIR PÚBLICO: ex: Acionistas / Alunos / Convidados de Casamento]. O objetivo é [INSERIR OBJETIVO: ex: Conseguir Investimento / Emocionar / Ensinar].
 
@@ -1273,7 +1273,7 @@ Recursos Estilísticos: Insira no texto técnicas como a "Regra de Três" (lista
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.7. Comunicação Não-Violenta',
+        title: 'Comunicação Não-Violenta',
         description: 'Foco: Gestão de Conflitos (CNV).',
         content: `Contexto: Atue como um Mediador de Conflitos. Estou prestes a ter uma conversa difícil com [INSERIR PESSOA: ex: Meu Chefe / Minha Esposa / Um Cliente Irritado] sobre o problema: [INSERIR SITUAÇÃO: ex: Atrasos na entrega / Falta de reconhecimento / Gastos excessivos].
 
@@ -1289,7 +1289,7 @@ Pedido Claro: Formule um pedido de ação concreto e positivo para o futuro (nã
     },
     {
         category: '13. Linguagens & Comunicação',
-        title: '13.8. Linguagem Corporal',
+        title: 'Linguagem Corporal',
         description: 'Foco: Performance e Leitura.',
         content: `Contexto: Atue como um Especialista em Linguagem Não-Verbal. Tenho uma situação de alta pressão: [INSERIR SITUAÇÃO: ex: Entrevista de Emprego / Negociação Salarial / Primeiro Encontro].
 
@@ -1307,7 +1307,7 @@ Paralinguagem: Como devo modular o tom, o volume e a velocidade da minha voz par
     // --- 14. CIÊNCIAS HUMANAS E SOCIEDADE ---
     {
         category: '14. Humanas & Sociedade',
-        title: '14.1. História Antiga',
+        title: 'História Antiga',
         description: 'Foco: Liderança e Estratégia.',
         content: `Contexto: Atue como um Consultor de Estratégia Política. Estamos analisando a ascensão e queda de grandes impérios para aplicar lições a uma corporação multinacional moderna ou um governo atual.
 
@@ -1321,7 +1321,7 @@ Conselho do Oráculo: Se você fosse um conselheiro de César ou Péricles trans
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.2. História Medieval',
+        title: 'História Medieval',
         description: 'Foco: Economia e Estrutura Social.',
         content: `Contexto: Atue como um Economista Histórico e Roteirista. Estamos criando uma série ou jogo ambientado na Idade Média (Alta ou Baixa) e precisamos de precisão absoluta na construção do mundo (Worldbuilding).
 
@@ -1335,7 +1335,7 @@ A Peste e a Crise: Simule o impacto da Peste Negra nesta sociedade. Como a escas
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.3. Geografia Física',
+        title: 'Geografia Física',
         description: 'Foco: Planejamento Ambiental.',
         content: `Contexto: Atue como um Geógrafo e Planejador Ambiental. Temos um projeto de infraestrutura ([INSERIR OBRA: ex: Hidrelétrica / Rodovia / Condomínio]) para ser realizado em uma área de [INSERIR RELEVO: ex: Serra / Planície Alagável / Caatinga].
 
@@ -1349,7 +1349,7 @@ Climatologia Local: Como o regime de chuvas da região e o fenômeno de "Ilhas d
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.4. Geografia Humana',
+        title: 'Geografia Humana',
         description: 'Foco: Urbanismo e Demografia.',
         content: `Contexto: Atue como um Demógrafo e Urbanista. A cidade de [INSERIR NOME] está passando por um processo rápido de [INSERIR FENÔMENO: Gentrificação / Favelização / Envelhecimento Populacional].
 
@@ -1363,7 +1363,7 @@ Plano Diretor: Sugira 3 alterações no Plano Diretor da cidade para mitigar ess
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.5. Geopolítica',
+        title: 'Geopolítica',
         description: 'Foco: Relações Internacionais e Conflito.',
         content: `Contexto: Atue como um Analista de Inteligência Internacional. Existe uma tensão crescente entre o País A ([INSERIR PAÍS: ex: EUA / China / Rússia]) e o País B ([INSERIR PAÍS]) disputando o controle de [INSERIR RECURSO: ex: Semicondutores / Petróleo / Água Potável].
 
@@ -1377,7 +1377,7 @@ Teoria do Heartland/Rimland: Aplique conceitos clássicos da geopolítica (Macki
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.6. Filosofia Antiga',
+        title: 'Filosofia Antiga',
         description: 'Foco: Ética Empresarial e Pessoal.',
         content: `Contexto: Atue como um Consultor Filosófico (Chief Philosophy Officer). Nossa empresa ou líder está enfrentando um dilema: [INSERIR DILEMA: ex: Demitir funcionários para salvar a empresa / Priorizar lucro ou sustentabilidade].
 
@@ -1391,7 +1391,7 @@ Maiêutica Socrática: Faça 5 perguntas incômodas e profundas que o CEO deve r
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.7. Ética e Moral',
+        title: 'Ética e Moral',
         description: 'Foco: Bioética e IA.',
         content: `Contexto: Atue como um Especialista em Ética da IA ou Bioética. Estamos programando um carro autônomo ou um algoritmo de triagem médica que deve tomar uma decisão de vida ou morte: [INSERIR CENÁRIO TROLLEY PROBLEM: ex: Salvar o passageiro ou atropelar 3 pedestres].
 
@@ -1405,7 +1405,7 @@ Programação Final: Como você traduziria esse debate filosófico em uma linha 
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.8. Sociologia Clássica',
+        title: 'Sociologia Clássica',
         description: 'Foco: Cultura Corporativa.',
         content: `Contexto: Atue como um Sociólogo Organizacional. A empresa [INSERIR NOME] está sofrendo com altas taxas de Burnout e falta de propósito entre os funcionários.
 
@@ -1419,7 +1419,7 @@ Durkheim e a Anomia: Existe um estado de "Anomia" (falta de normas claras ou per
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.9. Antropologia',
+        title: 'Antropologia',
         description: 'Foco: Marketing e UX.',
         content: `Contexto: Atue como um Antropólogo Digital. Queremos lançar nosso produto [INSERIR PRODUTO] em um novo mercado cultural: [INSERIR PAÍS OU TRIBO URBANA: ex: Japão / Gamers Gen Z / Idosos Rurais].
 
@@ -1433,7 +1433,7 @@ Alteridade: Como evitar o "Etnocentrismo" (julgar a cultura deles pela régua da
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.10. Psicologia Comportamental',
+        title: 'Psicologia Comportamental',
         description: 'Foco: Mudança de Hábitos.',
         content: `Contexto: Atue como um Designer Comportamental. Estamos criando um aplicativo para ajudar as pessoas a [INSERIR HÁBITO: ex: Parar de Fumar / Economizar Dinheiro / Estudar Todos os Dias].
 
@@ -1447,7 +1447,7 @@ Modelagem (Shaping): Como vamos dividir o objetivo grande em pequenos passos suc
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.11. Psicanálise',
+        title: 'Psicanálise',
         description: 'Foco: Branding e Narrativa.',
         content: `Contexto: Atue como um Especialista em Arquétipos de Marca. Estamos definindo a personalidade da marca [INSERIR MARCA] que atua no setor de [INSERIR SETOR: ex: Motocicletas / Seguros / Chocolate].
 
@@ -1461,7 +1461,7 @@ A Sombra: Qual é o lado sombrio da marca que não deve ser revelado, mas que d�
     },
     {
         category: '14. Humanas & Sociedade',
-        title: '14.12. Teologia e Ciência da Religião',
+        title: 'Teologia e Ciência da Religião',
         description: 'Foco: Diversidade e Conflito.',
         content: `Contexto: Atue como um Historiador das Religiões. Estou escrevendo um livro ou roteiro que envolve o encontro entre duas crenças distintas: [INSERIR CRENÇA A: ex: Cristianismo] e [INSERIR CRENÇA B: ex: Budismo / Paganismo].
 
@@ -1479,7 +1479,7 @@ Função Social: Além da fé, qual função social cada uma desempenha na sua c
     // --- 15. DIREITO, CIDADANIA E POLÍTICA ---
     {
         category: '15. Direito & Política',
-        title: '15.1. Direito Constitucional',
+        title: 'Direito Constitucional',
         description: 'Foco: Controle de Constitucionalidade.',
         content: `Contexto: Atue como um Ministro do Supremo Tribunal Federal (STF) ou um Constitucionalista Sênior. Foi aprovada uma nova lei ([INSERIR LEI: ex: Bloqueio de Redes Sociais / Obrigatoriedade de Voto Impresso / Restrição de Cultos Religiosos na Pandemia]) que está sendo questionada.
 
@@ -1493,7 +1493,7 @@ Veredito: Com base na Constituição Federal de 1988 e em precedentes histórico
     },
     {
         category: '15. Direito & Política',
-        title: '15.2. Direito Civil',
+        title: 'Direito Civil',
         description: 'Foco: Contratos e Responsabilidade.',
         content: `Contexto: Atue como um Advogado Civilista. Meu cliente ([INSERIR CLIENTE: ex: Uma Construtora / Um Locatário Comercial / Um Influenciador Digital]) assinou um contrato de [INSERIR TIPO: ex: Prestação de Serviços / Aluguel] e agora deseja rescindir ou revisar o contrato devido a [INSERIR FATO: ex: Aumento excessivo do IGPM / Falha na entrega / Pandemia].
 
@@ -1507,7 +1507,7 @@ Danos Morais e Materiais: Calcule e justifique se cabe pedido de indenização. 
     },
     {
         category: '15. Direito & Política',
-        title: '15.3. Direito do Consumidor',
+        title: 'Direito do Consumidor',
         description: 'Foco: Práticas Abusivas.',
         content: `Contexto: Atue como um Defensor Público ou Promotor do Consumidor. Um grande número de reclamações surgiu contra a empresa [INSERIR EMPRESA: ex: Operadora de Telefonia / Companhia Aérea / E-commerce] devido à prática de [INSERIR PRÁTICA: ex: Venda Casada / Publicidade Enganosa / Cancelamento Unilateral].
 
@@ -1521,7 +1521,7 @@ Dano Moral Coletivo: Argumente por que essa prática não afetou apenas um indiv
     },
     {
         category: '15. Direito & Política',
-        title: '15.4. Direito Trabalhista',
+        title: 'Direito Trabalhista',
         description: 'Foco: Novas Relações de Trabalho.',
         content: `Contexto: Atue como um Juiz do Trabalho ou Advogado Trabalhista. Estamos analisando o caso de um profissional [INSERIR PROFISSÃO: ex: Motorista de App / Desenvolvedor de Software PJ / Entregador] que pede reconhecimento de vínculo empregatício com a plataforma/empresa.
 
@@ -1535,7 +1535,7 @@ Pejotização: Verifique se a contratação como PJ (Pessoa Jurídica) foi uma f
     },
     {
         category: '15. Direito & Política',
-        title: '15.5. Direito Penal',
+        title: 'Direito Penal',
         description: 'Foco: Teoria do Delito e Tribunal do Júri.',
         content: `Contexto: Atue como um Advogado Criminalista de Defesa. Seu cliente está sendo acusado de [INSERIR CRIME: ex: Homicídio / Legítima Defesa / Furto Famélico] nas seguintes circunstâncias: [DESCREVER O FATO BREVEMENTE].
 
@@ -1549,7 +1549,7 @@ Retórica para o Júri: Escreva o parágrafo de encerramento da sua sustentaçã
     },
     {
         category: '15. Direito & Política',
-        title: '15.6. Estrutura do Estado',
+        title: 'Estrutura do Estado',
         description: 'Foco: Crise Institucional.',
         content: `Contexto: Atue como um Analista Político Institucional. O país está vivendo uma crise onde o Poder [INSERIR PODER: ex: Executivo] está tentando interferir nas atribuições do Poder [INSERIR PODER: ex: Judiciário], alegando [INSERIR MOTIVO: ex: Ativismo Judicial / Obstrução de Governo].
 
@@ -1563,7 +1563,7 @@ Consequências: Analise o risco de ruptura democrática. O que acontece se uma o
     },
     {
         category: '15. Direito & Política',
-        title: '15.7. Ciência Política',
+        title: 'Ciência Política',
         description: 'Foco: Ideologias e Políticas Públicas.',
         content: `Contexto: Atue como um Cientista Político. O governo acabou de lançar um programa de [INSERIR PROGRAMA: ex: Renda Básica Universal / Privatização de Estatais / Reforma Agrária].
 
@@ -1577,7 +1577,7 @@ Síntese: Qual das duas visões prevalece na implementação prática desse prog
     },
     {
         category: '15. Direito & Política',
-        title: '15.8. Direito Digital e LGPD',
+        title: 'Direito Digital e LGPD',
         description: 'Foco: Privacidade de Dados.',
         content: `Contexto: Atue como um DPO (Data Protection Officer) ou Advogado Digital. Uma empresa de [INSERIR SETOR: ex: Saúde / Marketing / Finanças] sofreu um vazamento de dados ou quer coletar dados sensíveis de seus usuários.
 
@@ -1594,7 +1594,7 @@ Plano de Resposta a Incidentes: Ocorreu um vazamento. Escreva o comunicado ofici
     // --- 16. ECONOMIA E NEGÓCIOS ---
     {
         category: '16. Economia & Negócios',
-        title: '16.1. Microeconomia',
+        title: 'Microeconomia',
         description: 'Foco: Estratégia de Preços e Elasticidade.',
         content: `Contexto: Atue como um Economista Sênior de Pricing (Precificação). Minha empresa vende [INSERIR PRODUTO: ex: Café Gourmet / Software por Assinatura / Passagens Aéreas] e estamos considerando aumentar o preço em [INSERIR % DE AUMENTO].
 
@@ -1608,7 +1608,7 @@ Estratégia de Discriminação de Preços: Sugira formas de cobrar preços difer
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.2. Macroeconomia',
+        title: 'Macroeconomia',
         description: 'Foco: Cenários e Planejamento Estratégico.',
         content: `Contexto: Atue como um Estrategista Econômico Global. Sou CEO de uma empresa que pretende [INSERIR AÇÃO: ex: Exportar para a Europa / Importar Peças da China / Contrair Empréstimo de Longo Prazo].
 
@@ -1622,7 +1622,7 @@ PIB e Setor: Dado que o PIB está projetado para crescer/encolher [INSERIR %], o
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.3. Contabilidade Básica',
+        title: 'Contabilidade Básica',
         description: 'Foco: Saúde Financeira Real.',
         content: `Contexto: Atue como um Auditor Contábil e Analista de M&A (Fusões e Aquisições). Estou avaliando comprar ou investir na empresa [INSERIR NOME/TIPO], mas preciso saber se ela é saudável ou uma "bomba relógio".
 
@@ -1636,7 +1636,7 @@ EBITDA: Calcule ou estime o EBITDA (Lucros antes de juros, impostos, depreciaç�
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.4. Empreendedorismo',
+        title: 'Empreendedorismo',
         description: 'Foco: Modelagem e Pitch.',
         content: `Contexto: Atue como um Investidor de Venture Capital (VC). Tenho uma ideia de startup: [DESCREVER IDEIA: ex: Uber para Passeadores de Cães / Marketplace de Obras de Arte].
 
@@ -1650,7 +1650,7 @@ Vantagem Injusta (Moat): O que impede o Google ou a Amazon de copiar sua ideia a
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.5. Marketing e Vendas',
+        title: 'Marketing e Vendas',
         description: 'Foco: Funil e Conversão.',
         content: `Contexto: Atue como um CMO (Chief Marketing Officer) e Especialista em Growth Hacking. Precisamos lançar o produto [INSERIR PRODUTO] com um orçamento limitado de [INSERIR ORÇAMENTO].
 
@@ -1664,7 +1664,7 @@ Métricas Chave (KPIs): Defina o CAC (Custo de Aquisição de Cliente) máximo a
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.6. Investimentos',
+        title: 'Investimentos',
         description: 'Foco: Alocação de Ativos e Risco.',
         content: `Contexto: Atue como um Consultor Financeiro de Wealth Management. O cliente tem [INSERIR IDADE] anos, patrimônio de [INSERIR VALOR] e perfil de risco [INSERIR PERFIL: ex: Conservador / Moderado / Arrojado]. O objetivo é [INSERIR META: ex: Independência Financeira em 10 anos].
 
@@ -1678,7 +1678,7 @@ Rebalanceamento: Crie uma regra clara para quando o cliente deve vender o que su
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.7. Gestão de Pessoas / Liderança',
+        title: 'Gestão de Pessoas / Liderança',
         description: 'Foco: Cultura e Conflito.',
         content: `Contexto: Atue como um Coach Executivo e Especialista em RH. Um gestor recém-promovido está enfrentando problemas com a equipe: [INSERIR PROBLEMA: ex: Baixa produtividade / Conflito entre gerações / Resistência ao retorno presencial].
 
@@ -1692,7 +1692,7 @@ Segurança Psicológica: Como o líder pode criar um ambiente onde a equipe se s
     },
     {
         category: '16. Economia & Negócios',
-        title: '16.8. Administração do Tempo',
+        title: 'Administração do Tempo',
         description: 'Foco: Produtividade Executiva.',
         content: `Contexto: Atue como um Mentor de Alta Performance. O cliente é um executivo C-Level ou Empreendedor que trabalha 14h por dia, está à beira do Burnout e sente que não produz nada estratégico, apenas "apaga incêndios".
 
@@ -1709,7 +1709,7 @@ Sistemas de Delegação: Crie um checklist para ele delegar tarefas. Não basta 
     // --- 17. TECNOLOGIA E DIGITAL ---
     {
         category: '17. Tecnologia & Digital',
-        title: '17.1. Lógica de Programação',
+        title: 'Lógica de Programação',
         description: 'Foco: Algoritmos e Otimização.',
         content: `Contexto: Atue como um Engenheiro de Software Sênior. Estamos enfrentando um problema de performance no nosso sistema de [INSERIR SISTEMA: ex: E-commerce / Logística de Entregas / Processamento de Dados].
 
@@ -1723,7 +1723,7 @@ Edge Cases: Identifique 3 casos extremos (ex: entrada nula, lista vazia, número
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.2. Hardware e Montagem',
+        title: 'Hardware e Montagem',
         description: 'Foco: Arquitetura de Hardware e Gargalos.',
         content: `Contexto: Atue como um Arquiteto de Hardware e Sistemas. O cliente ([INSERIR PERFIL: ex: Estúdio de Renderização 3D / Gamer Competitivo / Data Center de IA]) tem um orçamento de [INSERIR VALOR] para montar uma máquina de alta performance.
 
@@ -1737,7 +1737,7 @@ Refrigeração e Energia: Calcule o TDP total do sistema. Indique se é necessá
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.3. Redes e Internet',
+        title: 'Redes e Internet',
         description: 'Foco: Infraestrutura e Troubleshooting.',
         content: `Contexto: Atue como um Engenheiro de Redes (CCNA/CCNP). Uma empresa de [INSERIR TAMANHO: ex: 50 funcionários] está reclamando de lentidão e quedas constantes na conexão Wi-Fi e cabeada.
 
@@ -1751,7 +1751,7 @@ Wi-Fi Corporativo: Explique a diferença entre usar vários Roteadores doméstic
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.4. Segurança Digital',
+        title: 'Segurança Digital',
         description: 'Foco: Defesa Cibernética e Prevenção.',
         content: `Contexto: Atue como um Especialista em Cibersegurança (Blue Team). Nossa empresa vai adotar o modelo de trabalho "Home Office" ou "BYOD" (Bring Your Own Device).
 
@@ -1765,7 +1765,7 @@ Autenticação (MFA): Por que senhas fortes não são mais suficientes? Defina a
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.5. Inteligência Artificial',
+        title: 'Inteligência Artificial',
         description: 'Foco: Implementação de Negócios.',
         content: `Contexto: Atue como um Arquiteto de Soluções de IA. Uma empresa de [INSERIR SETOR: ex: Atendimento ao Cliente / Jurídico / Marketing] quer usar IA Generativa (LLMs) para automatizar processos.
 
@@ -1779,7 +1779,7 @@ RAG (Retrieval-Augmented Generation): Explique como conectar a IA à base de dad
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.6. Pacote Office / Produtividade',
+        title: 'Pacote Office / Produtividade',
         description: 'Foco: Análise de Dados e Automação.',
         content: `Contexto: Atue como um Analista de Business Intelligence (BI). Recebi uma planilha bruta com 50.000 linhas de vendas de uma rede de lojas desorganizada.
 
@@ -1793,7 +1793,7 @@ Automação: Como poderíamos usar uma Macro (VBA) ou Script para automatizar o 
     },
     {
         category: '17. Tecnologia & Digital',
-        title: '17.7. Design Gráfico',
+        title: 'Design Gráfico',
         description: 'Foco: Identidade Visual e Psicologia.',
         content: `Contexto: Atue como um Diretor de Arte. Uma marca de [INSERIR TIPO: ex: Cosméticos Naturais / Banco Digital / Fast Food] quer fazer um Rebranding total para atingir um público mais [INSERIR PÚBLICO: ex: Sofisticado / Jovem / Consciente].
 
@@ -1810,7 +1810,7 @@ Gestalt: Aplique um princípio da Gestalt (ex: Fechamento, Proximidade, Semelhan
     // --- 18. ARTES E CULTURA ---
     {
         category: '18. Artes & Cultura',
-        title: '18.1. História da Arte',
+        title: 'História da Arte',
         description: 'Foco: Curadoria e Análise Simbólica.',
         content: `Contexto: Atue como um Curador de Arte de um Museu Internacional. Estamos organizando uma exposição que conecta o movimento [INSERIR MOVIMENTO A: ex: Renascimento Italiano] com o [INSERIR MOVIMENTO B: ex: Modernismo Brasileiro].
 
@@ -1824,7 +1824,7 @@ Legado: Explique por que essas obras são consideradas "divisores de águas" na 
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.2. Teoria Musical',
+        title: 'Teoria Musical',
         description: 'Foco: Composição e Emoção.',
         content: `Contexto: Atue como um Produtor Musical e Compositor. Quero compor uma trilha sonora ou canção para [INSERIR FINALIDADE: ex: Uma Cena Triste de Filme / Um Jogo de Ação / Um Hit Pop]. A emoção desejada é [INSERIR EMOÇÃO: ex: Melancolia / Tensão / Euforia].
 
@@ -1838,7 +1838,7 @@ Arranjo e Instrumentação: Quais instrumentos (Cordas, Sintetizadores, Percuss�
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.3. Cinema e Audiovisual',
+        title: 'Cinema e Audiovisual',
         description: 'Foco: Roteiro e Narrativa.',
         content: `Contexto: Atue como um Roteirista de Cinema (Screenwriter). Tenho uma ideia de filme do gênero [INSERIR GÊNERO: ex: Terror Psicológico / Comédia Romântica] sobre [INSERIR TEMA: ex: Inteligência Artificial / Primeiro Amor].
 
@@ -1852,7 +1852,7 @@ Arco do Personagem: Descreva a "Falha Trágica" (Fatal Flaw) do protagonista e c
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.4. Cinema e Audiovisual',
+        title: 'Cinema e Audiovisual',
         description: 'Foco: Direção e Mise-en-scène.',
         content: `Contexto: Atue como um Diretor de Cinema. Vamos filmar a cena crucial onde [DESCREVER AÇÃO: ex: O detetive descobre o assassino / O casal se separa]. O ambiente é [INSERIR LOCAL: ex: Um beco chuvoso / Um jantar de luxo].
 
@@ -1866,7 +1866,7 @@ Direção de Atores: Qual é o "Subtexto" da cena? O que os personagens não est
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.5. Fotografia',
+        title: 'Fotografia',
         description: 'Foco: Iluminação e Composição.',
         content: `Contexto: Atue como um Diretor de Fotografia. Vou realizar um ensaio fotográfico de [INSERIR TIPO: ex: Retrato Corporativo / Fotografia de Comida / Paisagem Urbana] no horário [INSERIR HORÁRIO: ex: Golden Hour / Meio-dia / Noite].
 
@@ -1880,7 +1880,7 @@ Configuração da Câmera (Triângulo de Exposição): Sugira os valores ideais 
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.6. Arquitetura e Urbanismo',
+        title: 'Arquitetura e Urbanismo',
         description: 'Foco: História e Estilo.',
         content: `Contexto: Atue como um Historiador da Arquitetura. Estou diante de um edifício famoso: [INSERIR NOME OU ESTILO: ex: Catedral de Notre Dame / Edifício Copan / Uma Casa Modernista].
 
@@ -1894,7 +1894,7 @@ Impacto Urbano: Como esse edifício dialoga com a rua e a cidade ao redor? Ele �
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.7. Arquitetura e Urbanismo',
+        title: 'Arquitetura e Urbanismo',
         description: 'Foco: Projeto e Humanização.',
         content: `Contexto: Atue como um Urbanista e Paisagista. A prefeitura quer revitalizar uma praça ou área degradada em [INSERIR CIDADE/BAIRRO]. O objetivo é tornar o local seguro e conviviane.
 
@@ -1908,7 +1908,7 @@ Sustentabilidade: Proponha soluções de drenagem (jardins de chuva) e vegetaç�
     },
     {
         category: '18. Artes & Cultura',
-        title: '18.8. Artes Visuais e Design',
+        title: 'Artes Visuais e Design',
         description: 'Foco: Psicologia da Imagem.',
         content: `Contexto: Atue como um Crítico de Cinema ou Designer Visual. Analise a paleta de cores e a estética do filme/obra [INSERIR NOME: ex: O Grande Hotel Budapeste / Matrix / Pinturas de Frida Kahlo].
 
@@ -1925,7 +1925,7 @@ Composição Estática vs. Dinâmica: A imagem transmite calma e ordem (simetria
     // --- 19. CRIAÇÃO DE GAMES ---
     {
         category: '19. Criação de Games',
-        title: '19.1. Game Design e Mecânicas',
+        title: 'Game Design e Mecânicas',
         description: 'Foco: Diversão e Retenção.',
         content: `Contexto: Atue como um Lead Game Designer Sênior (ex-Blizzard ou Riot). Tenho uma ideia de jogo do gênero [INSERIR GÊNERO: ex: MMORPG, Sobrevivência, Plataforma] com a temática [INSERIR TEMA: ex: Cyberpunk, Fantasia Medieval]. Preciso transformar essa ideia vaga em um sistema viciante e equilibrado. Tarefa: Desenhe o "Core Loop" (Loop Central) e o sistema de progressão.
 
@@ -1937,7 +1937,7 @@ Design de Recompensas (Psicologia): Como usar a psicologia comportamental (Skinn
     },
     {
         category: '19. Criação de Games',
-        title: '19.2. Desenvolvimento de Jogos',
+        title: 'Desenvolvimento de Jogos',
         description: 'Foco: Arquitetura Técnica e Multiplayer.',
         content: `Contexto: Atue como um Engenheiro de Gameplay e Redes. Estou desenvolvendo um jogo [INSERIR TIPO: Multiplayer Online / Single Player] usando a engine [INSERIR ENGINE: Unity, Unreal, Godot, Web/Three.js]. Preciso garantir que o jogo rode liso e, se for online, que não tenha "lag" ou trapaças. Tarefa: Defina a arquitetura técnica do jogo.
 
