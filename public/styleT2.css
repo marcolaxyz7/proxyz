@@ -137,3 +137,27 @@ footer {
         text-align: center;
     }
 }
+
+/* 1. Transforma a área principal em uma coluna flexível que ocupa 100% da altura */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Garante que o main tenha no mínimo a altura da tela */
+}
+
+/* 2. Faz com que a área de conteúdo (onde ficam os cards/prompts) cresça */
+/* Isso vai ocupar todo o espaço vazio e empurrar o rodapé para o fundo */
+.view-section {
+    flex: 1; 
+}
+
+/* 3. Trava o rodapé para ele não esticar nem sair do lugar */
+footer {
+    flex-shrink: 0; /* Impede que o rodapé seja esmagado */
+    margin-top: auto; /* Garante que ele fique no fundo mesmo se tiver pouco conteúdo */
+    
+    /* Mantenha o estilo visual que você já tem, exemplo: */
+    width: 100%;
+    padding: 20px;
+    background-color: black; /* cor de exemplo */
+}
