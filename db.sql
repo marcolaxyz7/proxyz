@@ -61,6 +61,16 @@ CREATE TABLE favorites (
     UNIQUE(user_id, prompt_id)
 );
 
+CREATE TABLE prompt_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    prompt_id INT NOT NULL,
+    action VARCHAR(50) DEFAULT 'copy',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (prompt_id) REFERENCES prompts(id) ON DELETE CASCADE
+);
+
 
 -- Criar um Usuário Admin Fictício
 INSERT INTO users (name, email, whatsapp, password_hash, role, status) 

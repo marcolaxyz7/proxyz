@@ -144,7 +144,11 @@ function renderPrompts(promptsList) {
         btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Prompt';
         
         btn.onclick = function() {
+            // 1. Copia o texto (Benefício do Usuário)
             copyToClipboard(prompt.content);
+            
+            // 2. Registra o consumo (Sua Defesa Jurídica)
+            logCopyAction(prompt.id); 
         };
 
         card.appendChild(btn);
@@ -201,5 +205,27 @@ function switchView(viewId, btn) {
     if(btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+    }
+}
+
+// --- FUNÇÃO: REGISTRAR O CONSUMO (CAIXA PRETA) ---
+async function logCopyAction(promptId) {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        // Envia o ID do prompt para o servidor gravar no banco
+        await fetch(`${API_URL}/log-copy`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ promptId })
+        });
+        // Não mostramos nada visualmente, acontece em "segredo"
+        console.log(`Consumo do prompt ${promptId} registrado.`);
+    } catch (e) {
+        console.error("Erro ao registrar cópia", e);
     }
 }

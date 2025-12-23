@@ -321,7 +321,7 @@ app.post('/api/create-stripe-session', async (req, res) => {
             }],
             mode: 'payment',
             success_url: `http://localhost:3000/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:3000/indexT1.html?payment=canceled`,
+            cancel_url: `http://localhost:3000/api/stripe-cancel?userId=${userId}`,
             client_reference_id: userId.toString(),
             customer_email: email,
         });
@@ -359,6 +359,65 @@ app.get('/api/check-stripe-payment/:sessionId', async (req, res) => {
         console.error(e);
         res.status(500).json({ error: 'Erro ao verificar pagamento' });
     }
+});
+
+// --- ROTA: CANCELAMENTO DO STRIPE ---
+// Esta rota é chamada quando o usuário clica em "voltar" na página do Stripe
+app.get('/api/stripe-cancel', async (req, res) => {
+    const { userId } = req.query;
+
+    if (userId) {
+        try {
+            // 1. Verifica se o usuário existe e se está 'pending' (Segurança para não apagar usuários ativos)
+            const [user] = await pool.query('SELECT status FROM users WHERE id = ?', [userId]);
+            
+            if (user.length > 0 && user[0].status === 'pending') {
+                // 2. Deleta vendas e usuário
+                await pool.query('DELETE FROM sales WHERE user_id = ?', [userId]);
+                await pool.query('DELETE FROM users WHERE id = ?', [userId]);
+                console.log(`Usuário ${userId} deletado após cancelamento no Stripe.`);
+            }
+        } catch (err) {
+            console.error("Erro ao limpar usuário do Stripe:", err);
+        }
+    }
+
+    // 3. Redireciona o usuário de volta para a tela inicial
+    res.redirect('/indexT1.html?payment=canceled');
+});
+
+// --- ROTA: REGISTRAR CÓPIA DE PROMPT (A CAIXA PRETA) ---
+app.post('/api/log-copy', async (req, res) => {
+    // 1. Verifica Autenticação (Igual à rota de prompts)
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decodedUser) => {
+        if (err) return res.sendStatus(403);
+
+        // 2. Recebe o ID do prompt que foi copiado
+        const { promptId } = req.body;
+        const userId = decodedUser.id; // Pega o ID do usuário direto do token (seguro)
+
+        if (!promptId) return res.status(400).json({ error: 'Prompt ID necessário.' });
+
+        try {
+            // 3. Grava no banco de dados (A prova jurídica)
+            await pool.query(
+                'INSERT INTO prompt_logs (user_id, prompt_id) VALUES (?, ?)',
+                [userId, promptId]
+            );
+            
+            // Retorna OK (200) sem mostrar nada pro usuário
+            res.sendStatus(200);
+            
+        } catch (error) {
+            console.error('Erro ao logar cópia:', error);
+            // Mesmo se der erro no log, não travamos o usuário, apenas logamos o erro no console
+            res.sendStatus(500);
+        }
+    });
 });
 
 const PORT = 3000;
