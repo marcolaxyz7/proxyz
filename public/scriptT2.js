@@ -229,3 +229,36 @@ async function logCopyAction(promptId) {
         console.error("Erro ao registrar cópia", e);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('token');
+    
+    // ... (suas verificações de login existentes) ...
+
+    // --- CARREGAR VÍDEO SEGURO ---
+    const video = document.getElementById('videoPlayer');
+    if (video && token) {
+        // Aponta para a nossa rota segura + token do usuário
+        video.src = `/api/video-tutorial?token=${token}`;
+    }
+
+    // --- NOVO: CARREGAR ÁUDIO SEGURO ---
+    const audio = document.getElementById('audioPlayer');
+    if (audio && token) {
+        // Agora o áudio também passa pela verificação de segurança
+        audio.src = `/api/audio-tutorial?token=${token}`;
+    }
+    
+    if (video && audio) {
+        // Opcional: Proteger o áudio da mesma forma se quiser
+        // audio.src = `/api/audio-tutorial?token=${token}`; 
+        
+        video.onplay = () => { audio.play(); };
+        video.onpause = () => { audio.pause(); };
+        video.onseeking = () => { audio.currentTime = video.currentTime; };
+        video.onseeked = () => { audio.currentTime = video.currentTime; };
+        video.onended = () => { audio.pause(); audio.currentTime = 0; };
+    }
+
+    
+});

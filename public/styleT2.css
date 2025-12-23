@@ -161,3 +161,12 @@ footer {
     padding: 20px;
     background-color: black; /* cor de exemplo */
 }
+
+#videoPlayer {
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    background-color: #000; /* Fundo preto para ver se o player está lá */
+    margin: 0 auto;
+}

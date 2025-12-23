@@ -59,24 +59,29 @@
         </div>
 
         <div id="view-tutorial" class="view-section">
-            <div class="video-wrapper">
-                <div style="text-align:center;">
-                    <i class="fa-brands fa-youtube" style="font-size:3rem; margin-bottom:10px;"></i>
-                    <p>Vídeo Tutorial em Breve</p>
-                </div>
-            </div>
-            <div style="max-width:800px; margin: 30px auto; color:#ccc; line-height:1.6;">
-                <h3>Guia Rápido:</h3>
-                <ol>
-                    <li>Selecione uma categoria na barra lateral ou use a busca.</li>
-                    <li>Escolha o prompt desejado.</li>
-                    <li style="color: #fff; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 10px 0;">
-                        <strong>Importante:</strong> Ao ler o prompt, localize os textos entre <strong>colchetes [ ... ]</strong>. Substitua-os pelo seu tema ou nicho para que a IA saiba exatamente onde atuar.
-                    </li>
-                    <li>Clique em "Copiar Prompt", faça a substituição e envie para a IA.</li>
-                </ol>
-            </div>
-        </div>
+    <div class="video-wrapper" style="text-align: center; max-width: 800px; margin: 0 auto;">
+        
+        <video id="videoPlayer" width="100%" controls style="border-radius: 8px; border: 1px solid #333;">
+            Seu navegador não suporta a tag de vídeo.
+        </video>
+
+        <audio id="audioPlayer" style="display:none;">
+        </audio>
+
+    </div>
+
+    <div style="max-width:800px; margin: 30px auto; color:#ccc; line-height:1.6;">
+        <h3>Guia Rápido:</h3>
+        <ol>
+            <li>Selecione uma categoria na barra lateral ou use a busca.</li>
+            <li>Escolha o prompt desejado.</li>
+            <li style="color: #fff; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 10px 0;">
+                <strong>Importante:</strong> Ao ler o prompt, localize os textos entre <strong>colchetes [ ... ]</strong>. Substitua-os pelo seu tema ou nicho para que a IA saiba exatamente onde atuar.
+            </li>
+            <li>Clique em "Copiar Prompt", faça a substituição e envie para a IA.</li>
+        </ol>
+    </div>
+</div>
 
         <div class="modal-overlay" id="msgModal" style="display: none;">
             <div class="auth-card" style="max-width: 400px; border-color: #333;">

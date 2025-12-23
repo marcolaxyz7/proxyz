@@ -420,5 +420,100 @@ app.post('/api/log-copy', async (req, res) => {
     });
 });
 
+// --- ROTA DE VÍDEO SEGURO (COM STREAMING) ---
+const fs = require('fs');
+
+app.get('/api/video-tutorial', (req, res) => {
+    // 1. Validação do Token (via URL)
+    const token = req.query.token;
+    
+    if (!token) return res.status(403).send('Token necessário');
+
+    jwt.verify(token, 'SEU_JWT_SECRET', (err, decoded) => { // USE A MESMA CHAVE SECRETA DO LOGIN
+        if (err) return res.status(401).send('Token inválido');
+
+        // 2. Caminho do arquivo seguro (fora da public)
+        const videoPath = path.join(__dirname, 'videos_secretos', 'Tut1.mp4');
+
+        // 3. Verifica se existe
+        fs.stat(videoPath, (err, stats) => {
+            if (err) return res.status(404).send('Vídeo não encontrado');
+
+            // 4. Lógica de Streaming (Range Requests) - Essencial para poder "pular" o vídeo
+            const range = req.headers.range;
+            if (!range) {
+                // Se o navegador não pedir pedaço (range), manda tudo (raro em vídeo)
+                res.writeHead(200, {
+                    'Content-Length': stats.size,
+                    'Content-Type': 'video/mp4',
+                });
+                fs.createReadStream(videoPath).pipe(res);
+                return;
+            }
+
+            const CHUNK_SIZE = 10 ** 6; // 1MB por vez
+            const start = Number(range.replace(/\D/g, ""));
+            const end = Math.min(start + CHUNK_SIZE, stats.size - 1);
+            const contentLength = end - start + 1;
+
+            const headers = {
+                "Content-Range": `bytes ${start}-${end}/${stats.size}`,
+                "Accept-Ranges": "bytes",
+                "Content-Length": contentLength,
+                "Content-Type": "video/mp4",
+            };
+
+            res.writeHead(206, headers); // 206 = Partial Content
+            const videoStream = fs.createReadStream(videoPath, { start, end });
+            videoStream.pipe(res);
+        });
+    });
+});
+
+// Adicione no server.js (abaixo da rota /api/video-tutorial)
+
+app.get('/api/audio-tutorial', (req, res) => {
+    const token = req.query.token;
+    if (!token) return res.status(403).send('Token necessário');
+
+    jwt.verify(token, 'SEU_JWT_SECRET', (err, decoded) => {
+        if (err) return res.status(401).send('Token inválido');
+
+        // 1. Aponta para o arquivo MP3 na pasta segura
+        const audioPath = path.join(__dirname, 'videos_secretos', 'Tut1.MP3');
+
+        fs.stat(audioPath, (err, stats) => {
+            if (err) return res.status(404).send('Áudio não encontrado');
+
+            // 2. Lógica de Streaming para o Áudio
+            const range = req.headers.range;
+            if (!range) {
+                res.writeHead(200, {
+                    'Content-Length': stats.size,
+                    'Content-Type': 'audio/mpeg', // Tipo correto para MP3
+                });
+                fs.createReadStream(audioPath).pipe(res);
+                return;
+            }
+
+            const CHUNK_SIZE = 10 ** 6; 
+            const start = Number(range.replace(/\D/g, ""));
+            const end = Math.min(start + CHUNK_SIZE, stats.size - 1);
+            const contentLength = end - start + 1;
+
+            const headers = {
+                "Content-Range": `bytes ${start}-${end}/${stats.size}`,
+                "Accept-Ranges": "bytes",
+                "Content-Length": contentLength,
+                "Content-Type": "audio/mpeg",
+            };
+
+            res.writeHead(206, headers);
+            const audioStream = fs.createReadStream(audioPath, { start, end });
+            audioStream.pipe(res);
+        });
+    });
+});
+
 const PORT = 3000;
 app.listen(PORT, () => console.log(`🔥 Server ON porta ${PORT}`));
