@@ -1,7 +1,7 @@
 const API_URL = 'http://localhost:3000/api';
 let allPrompts = []; 
 
-// --- MAPA DE ÍCONES (Configuração Visual) ---
+// --- MAPA DE ÍCONES ---
 const categoryIcons = {
     'Prompts Universais': 'fa-earth-americas',
     'Habilidades Práticas': 'fa-toolbox',
@@ -47,7 +47,7 @@ function logout() {
     window.location.href = 'indexT1.html';
 }
 
-// --- INICIALIZAÇÃO ---
+// --- INICIALIZAÇÃO UNIFICADA ---
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -58,8 +58,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) document.getElementById('userName').innerText = user.name;
 
+    // 1. Carrega os Prompts
     loadPrompts(token);
+
+    // 2. Configura o Vídeo e Áudio Seguro
+    setupSecureVideo(token);
 });
+
+// --- FUNÇÃO DE VÍDEO/ÁUDIO SEGURO ---
+function setupSecureVideo(token) {
+    const video = document.getElementById('videoPlayer');
+    const audio = document.getElementById('audioPlayer');
+
+    if (video && token) {
+        // Define o source com o token
+        video.src = `/api/video-tutorial?token=${token}`;
+    }
+
+    if (audio && token) {
+        audio.src = `/api/audio-tutorial?token=${token}`;
+    }
+
+    // Sincronização
+    if (video && audio) {
+        video.onplay = () => { audio.play(); };
+        video.onpause = () => { audio.pause(); };
+        video.onseeking = () => { audio.currentTime = video.currentTime; };
+        video.onseeked = () => { audio.currentTime = video.currentTime; };
+        video.onended = () => { 
+            audio.pause(); 
+            audio.currentTime = 0; 
+        };
+        // Opcional: sincronizar volume
+        video.onvolumechange = () => {
+            if(video.muted) audio.muted = true;
+            else {
+                audio.muted = false;
+                audio.volume = video.volume;
+            }
+        };
+    }
+}
 
 // --- CORE: CARREGAR DADOS ---
 async function loadPrompts(token) {
@@ -81,27 +120,20 @@ async function loadPrompts(token) {
     }
 }
 
-// --- RENDERIZAÇÃO DA SIDEBAR (ATUALIZADA) ---
+// --- RENDERIZAÇÃO DA SIDEBAR ---
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
     container.innerHTML = ''; 
 
-    // 1. Pega categorias e ordena (Mantém o número "01.", "02." para a ordem ficar certa)
     const categories = [...new Set(allPrompts.map(p => p.category))].sort();
 
     categories.forEach(cat => {
-        // 2. Limpa o nome para exibição (Remove "01. ", "02. ")
         const cleanName = cat.replace(/^\d+\.\s+/, ''); 
-        
-        // 3. Escolhe o ícone certo
         const iconClass = categoryIcons[cleanName] || 'fa-folder';
 
         const btn = document.createElement('button');
         btn.className = 'nav-btn';
-        // Exibe o Ícone Personalizado + Nome Limpo
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
-        
-        // O filtro continua usando a categoria original (cat) para achar os itens certos
         btn.onclick = () => filterByCategory(cat, btn); 
         container.appendChild(btn);
     });
@@ -123,14 +155,9 @@ function renderPrompts(promptsList) {
         const card = document.createElement('div');
         card.className = 'dash-card'; 
         
-        // 1. Limpa o nome da categoria para achar o ícone certo
         const cleanCategoryName = prompt.category.replace(/^\d+\.\s+/, '');
-
-        // 2. Busca o ícone no mapa
         const iconClass = categoryIcons[cleanCategoryName] || 'fa-folder';
 
-        // 3. Monta o HTML: SEM badge, COM ícone no título
-        // Adicionei uma cor (color: #e50914) no ícone para dar destaque, mas você pode tirar se quiser.
         card.innerHTML = `
             <h3 style="margin-top: 10px;">
                 <i class="fa-solid ${iconClass}" style="margin-right: 8px; color: #e50914;"></i>
@@ -142,12 +169,8 @@ function renderPrompts(promptsList) {
         const btn = document.createElement('button');
         btn.className = 'copy-btn';
         btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar Prompt';
-        
         btn.onclick = function() {
-            // 1. Copia o texto (Benefício do Usuário)
             copyToClipboard(prompt.content);
-            
-            // 2. Registra o consumo (Sua Defesa Jurídica)
             logCopyAction(prompt.id); 
         };
 
@@ -156,37 +179,28 @@ function renderPrompts(promptsList) {
     });
 }
 
-// --- FILTROS ---
+// --- FILTROS E UTILITÁRIOS ---
 function filterByCategory(category, btnElement) {
-
     switchView('indexT2');
-
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
 
-    // Atualiza o Título da Página (Sem o número também)
     const displayTitle = category === 'all' ? 'TODOS OS PROMPTS' : category.replace(/^\d+\.\s+/, '').toUpperCase();
     document.getElementById('page-title').innerText = displayTitle;
     
-    if (category === 'all') {
-        renderPrompts(allPrompts);
-    } else {
-        const filtered = allPrompts.filter(p => p.category === category);
-        renderPrompts(filtered);
-    }
+    if (category === 'all') renderPrompts(allPrompts);
+    else renderPrompts(allPrompts.filter(p => p.category === category));
     
     document.getElementById('searchInput').value = '';
 }
 
 function searchPrompts() {
     const term = document.getElementById('searchInput').value.toLowerCase();
-    
     const filtered = allPrompts.filter(p => 
         p.title.toLowerCase().includes(term) || 
         p.description.toLowerCase().includes(term) ||
         p.content.toLowerCase().includes(term)
     );
-    
     renderPrompts(filtered);
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById('page-title').innerText = 'RESULTADOS DA BUSCA';
@@ -208,57 +222,15 @@ function switchView(viewId, btn) {
     }
 }
 
-// --- FUNÇÃO: REGISTRAR O CONSUMO (CAIXA PRETA) ---
 async function logCopyAction(promptId) {
     const token = localStorage.getItem('token');
     if (!token) return;
-
     try {
-        // Envia o ID do prompt para o servidor gravar no banco
         await fetch(`${API_URL}/log-copy`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ promptId })
         });
-        // Não mostramos nada visualmente, acontece em "segredo"
         console.log(`Consumo do prompt ${promptId} registrado.`);
-    } catch (e) {
-        console.error("Erro ao registrar cópia", e);
-    }
+    } catch (e) { console.error("Erro ao registrar cópia", e); }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const token = localStorage.getItem('token');
-    
-    // ... (suas verificações de login existentes) ...
-
-    // --- CARREGAR VÍDEO SEGURO ---
-    const video = document.getElementById('videoPlayer');
-    if (video && token) {
-        // Aponta para a nossa rota segura + token do usuário
-        video.src = `/api/video-tutorial?token=${token}`;
-    }
-
-    // --- NOVO: CARREGAR ÁUDIO SEGURO ---
-    const audio = document.getElementById('audioPlayer');
-    if (audio && token) {
-        // Agora o áudio também passa pela verificação de segurança
-        audio.src = `/api/audio-tutorial?token=${token}`;
-    }
-    
-    if (video && audio) {
-        // Opcional: Proteger o áudio da mesma forma se quiser
-        // audio.src = `/api/audio-tutorial?token=${token}`; 
-        
-        video.onplay = () => { audio.play(); };
-        video.onpause = () => { audio.pause(); };
-        video.onseeking = () => { audio.currentTime = video.currentTime; };
-        video.onseeked = () => { audio.currentTime = video.currentTime; };
-        video.onended = () => { audio.pause(); audio.currentTime = 0; };
-    }
-
-    
-});
