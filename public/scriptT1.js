@@ -1,4 +1,10 @@
 const API_URL = 'http://localhost:3000/api';
+
+const audioSuccess = new Audio('success.wav');
+const audioError = new Audio('error.wav');
+audioSuccess.volume = 0.5; // Ajuste o volume (0.0 a 1.0)
+audioError.volume = 0.5;
+
         let currentUserId = null;
         let currentUserEmail = null;
         let mp = null;
@@ -47,6 +53,15 @@ function updatePriceUI() {
             const icon = document.getElementById('msgIcon');
             icon.className = 'msg-icon fa-solid ' + (type === 'success' ? 'fa-check-circle msg-success' : type === 'error' ? 'fa-circle-xmark msg-error' : 'fa-circle-exclamation msg-info');
             document.getElementById('msgModal').style.display = 'flex';
+            // TOCA O SOM BASEADO NO TIPO
+    if (type === 'success') {
+        audioSuccess.currentTime = 0;
+        audioSuccess.play();
+    } else {
+        // Serve para 'error' e 'info'
+        audioError.currentTime = 0;
+        audioError.play();
+    }
         }
 
         function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
@@ -156,39 +171,56 @@ function updatePriceUI() {
         }
 
         // 4. LÓGICA DE USUÁRIO
-        async function loginUser() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPass').value;
-            try {
-                const res = await fetch(`${API_URL}/login`, { 
-                    method:'POST', 
-                    headers:{'Content-Type':'application/json'}, 
-                    body:JSON.stringify({email,password})
-                });
-                
-                const data = await res.json();
-                
-                if(res.ok) {
-                    // 1. Salva o Token
-                    localStorage.setItem('token', data.token);
-                    
-                    // 2. SALVA O NOME DO USUÁRIO (Essa era a linha que faltava)
-                    localStorage.setItem('user', JSON.stringify(data.user)); 
+async function loginUser() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPass').value;
+    try {
+        const res = await fetch(`${API_URL}/login`, { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({email,password})
+        });
+        
+        const data = await res.json();
+        
+        if(res.ok) {
+            // [SUCESSO] TOCA O SOM AQUI
+            audioSuccess.currentTime = 0;
+            audioSuccess.play().catch(e => console.log("Som bloqueado pelo navegador"));
 
-                    // 3. Redireciona
-                    window.location.href='indexT2.html';
-                
-                } else if(res.status===403) {
-                    currentUserId = data.userId; currentUserEmail = data.email;
-                    showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
-                    openModal('signup'); switchStep('step-payment'); resetPaymentView();
-                } else {
-                    showMsg('Erro', data.error, 'error');
-                }
-            } catch(e) { 
-                showMsg('Erro', 'Falha na conexão.', 'error'); 
-            }
+            // 1. Salva o Token
+            localStorage.setItem('token', data.token);
+            
+            // 2. SALVA O NOME DO USUÁRIO
+            localStorage.setItem('user', JSON.stringify(data.user)); 
+
+            // 3. Redireciona
+            window.location.href='indexT2.html';
+        
+        } else if(res.status===403) {
+            // [PAGAMENTO PENDENTE] TOCA SOM DE ALERTA/ERRO AQUI
+            audioError.currentTime = 0;
+            audioError.play().catch(e => console.log("Som bloqueado"));
+
+            currentUserId = data.userId; currentUserEmail = data.email;
+            showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
+            openModal('signup'); switchStep('step-payment'); resetPaymentView();
+
+        } else {
+            // [ERRO GERAL - SENHA ERRADA, ETC] TOCA SOM DE ERRO AQUI
+            audioError.currentTime = 0;
+            audioError.play().catch(e => console.log("Som bloqueado"));
+
+            showMsg('Erro', data.error, 'error');
         }
+    } catch(e) { 
+        // [ERRO DE CONEXÃO] TOCA SOM DE ERRO AQUI TAMBÉM
+        audioError.currentTime = 0;
+        audioError.play().catch(e => console.log("Som bloqueado"));
+
+        showMsg('Erro', 'Falha na conexão.', 'error'); 
+    }
+}
 
         async function validateAndGoToPayment() {
             const name = document.getElementById('regName').value.trim();

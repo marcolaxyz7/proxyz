@@ -1,5 +1,12 @@
 const API_URL = 'http://localhost:3000/api';
-let allPrompts = []; 
+let allPrompts = [];
+
+// --- SONS DO SISTEMA ---
+const audioSuccess = new Audio('success.wav');
+const audioError = new Audio('error.wav');
+// Ajuste o volume para não assustar o usuário (0.0 a 1.0)
+audioSuccess.volume = 0.5;
+audioError.volume = 0.5;
 
 // --- MAPA DE ÍCONES ---
 const categoryIcons = {
@@ -32,9 +39,26 @@ function showMsg(title, text, type = 'info') {
     document.getElementById('msgText').innerText = text;
 
     icon.className = 'msg-icon fa-solid';
-    if (type === 'success') icon.classList.add('fa-check-circle', 'msg-success');
-    else if (type === 'error') icon.classList.add('fa-circle-xmark', 'msg-error');
-    else icon.classList.add('fa-circle-exclamation', 'msg-info');
+    
+    // Reseta classes antigas
+    icon.classList.remove('msg-success', 'msg-error', 'msg-info', 'fa-check-circle', 'fa-circle-xmark', 'fa-circle-exclamation');
+
+    if (type === 'success') {
+        icon.classList.add('fa-check-circle', 'msg-success');
+        // Toca o som de sucesso (reseta o tempo para tocar rápido se clicar várias vezes)
+        audioSuccess.currentTime = 0;
+        audioSuccess.play().catch(e => console.log("Interação necessária para som"));
+        
+    } else if (type === 'error') {
+        icon.classList.add('fa-circle-xmark', 'msg-error');
+        // Toca o som de erro
+        audioError.currentTime = 0;
+        audioError.play().catch(e => console.log("Interação necessária para som"));
+        
+    } else {
+        icon.classList.add('fa-circle-exclamation', 'msg-info');
+        // Opcional: Se quiser um som neutro para 'info', adicione aqui
+    }
 
     modal.style.display = 'flex';
 }
@@ -72,11 +96,11 @@ function setupSecureVideo(token) {
 
     if (video && token) {
         // Define o source com o token
-        video.src = `/api/video-tutorial?token=${token}`;
+        video.src = `${API_URL}/video-tutorial?token=${token}`;
     }
 
     if (audio && token) {
-        audio.src = `/api/audio-tutorial?token=${token}`;
+        audio.src = `${API_URL}/audio-tutorial?token=${token}`;
     }
 
     // Sincronização

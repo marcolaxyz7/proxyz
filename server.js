@@ -432,7 +432,7 @@ app.get('/api/video-tutorial', (req, res) => {
         if (err) return res.status(401).send('Token inválido');
 
         // CORREÇÃO AQUI: Adicionamos 'Tut1' no caminho
-        const videoPath = path.join(__dirname, 'videos_secretos', 'Tut1', 'Tut1.mp4');
+        const videoPath = path.join(__dirname, 'videos_secretos', 'tut1', 'tut1.mp4');
 
         fs.stat(videoPath, (err, stats) => {
             if (err) {
