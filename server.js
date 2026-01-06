@@ -225,7 +225,7 @@ app.post('/api/forgot-password', async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: '1h' });
 
         // 3. Cria o Link de Recuperação
-        const link = `http://localhost:3000/reset-password.html?id=${user.id}&token=${token}`;
+        const link = `http://próxyz.com/reset-password.html?id=${user.id}&token=${token}`;
 
         // 4. Envia o E-mail
         const mailOptions = {
@@ -320,8 +320,8 @@ app.post('/api/create-stripe-session', async (req, res) => {
                 quantity: 1,
             }],
             mode: 'payment',
-            success_url: `http://localhost:3000/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:3000/api/stripe-cancel?userId=${userId}`,
+            success_url: `http://próxyz.com/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://próxyz.com/api/stripe-cancel?userId=${userId}`,
             client_reference_id: userId.toString(),
             customer_email: email,
         });
@@ -514,5 +514,6 @@ app.get('/api/audio-tutorial', (req, res) => {
     });
 });
 
-const PORT = 3000;
+// A Hostinger vai preencher o process.env.PORT automaticamente
+const PORT = process.env.PORT || 3000; 
 app.listen(PORT, () => console.log(`🔥 Server ON porta ${PORT}`));
