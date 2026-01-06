@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = '/api';
 
 const audioSuccess = new Audio('success.wav');
 const audioError = new Audio('error.wav');
