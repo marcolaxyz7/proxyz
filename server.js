@@ -225,7 +225,7 @@ app.post('/api/forgot-password', async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: '1h' });
 
         // 3. Cria o Link de Recuperação
-        const link = `http://próxyz.com/reset-password.html?id=${user.id}&token=${token}`;
+        const link = `https://xn--prxyz-1ta.com/reset-password.html?id=${user.id}&token=${token}`;
 
         // 4. Envia o E-mail
         const mailOptions = {
@@ -320,8 +320,8 @@ app.post('/api/create-stripe-session', async (req, res) => {
                 quantity: 1,
             }],
             mode: 'payment',
-            success_url: `http://próxyz.com/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://próxyz.com/api/stripe-cancel?userId=${userId}`,
+            success_url: `https://xn--prxyz-1ta.com/indexT1.html?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `https://xn--prxyz-1ta.com/api/stripe-cancel?userId=${userId}`,
             client_reference_id: userId.toString(),
             customer_email: email,
         });
