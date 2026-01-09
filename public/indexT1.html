@@ -478,20 +478,20 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 <p id="price-display" style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR: R$ 97,97</p>
                 
                 <div id="pay-options">
-                    <button class="pay-option-btn" onclick="showPixView()">
-                        <i class="fa-brands fa-pix"></i> PAGAR COM PIX
-                        <span style="font-size:0.7rem; color:#888;">Liberação Imediata</span>
-                    </button>
-                    
-                    <button class="pay-option-btn" onclick="showCardView()">
-                        <i class="fa-regular fa-credit-card"></i> CRÉDITO / DÉBITO
-                        <span style="font-size:0.7rem; color:#888;">Nacional</span>
-                    </button>
+                    <button id="btn-opt-pix" class="pay-option-btn" onclick="showPixView()">
+    <i class="fa-brands fa-pix"></i> PAGAR COM PIX
+    <span style="font-size:0.7rem; color:#888;">Liberação Imediata</span>
+</button>
 
-                    <button class="pay-option-btn" onclick="showStripeView()">
-                        <i class="fa-brands fa-stripe-s"></i> INTERNACIONAL (STRIPE)
-                        <span style="font-size:0.7rem; color:#888;">USD / EUR / Global</span>
-                    </button>
+<button id="btn-opt-card" class="pay-option-btn" onclick="showCardView()">
+    <i class="fa-regular fa-credit-card"></i> CRÉDITO / DÉBITO
+    <span style="font-size:0.7rem; color:#888;">Nacional</span>
+</button>
+
+<button id="btn-opt-stripe" class="pay-option-btn" onclick="showStripeView()">
+    <i class="fa-brands fa-stripe-s"></i> INTERNACIONAL (STRIPE)
+    <span style="font-size:0.7rem; color:#888;">USD / EUR / Global</span>
+</button>
                     
                     <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
                 </div>

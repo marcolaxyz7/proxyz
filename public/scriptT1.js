@@ -39,11 +39,37 @@ const PRICING_DISPLAY = {
 };
 
 function updatePriceUI() {
+    // 1. Descobre a moeda (BRL, USD, EUR...)
     const currency = getUserCurrency();
-    const priceInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
     
+    // 2. Atualiza o Texto do Preço (Isso já existia)
+    const priceInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
     const el = document.getElementById('price-display');
     if(el) el.innerText = `VALOR: ${priceInfo.text}`;
+
+    // 3. LÓGICA DE EXIBIÇÃO DOS BOTÕES (NOVO!)
+    const btnPix = document.getElementById('btn-opt-pix');
+    const btnCard = document.getElementById('btn-opt-card');
+    const btnStripe = document.getElementById('btn-opt-stripe');
+
+    if (currency === 'BRL') {
+        // --- SE FOR BRASIL ---
+        // Mostra as opções nacionais
+        if(btnPix) btnPix.style.display = 'block';
+        if(btnCard) btnCard.style.display = 'block';
+        
+        // Esconde o Stripe (Para não confundir o brasileiro)
+        if(btnStripe) btnStripe.style.display = 'none';
+
+    } else {
+        // --- SE FOR GRINGO (Qualquer outro país) ---
+        // Esconde as opções nacionais (Eles não têm CPF nem PIX)
+        if(btnPix) btnPix.style.display = 'none';
+        if(btnCard) btnCard.style.display = 'none';
+        
+        // Mostra só o Stripe
+        if(btnStripe) btnStripe.style.display = 'block';
+    }
 }
 
         // 2. FUNÇÕES DE MODAL
