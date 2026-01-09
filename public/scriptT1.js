@@ -230,7 +230,7 @@ async function loginUser() {
 
             currentUserId = data.userId; currentUserEmail = data.email;
             showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
-            openModal('signup'); switchStep('step-payment'); resetPaymentView();
+            openModal('signup'); switchStep('step-payment'); resetPaymentView(); updatePriceUI();
 
         } else {
             // [ERRO GERAL - SENHA ERRADA, ETC] TOCA SOM DE ERRO AQUI
