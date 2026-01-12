@@ -329,22 +329,24 @@ async function loginUser() {
 let cardFormInstance = null; 
 
 async function mountCardForm() {
+    // Preenche o email oculto
     const emailField = document.getElementById('form-checkout__cardholderEmail');
     if(emailField) emailField.value = currentUserEmail;
 
+    // Limpa instância anterior
     if (cardFormInstance) {
         try { cardFormInstance.unmount(); } catch(e){}
         cardFormInstance = null;
     }
 
     setTimeout(() => {
-        console.log("Montando formulário com Public Key...");
+        console.log("Iniciando Mercado Pago...");
         
         cardFormInstance = mp.cardForm({
             amount: "97.97",
             iframe: true,
             form: {
-                id: "form-checkout",
+                id: "form-checkout", // IMPORTANTE: Vincula ao HTML que criamos
                 cardNumber: { id: "form-checkout__cardNumber", placeholder: "0000 0000 0000 0000", style: { color: "#ffffff" } },
                 expirationDate: { id: "form-checkout__expirationDate", placeholder: "MM/YY", style: { color: "#ffffff" } },
                 securityCode: { id: "form-checkout__securityCode", placeholder: "123", style: { color: "#ffffff" } },
@@ -357,22 +359,16 @@ async function mountCardForm() {
             },
             callbacks: {
                 onFormMounted: error => { 
-                    if (error) return console.warn("Erro montagem:", error);
-                    console.log("Formulário pronto!");
+                    if (error) return console.warn("Erro ao montar:", error);
+                    console.log("Formulário carregado!");
                 },
-                
-                // AQUI ESTÁ O TRUQUE: Captura erro de validação do formulário
+                // Aqui capturamos o erro 324 se ele acontecer de novo
                 onFormError: (error, event) => {
-                    console.error("Erro no formulário:", error);
-                    // Mostra qual campo está errado
-                    if(Array.isArray(error)) {
-                        const erros = error.map(e => `${e.field}: ${e.message}`).join('\n');
-                        alert("Corrija os campos:\n" + erros);
-                    } else {
-                        alert("Erro no formulário: " + JSON.stringify(error));
-                    }
+                    console.error("Erro MP:", error);
+                    // Pega o erro e mostra um alerta legível
+                    const msg = Array.isArray(error) ? error[0].message : JSON.stringify(error);
+                    alert("Erro nos dados: " + msg); 
                 },
-
                 onSubmit: event => {
                     event.preventDefault();
                     
@@ -388,11 +384,10 @@ async function mountCardForm() {
                     } = cardFormInstance.getCardFormData();
 
                     if (!token) {
-                        alert("Token não gerado. Verifique se o cartão é válido.");
+                        alert("Dados do cartão inválidos ou incompletos.");
                         return;
                     }
 
-                    // Se chegou aqui, o token existe! Envia pro backend.
                     const btn = document.getElementById('form-checkout__submit');
                     const oldText = btn.innerHTML;
                     btn.innerHTML = 'Processando...';
@@ -403,7 +398,7 @@ async function mountCardForm() {
                         issuerId,
                         paymentMethodId,
                         amount,
-                        installments: 1, 
+                        installments: 1,
                         payer: {
                             email,
                             identification: {
