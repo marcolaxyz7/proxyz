@@ -314,82 +314,88 @@ async function loginUser() {
         }
 
         // 6. CARTÃO (BRICK/FORM)
-        function mountCardForm() {
-    // Preenche o e-mail oculto automaticamente
-    document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
-    
-    // Se o formulário já existe, desmonta para não duplicar
+        async function mountCardForm() {
+    // 1. Preenche o e-mail oculto
+    const emailField = document.getElementById('form-checkout__cardholderEmail');
+    if(emailField) emailField.value = currentUserEmail;
+
+    // 2. Se já existe uma instância, desmonte-a primeiro!
     if (cardForm) {
-        cardForm.unmount();
+        try {
+            await cardForm.unmount(); 
+        } catch (e) {
+            console.log("Erro ao desmontar form antigo (ignorar):", e);
+        }
+        cardForm = null; // Limpa a variável
     }
 
-    cardForm = mp.cardForm({
-        amount: "97.97",
-        iframe: true,
-        form: {
-            id: "form-checkout",
-            cardNumber: { 
-                id: "form-checkout__cardNumber",
-                placeholder: "0000 0000 0000 0000",
-            },
-            expirationDate: { 
-                id: "form-checkout__expirationDate",
-                placeholder: "MM/YY",
-            },
-            securityCode: { 
-                id: "form-checkout__securityCode",
-                placeholder: "123",
-            },
-            cardholderName: { id: "form-checkout__cardholderName" },
-            issuer: { id: "form-checkout__issuer" },
-            installments: { id: "form-checkout__installments" },
-            identificationType: { id: "form-checkout__identificationType" },
-            identificationNumber: { id: "form-checkout__identificationNumber" },
-            cardholderEmail: { id: "form-checkout__cardholderEmail" },
-        },
-        callbacks: {
-            onFormMounted: error => { 
-                if (error) return console.warn("Form Error:", error); 
-                console.log("Formulário de cartão montado com sucesso!");
-            },
-            onSubmit: event => {
-                event.preventDefault();
-                
-                // Pega os dados do formulário seguro
-                const { paymentMethodId, issuerId, amount, token, identificationNumber, identificationType } = cardForm.getCardFormData();
-                
-                // Verifica se gerou o token
-                if (!token) {
-                    alert('Erro: Verifique os dados do cartão.');
-                    return;
-                }
+    // 3. Pequeno delay para garantir que o DOM está limpo
+    setTimeout(() => {
+        try {
+            cardForm = mp.cardForm({
+                amount: "97.97",
+                iframe: true,
+                form: {
+                    id: "form-checkout",
+                    cardNumber: { 
+                        id: "form-checkout__cardNumber",
+                        placeholder: "0000 0000 0000 0000",
+                        style: { color: "#ffffff" } // Texto Branco
+                    },
+                    expirationDate: { 
+                        id: "form-checkout__expirationDate",
+                        placeholder: "MM/YY",
+                        style: { color: "#ffffff" }
+                    },
+                    securityCode: { 
+                        id: "form-checkout__securityCode",
+                        placeholder: "123",
+                        style: { color: "#ffffff" }
+                    },
+                    cardholderName: { id: "form-checkout__cardholderName" },
+                    issuer: { id: "form-checkout__issuer" },
+                    installments: { id: "form-checkout__installments" },
+                    identificationType: { id: "form-checkout__identificationType" },
+                    identificationNumber: { id: "form-checkout__identificationNumber" },
+                    cardholderEmail: { id: "form-checkout__cardholderEmail" },
+                },
+                callbacks: {
+                    onFormMounted: error => { 
+                        if (error) return console.warn("Erro ao montar:", error);
+                        console.log("Formulário MP pronto!");
+                    },
+                    onSubmit: event => {
+                        event.preventDefault();
+                        console.log("Tentando enviar...");
 
-                // Envia para o backend
-                processCardBackend({
-                    token, 
-                    issuerId, 
-                    paymentMethodId, 
-                    amount, 
-                    payer: { 
-                        identification: { 
-                            type: identificationType, 
-                            number: identificationNumber 
-                        } 
+                        // Tenta pegar os dados
+                        const data = cardForm.getCardFormData();
+                        console.log("Dados recebidos:", data); // Debug
+
+                        if (!data.token) {
+                            alert('Erro: Token não gerado. Verifique os dados.');
+                            return;
+                        }
+
+                        processCardBackend({
+                            token: data.token,
+                            issuerId: data.issuerId,
+                            paymentMethodId: data.paymentMethodId,
+                            amount: data.amount,
+                            payer: {
+                                identification: {
+                                    type: data.identificationType,
+                                    number: data.identificationNumber
+                                }
+                            }
+                        });
                     }
-                });
-            },
-            onFetching: (resource) => {
-                const btn = document.getElementById('form-checkout__submit');
-                const txt = btn.innerHTML;
-                btn.innerHTML = 'Processando...'; 
-                btn.disabled = true;
-                return () => { 
-                    btn.disabled = false; 
-                    btn.innerHTML = txt; 
-                };
-            }
-        },
-    });
+                },
+            });
+        } catch (err) {
+            console.error("Erro fatal ao iniciar MP:", err);
+        }
+    }, 100); // Delay de 100ms
 }
 
         async function processCardBackend(data) {
