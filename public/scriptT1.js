@@ -147,10 +147,20 @@ function updatePriceUI() {
         }
 
         function showCardView() {
-            document.getElementById('pay-options').style.display = 'none';
-            document.getElementById('pay-card').style.display = 'block';
-            if(mp && !cardForm) mountCardForm();
+    // 1. Mostra a tela (muda o display: none para block)
+    document.getElementById('pay-options').style.display = 'none';
+    document.getElementById('pay-card').style.display = 'block';
+    
+    // 2. Aguarda 100ms para garantir que a div existe visualmente
+    setTimeout(() => {
+        if(mp) {
+            console.log("Iniciando montagem do formulário...");
+            mountCardForm();
+        } else {
+            console.error("SDK do Mercado Pago não inicializado!");
         }
+    }, 100);
+}
 
         // NOVA FUNÇÃO: View do Stripe
         function showStripeView() {
@@ -322,7 +332,7 @@ async function mountCardForm() {
     if(emailField) emailField.value = currentUserEmail;
 
     if (cardFields) {
-        try { await cardFields.unmount(); } catch(e){}
+        try { await cardFields.unmount(); } catch(e){console.log("Aviso: Nada para desmontar ou erro ao limpar.");}
         cardFields = null;
     }
 
