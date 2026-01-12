@@ -314,88 +314,95 @@ async function loginUser() {
         }
 
         // 6. CARTÃO (BRICK/FORM)
-        async function mountCardForm() {
-    // 1. Preenche o e-mail oculto
-    const emailField = document.getElementById('form-checkout__cardholderEmail');
-    if(emailField) emailField.value = currentUserEmail;
+        // Variável global para guardar os campos
+let cardFields = null;
 
-    // 2. Se já existe uma instância, desmonte-a primeiro!
-    if (cardForm) {
-        try {
-            await cardForm.unmount(); 
-        } catch (e) {
-            console.log("Erro ao desmontar form antigo (ignorar):", e);
-        }
-        cardForm = null; // Limpa a variável
+async function mountCardForm() {
+    // Limpa instância anterior se houver
+    if (cardFields) {
+        try { cardFields.unmount(); } catch(e){}
     }
 
-    // 3. Pequeno delay para garantir que o DOM está limpo
-    setTimeout(() => {
-        try {
-            cardForm = mp.cardForm({
-                amount: "97.97",
-                iframe: true,
-                form: {
-                    id: "form-checkout",
-                    cardNumber: { 
-                        id: "form-checkout__cardNumber",
-                        placeholder: "0000 0000 0000 0000",
-                        style: { color: "#ffffff" } // Texto Branco
-                    },
-                    expirationDate: { 
-                        id: "form-checkout__expirationDate",
-                        placeholder: "MM/YY",
-                        style: { color: "#ffffff" }
-                    },
-                    securityCode: { 
-                        id: "form-checkout__securityCode",
-                        placeholder: "123",
-                        style: { color: "#ffffff" }
-                    },
-                    cardholderName: { id: "form-checkout__cardholderName" },
-                    issuer: { id: "form-checkout__issuer" },
-                    installments: { id: "form-checkout__installments" },
-                    identificationType: { id: "form-checkout__identificationType" },
-                    identificationNumber: { id: "form-checkout__identificationNumber" },
-                    cardholderEmail: { id: "form-checkout__cardholderEmail" },
-                },
-                callbacks: {
-                    onFormMounted: error => { 
-                        if (error) return console.warn("Erro ao montar:", error);
-                        console.log("Formulário MP pronto!");
-                    },
-                    onSubmit: event => {
-                        event.preventDefault();
-                        console.log("Tentando enviar...");
-
-                        // Tenta pegar os dados
-                        const data = cardForm.getCardFormData();
-                        console.log("Dados recebidos:", data); // Debug
-
-                        if (!data.token) {
-                            alert('Erro: Token não gerado. Verifique os dados.');
-                            return;
-                        }
-
-                        processCardBackend({
-                            token: data.token,
-                            issuerId: data.issuerId,
-                            paymentMethodId: data.paymentMethodId,
-                            amount: data.amount,
-                            payer: {
-                                identification: {
-                                    type: data.identificationType,
-                                    number: data.identificationNumber
-                                }
-                            }
-                        });
-                    }
-                },
-            });
-        } catch (err) {
-            console.error("Erro fatal ao iniciar MP:", err);
+    // 1. Cria a instância dos campos (Cardform simplificado)
+    cardFields = mp.cardForm({
+        amount: "97.97",
+        iframe: true,
+        form: {
+            id: "form-checkout",
+            cardNumber: { 
+                id: "form-checkout__cardNumber",
+                placeholder: "0000 0000 0000 0000",
+                style: { color: "#ffffff" }
+            },
+            expirationDate: { 
+                id: "form-checkout__expirationDate",
+                placeholder: "MM/YY",
+                style: { color: "#ffffff" }
+            },
+            securityCode: { 
+                id: "form-checkout__securityCode",
+                placeholder: "123",
+                style: { color: "#ffffff" }
+            },
+            cardholderName: { id: "form-checkout__cardholderName" },
+            issuer: { id: "form-checkout__issuer" },
+            installments: { id: "form-checkout__installments" },
+            identificationType: { id: "form-checkout__identificationType" },
+            identificationNumber: { id: "form-checkout__identificationNumber" },
+            cardholderEmail: { id: "form-checkout__cardholderEmail" },
+        },
+        callbacks: {
+            onFormMounted: error => {
+                if (error) return console.warn("Erro montagem:", error);
+                console.log("Campos montados!");
+            },
+            // IMPORTANTE: Removemos o onSubmit automático daqui!
         }
-    }, 100); // Delay de 100ms
+    });
+}
+
+// 3. Função Manual de Pagamento (Chamada pelo botão)
+async function manualPay() {
+    console.log("Iniciando pagamento manual...");
+    const btn = document.getElementById('btn-pay-manual');
+    btn.innerHTML = 'Processando...';
+    btn.disabled = true;
+
+    try {
+        // Força a criação do token
+        const data = await cardFields.createCardToken();
+        
+        console.log("Token gerado:", data); // Debug
+
+        if (!data.id) { // O token vem no campo 'id'
+            throw new Error("Token não gerado");
+        }
+
+        // Pega os outros dados manualmente
+        const docNumber = document.getElementById('form-checkout__identificationNumber').value;
+        // O tipo de documento geralmente vem automático, mas vamos forçar CPF se falhar
+        const docType = document.getElementById('form-checkout__identificationType').value || 'CPF'; 
+
+        // Envia para o backend
+        await processCardBackend({
+            token: data.id,
+            issuerId: data.issuer_id, // Note o underline (resposta direta da API)
+            paymentMethodId: data.payment_method_id, // Note o underline
+            amount: 97.97,
+            payer: {
+                identification: {
+                    type: docType,
+                    number: docNumber
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro no pagamento:", error);
+        alert("Erro ao processar cartão. Verifique os dados.");
+        btn.innerHTML = 'PAGAR AGORA';
+        btn.disabled = false;
+    }
 }
 
         async function processCardBackend(data) {

@@ -557,7 +557,7 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
             <label for="legalCheckCard">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
         </div>
 
-        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;" disabled>PAGAR AGORA</button>
+        <button type="button" id="btn-pay-manual" class="btn-main" style="width:100%;" onclick="manualPay()">PAGAR AGORA</button>
     </form>
     <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
 </div>
