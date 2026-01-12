@@ -315,54 +315,82 @@ async function loginUser() {
 
         // 6. CARTÃO (BRICK/FORM)
         function mountCardForm() {
-            document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
-            
-            cardForm = mp.cardForm({
-    amount: "97.97",
-    iframe: true,
-    form: {
-        id: "form-checkout",
-        cardNumber: { 
-            id: "form-checkout__cardNumber",
-            placeholder: "Número do Cartão" // <--- ADICIONE ISSO
+    // Preenche o e-mail oculto automaticamente
+    document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
+    
+    // Se o formulário já existe, desmonta para não duplicar
+    if (cardForm) {
+        cardForm.unmount();
+    }
+
+    cardForm = mp.cardForm({
+        amount: "97.97",
+        iframe: true,
+        form: {
+            id: "form-checkout",
+            cardNumber: { 
+                id: "form-checkout__cardNumber",
+                placeholder: "0000 0000 0000 0000",
+            },
+            expirationDate: { 
+                id: "form-checkout__expirationDate",
+                placeholder: "MM/YY",
+            },
+            securityCode: { 
+                id: "form-checkout__securityCode",
+                placeholder: "123",
+            },
+            cardholderName: { id: "form-checkout__cardholderName" },
+            issuer: { id: "form-checkout__issuer" },
+            installments: { id: "form-checkout__installments" },
+            identificationType: { id: "form-checkout__identificationType" },
+            identificationNumber: { id: "form-checkout__identificationNumber" },
+            cardholderEmail: { id: "form-checkout__cardholderEmail" },
         },
-        expirationDate: { 
-            id: "form-checkout__expirationDate",
-            placeholder: "MM/YY" // <--- ADICIONE ISSO
-        },
-        securityCode: { 
-            id: "form-checkout__securityCode",
-            placeholder: "CVV" // <--- ADICIONE ISSO
-        },
-                    cardholderName: { id: "form-checkout__cardholderName" },
-                    issuer: { id: "form-checkout__issuer" },
-                    installments: { id: "form-checkout__installments" },
-                    identificationType: { id: "form-checkout__identificationType" },
-                    identificationNumber: { id: "form-checkout__identificationNumber" },
-                    cardholderEmail: { id: "form-checkout__cardholderEmail" },
-                },
-                callbacks: {
-                    onFormMounted: error => { if (error) console.warn("Form Error", error); },
-                    onSubmit: event => {
-                        event.preventDefault();
-                        // Pega os dados seguros
-                        const { paymentMethodId, issuerId, amount, token, identificationNumber, identificationType } = cardForm.getCardFormData();
-                        
-                        // Envia para o backend
-                        processCardBackend({
-                            token, issuerId, paymentMethodId, amount, 
-                            payer: { identification: { type: identificationType, number: identificationNumber } }
-                        });
-                    },
-                    onFetching: (resource) => {
-                        const btn = document.getElementById('form-checkout__submit');
-                        const txt = btn.innerHTML;
-                        btn.innerHTML = 'Processando...'; btn.disabled = true;
-                        return () => { btn.disabled = false; btn.innerHTML = txt; };
+        callbacks: {
+            onFormMounted: error => { 
+                if (error) return console.warn("Form Error:", error); 
+                console.log("Formulário de cartão montado com sucesso!");
+            },
+            onSubmit: event => {
+                event.preventDefault();
+                
+                // Pega os dados do formulário seguro
+                const { paymentMethodId, issuerId, amount, token, identificationNumber, identificationType } = cardForm.getCardFormData();
+                
+                // Verifica se gerou o token
+                if (!token) {
+                    alert('Erro: Verifique os dados do cartão.');
+                    return;
+                }
+
+                // Envia para o backend
+                processCardBackend({
+                    token, 
+                    issuerId, 
+                    paymentMethodId, 
+                    amount, 
+                    payer: { 
+                        identification: { 
+                            type: identificationType, 
+                            number: identificationNumber 
+                        } 
                     }
-                },
-            });
-        }
+                });
+            },
+            onFetching: (resource) => {
+                const btn = document.getElementById('form-checkout__submit');
+                const txt = btn.innerHTML;
+                btn.innerHTML = 'Processando...'; 
+                btn.disabled = true;
+                return () => { 
+                    btn.disabled = false; 
+                    btn.innerHTML = txt; 
+                };
+            }
+        },
+    });
+}
 
         async function processCardBackend(data) {
             try {

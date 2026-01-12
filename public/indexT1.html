@@ -511,43 +511,56 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 </div>
 
                 <div id="pay-card" style="display:none;">
-                    <form id="form-checkout" style="text-align:left; margin-top:15px;">
-                        <div class="input-wrapper">
-    <!-- Div vazia para o Mercado Pago montar o campo seguro -->
-    <div id="form-checkout__cardNumber" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
+    <form id="form-checkout" style="text-align:left; margin-top:15px;">
+        
+        <!-- NÚMERO DO CARTÃO (DIV para Iframe) -->
+        <div class="input-wrapper">
+            <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">Número do Cartão</label>
+            <div id="form-checkout__cardNumber" class="auth-input" style="height: 40px; padding: 10px 10px 0 10px; background: #222;"></div>
+        </div>
+        
+        <div style="display:flex; gap:10px;">
+            <!-- VALIDADE (DIV para Iframe) -->
+            <div class="input-wrapper" style="flex: 1;">
+                <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">Validade (MM/YY)</label>
+                <div id="form-checkout__expirationDate" class="auth-input" style="height: 40px; padding: 10px 10px 0 10px; background: #222;"></div>
+            </div>
+            <!-- CVV (DIV para Iframe) -->
+            <div class="input-wrapper" style="flex: 1;">
+                <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">CVV</label>
+                <div id="form-checkout__securityCode" class="auth-input" style="height: 40px; padding: 10px 10px 0 10px; background: #222;"></div>
+            </div>
+        </div>
+
+        <!-- NOME (Input Normal) -->
+        <div class="input-wrapper">
+            <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">Nome no Cartão</label>
+            <input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Como está no cartão" />
+        </div>
+        
+        <!-- CAMPOS OCULTOS OBRIGATÓRIOS -->
+        <div style="display:none;">
+            <select id="form-checkout__issuer"></select>
+            <select id="form-checkout__installments"></select>
+            <select id="form-checkout__identificationType"></select>
+            <input type="email" id="form-checkout__cardholderEmail" />
+        </div>
+
+        <!-- DOCUMENTO (Input Normal) -->
+        <div class="input-wrapper">
+            <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">CPF do Titular</label>
+            <input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="CPF" />
+        </div>
+
+        <div class="legal-check-wrapper">
+            <input type="checkbox" id="legalCheckCard" onchange="document.getElementById('form-checkout__submit').disabled = !this.checked">
+            <label for="legalCheckCard">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
+        </div>
+
+        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;" disabled>PAGAR AGORA</button>
+    </form>
+    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
 </div>
-                        
-<div style="display:flex; gap:10px;">
-    <div class="input-wrapper">
-        <div id="form-checkout__expirationDate" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
-    </div>
-    <div class="input-wrapper">
-        <div id="form-checkout__securityCode" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
-    </div>
-</div>
-
-                        <div class="input-wrapper"><input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Nome no Cartão" /></div>
-                        
-                        <div style="display:flex; gap:10px;">
-                            <div class="input-wrapper" style="display:none;"><select id="form-checkout__issuer" class="auth-input"></select></div>
-                            <div class="input-wrapper" style="display:none;"><select id="form-checkout__installments" class="auth-input"></select></div>
-                        </div>
-
-                        <div style="display:flex; gap:10px;">
-                            <div class="input-wrapper"><select id="form-checkout__identificationType" class="auth-input" style="width:80px;"></select></div>
-                            <div class="input-wrapper"><input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="Documento" /></div>
-                        </div>
-                        <input type="email" id="form-checkout__cardholderEmail" style="display:none;"/>
-
-                        <div class="legal-check-wrapper">
-                            <input type="checkbox" id="legalCheckCard" onchange="document.getElementById('form-checkout__submit').disabled = !this.checked">
-                            <label for="legalCheckCard">Li e concordo com os <span onclick="event.preventDefault(); openLegalModal('modalTermos')" style="color:#cc0000; cursor:pointer; text-decoration:underline;">Termos de Uso</span>.</label>
-                        </div>
-
-                        <button type="submit" id="form-checkout__submit" class="btn-main" style="width:100%;" disabled>PAGAR AGORA</button>
-                    </form>
-                    <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
-                </div>
 
                 <div id="pay-stripe" style="display:none;">
                     <div style="margin: 30px 0; text-align: center;">
