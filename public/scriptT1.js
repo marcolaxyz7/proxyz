@@ -318,13 +318,22 @@ async function loginUser() {
             document.getElementById('form-checkout__cardholderEmail').value = currentUserEmail;
             
             cardForm = mp.cardForm({
-                amount: "97.97",
-                iframe: true,
-                form: {
-                    id: "form-checkout",
-                    cardNumber: { id: "form-checkout__cardNumber" },
-                    expirationDate: { id: "form-checkout__expirationDate" },
-                    securityCode: { id: "form-checkout__securityCode" },
+    amount: "97.97",
+    iframe: true,
+    form: {
+        id: "form-checkout",
+        cardNumber: { 
+            id: "form-checkout__cardNumber",
+            placeholder: "Número do Cartão" // <--- ADICIONE ISSO
+        },
+        expirationDate: { 
+            id: "form-checkout__expirationDate",
+            placeholder: "MM/YY" // <--- ADICIONE ISSO
+        },
+        securityCode: { 
+            id: "form-checkout__securityCode",
+            placeholder: "CVV" // <--- ADICIONE ISSO
+        },
                     cardholderName: { id: "form-checkout__cardholderName" },
                     issuer: { id: "form-checkout__issuer" },
                     installments: { id: "form-checkout__installments" },

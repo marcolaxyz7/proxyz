@@ -512,12 +512,19 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
 
                 <div id="pay-card" style="display:none;">
                     <form id="form-checkout" style="text-align:left; margin-top:15px;">
-                        <div class="input-wrapper"><input type="text" id="form-checkout__cardNumber" class="auth-input" placeholder="Número do Cartão" /></div>
+                        <div class="input-wrapper">
+    <!-- Div vazia para o Mercado Pago montar o campo seguro -->
+    <div id="form-checkout__cardNumber" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
+</div>
                         
-                        <div style="display:flex; gap:10px;">
-                            <div class="input-wrapper"><input type="text" id="form-checkout__expirationDate" class="auth-input" placeholder="MM/YY" /></div>
-                            <div class="input-wrapper"><input type="text" id="form-checkout__securityCode" class="auth-input" placeholder="CVV" /></div>
-                        </div>
+<div style="display:flex; gap:10px;">
+    <div class="input-wrapper">
+        <div id="form-checkout__expirationDate" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
+    </div>
+    <div class="input-wrapper">
+        <div id="form-checkout__securityCode" class="auth-input" style="height: 50px; padding-top: 12px;"></div>
+    </div>
+</div>
 
                         <div class="input-wrapper"><input type="text" id="form-checkout__cardholderName" class="auth-input" placeholder="Nome no Cartão" /></div>
                         
