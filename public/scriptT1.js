@@ -324,26 +324,27 @@ async function loginUser() {
         }
 
         // 6. CARTÃO (BRICK/FORM)
-        // VARIÁVEL GLOBAL PARA O FORMULÁRIO
+        // scriptT1.js - Versão Debug
+
 let cardFormInstance = null; 
 
 async function mountCardForm() {
     const emailField = document.getElementById('form-checkout__cardholderEmail');
     if(emailField) emailField.value = currentUserEmail;
 
-    // Se já existir instância anterior, tenta desmontar para evitar duplicidade
     if (cardFormInstance) {
         try { cardFormInstance.unmount(); } catch(e){}
         cardFormInstance = null;
     }
 
     setTimeout(() => {
-        // AQUI ESTAVA O ERRO: Faltava o ID do form
+        console.log("Montando formulário com Public Key...");
+        
         cardFormInstance = mp.cardForm({
             amount: "97.97",
             iframe: true,
             form: {
-                id: "form-checkout", // <--- OBRIGATÓRIO
+                id: "form-checkout",
                 cardNumber: { id: "form-checkout__cardNumber", placeholder: "0000 0000 0000 0000", style: { color: "#ffffff" } },
                 expirationDate: { id: "form-checkout__expirationDate", placeholder: "MM/YY", style: { color: "#ffffff" } },
                 securityCode: { id: "form-checkout__securityCode", placeholder: "123", style: { color: "#ffffff" } },
@@ -357,17 +358,24 @@ async function mountCardForm() {
             callbacks: {
                 onFormMounted: error => { 
                     if (error) return console.warn("Erro montagem:", error);
-                    console.log("Formulário montado com sucesso!");
+                    console.log("Formulário pronto!");
                 },
-                onSubmit: event => {
-                    event.preventDefault(); // Impede o reload da página
-                    
-                    const btn = document.getElementById('form-checkout__submit');
-                    const oldText = btn.innerHTML;
-                    btn.innerHTML = 'Processando...';
-                    btn.disabled = true;
+                
+                // AQUI ESTÁ O TRUQUE: Captura erro de validação do formulário
+                onFormError: (error, event) => {
+                    console.error("Erro no formulário:", error);
+                    // Mostra qual campo está errado
+                    if(Array.isArray(error)) {
+                        const erros = error.map(e => `${e.field}: ${e.message}`).join('\n');
+                        alert("Corrija os campos:\n" + erros);
+                    } else {
+                        alert("Erro no formulário: " + JSON.stringify(error));
+                    }
+                },
 
-                    // Pega os dados direto do SDK com segurança
+                onSubmit: event => {
+                    event.preventDefault();
+                    
                     const {
                         paymentMethodId,
                         issuerId,
@@ -379,36 +387,33 @@ async function mountCardForm() {
                         identificationType,
                     } = cardFormInstance.getCardFormData();
 
-                    if(!token) {
-                        alert("Verifique os dados do cartão.");
-                        btn.innerHTML = oldText;
-                        btn.disabled = false;
+                    if (!token) {
+                        alert("Token não gerado. Verifique se o cartão é válido.");
                         return;
                     }
 
-                    // Envia para o seu backend
+                    // Se chegou aqui, o token existe! Envia pro backend.
+                    const btn = document.getElementById('form-checkout__submit');
+                    const oldText = btn.innerHTML;
+                    btn.innerHTML = 'Processando...';
+                    btn.disabled = true;
+
                     processCardBackend({
                         token,
                         issuerId,
                         paymentMethodId,
                         amount,
-                        installments: 1, // Força à vista
+                        installments: 1, 
                         payer: {
                             email,
                             identification: {
-                                type: identificationType, // Pega o que o usuário escolheu (CPF ou CNPJ)
+                                type: identificationType, 
                                 number: identificationNumber
                             },
                         },
                     }).then(() => {
-                         // O processCardBackend já lida com sucesso/erro visual
-                         // Só destravamos o botão se der erro lá dentro, mas aqui garantimos o reset visual se precisar
                          setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 2000);
                     });
-                },
-                onFetching: (resource) => {
-                    // Opcional: animações de carregamento do próprio SDK
-                    console.log("Carregando recurso:", resource);
                 }
             },
         });
