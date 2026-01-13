@@ -27,47 +27,43 @@ audioError.volume = 0.5;
         }
         initApp();
 
-        // --- TABELA DE PREÇOS (Mesma do Backend) ---
+       // --- CORREÇÃO DE PREÇO E UI (NO SCRIPT T1) ---
+
+// 1. Forcei o valor para 1.00 aqui para testes
 const PRICING_DISPLAY = {
-    'BRL': { text: 'R$ 1.00', val: 1.00 },
-    'USD': { text: '$ 19.90', val: 19.90 },
-    'EUR': { text: '€ 19.90', val: 19.90 },
-    'JPY': { text: '¥ 3000', val: 3000 },
-    'GBP': { text: '£ 14.90', val: 14.90 },
-    'CAD': { text: 'C$ 29.90', val: 29.90 },
-    'AUD': { text: 'A$ 29.90', val: 29.90 }
+    'BRL': { text: 'R$ 1.00', val: 1.00 }, // <--- AQUI ESTAVA 97.97, MUDEI PRA 1.00
+    'USD': { text: '$ 1.00', val: 1.00 },
+    'EUR': { text: '€ 1.00', val: 1.00 },
+    'JPY': { text: '¥ 150', val: 150 },
+    'GBP': { text: '£ 1.00', val: 1.00 },
+    'CAD': { text: 'C$ 1.00', val: 1.00 },
+    'AUD': { text: 'A$ 1.00', val: 1.00 }
 };
 
+// 2. Função que esconde/mostra os botões
 function updatePriceUI() {
-    // 1. Descobre a moeda (BRL, USD, EUR...)
     const currency = getUserCurrency();
     
-    // 2. Atualiza o Texto do Preço (Isso já existia)
+    // Atualiza o Texto do Preço
     const priceInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
     const el = document.getElementById('price-display');
     if(el) el.innerText = `VALOR: ${priceInfo.text}`;
 
-    // 3. LÓGICA DE EXIBIÇÃO DOS BOTÕES (NOVO!)
+    // PEGA OS BOTÕES PELO ID
     const btnPix = document.getElementById('btn-opt-pix');
-    const btnCard = document.getElementById('btn-opt-card');
+    const btnCard = document.getElementById('btn-opt-card'); // Esse botão vai abrir o Brick
     const btnStripe = document.getElementById('btn-opt-stripe');
 
+    // LÓGICA DE EXIBIÇÃO
     if (currency === 'BRL') {
-        // --- SE FOR BRASIL ---
-        // Mostra as opções nacionais
-        if(btnPix) btnPix.style.display = 'block';
-        if(btnCard) btnCard.style.display = 'block';
-        
-        // Esconde o Stripe (Para não confundir o brasileiro)
-        if(btnStripe) btnStripe.style.display = 'none';
-
+        // --- BRASILEIRO: Vê Pix e Cartão (Brick), Não vê Stripe ---
+        if(btnPix) btnPix.style.display = 'block';     
+        if(btnCard) btnCard.style.display = 'block';   
+        if(btnStripe) btnStripe.style.display = 'none'; 
     } else {
-        // --- SE FOR GRINGO (Qualquer outro país) ---
-        // Esconde as opções nacionais (Eles não têm CPF nem PIX)
+        // --- GRINGO: Vê Stripe, Não vê Pix nem Cartão BR ---
         if(btnPix) btnPix.style.display = 'none';
         if(btnCard) btnCard.style.display = 'none';
-        
-        // Mostra só o Stripe
         if(btnStripe) btnStripe.style.display = 'block';
     }
 }
@@ -147,19 +143,75 @@ function updatePriceUI() {
         }
 
         function showCardView() {
-    // 1. Mostra a tela (muda o display: none para block)
+    // 1. Esconde as opções e mostra o container do cartão
     document.getElementById('pay-options').style.display = 'none';
     document.getElementById('pay-card').style.display = 'block';
     
-    // 2. Aguarda 100ms para garantir que a div existe visualmente
+    // 2. Aguarda um pouquinho para a div aparecer e chama o Brick
     setTimeout(() => {
+        // Se o MP estiver carregado, monta o formulário novo (Brick)
         if(mp) {
-            console.log("Iniciando montagem do formulário...");
-            mountCardForm();
+            mountCardForm(); 
         } else {
-            console.error("SDK do Mercado Pago não inicializado!");
+            console.error("SDK do Mercado Pago não carregou.");
         }
     }, 100);
+}
+
+let brickController = null;
+
+async function mountCardForm() {
+    // Limpa qualquer coisa que tinha antes
+    const container = document.getElementById('pay-card-container');
+    if(container) container.innerHTML = '';
+
+    const settings = {
+        initialization: {
+            amount: 1.00, // <--- GARANTA QUE ESTÁ 1.00 AQUI
+            payer: { email: currentUserEmail },
+        },
+        customization: {
+            visual: {
+                style: { theme: 'dark' } // Combina com seu site
+            },
+            paymentMethods: {
+                creditCard: "all",
+                debitCard: "all", // Habilita Débito
+                maxInstallments: 1
+            }
+        },
+        callbacks: {
+            onReady: () => console.log('Brick pronto'),
+            onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                return new Promise((resolve, reject) => {
+                    fetch(`${API_URL}/process-brick`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ formData, userId: currentUserId, email: currentUserEmail })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'approved') {
+                            showMsg('Sucesso!', 'Pagamento Aprovado!', 'success');
+                            currentUserId = null;
+                            document.getElementById('authModal').style.display = 'none';
+                            switchStep('step-login');
+                            resolve();
+                        } else {
+                            showMsg('Recusado', 'Pagamento negado.', 'error');
+                            reject();
+                        }
+                    })
+                    .catch(() => reject());
+                });
+            },
+            onError: (error) => console.error(error),
+        },
+    };
+
+    const bricksBuilder = mp.bricks();
+    // AQUI É O PULO DO GATO: Tem que ter essa div no seu HTML
+    brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
 }
 
         // NOVA FUNÇÃO: View do Stripe
@@ -322,83 +374,7 @@ async function loginUser() {
             } else { showMsg('Aguardando', 'Pagamento ainda não confirmado.', 'info'); }
             btn.innerHTML = 'JÁ FIZ O PAGAMENTO';
         }
-
-        // 6. CARTÃO (BRICK/FORM)
-        // --- SUBSTITUA A FUNÇÃO mountCardForm POR ESTA ---
-let brickController = null;
-
-async function mountCardForm() {
-    const settings = {
-        initialization: {
-            amount: 1.00, // Valor fixo de 1 real
-            payer: {
-                email: currentUserEmail,
-            },
-        },
-        customization: {
-            visual: {
-                style: {
-                    theme: 'dark', // Tema escuro para combinar com seu site
-                }
-            },
-            paymentMethods: {
-                creditCard: "all",
-                debitCard: "all", // <--- AQUI HABILITA O DÉBITO
-                ticket: "all",
-                bankTransfer: "all",
-                maxInstallments: 1
-            }
-        },
-        callbacks: {
-            onReady: () => {
-                // Brick carregou
-                console.log('Brick pronto');
-            },
-            onSubmit: async ({ selectedPaymentMethod, formData }) => {
-                // Quando o usuário clica em pagar
-                return new Promise((resolve, reject) => {
-                    fetch(`${API_URL}/process-brick`, { // <--- Nova rota que vamos criar
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            formData, 
-                            userId: currentUserId,
-                            email: currentUserEmail
-                        })
-                    })
-                    .then((response) => response.json())
-                    .then((response) => {
-                        if (response.status === 'approved') {
-                            showMsg('Sucesso!', 'Pagamento Aprovado!', 'success');
-                            currentUserId = null;
-                            document.getElementById('authModal').style.display = 'none';
-                            switchStep('step-login');
-                            resolve();
-                        } else {
-                            showMsg('Recusado', 'Pagamento não autorizado.', 'error');
-                            reject();
-                        }
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        reject();
-                    });
-                });
-            },
-            onError: (error) => {
-                console.error(error);
-            },
-        },
-    };
-
-    const bricksBuilder = mp.bricks();
-    // Limpa se já existir
-    document.getElementById('pay-card-container').innerHTML = ''; 
-    
-    // Cria o Brick na div onde ficava o form antigo
-    // IMPORTANTE: No HTML, certifique-se que dentro de <div id="pay-card"> tenha uma <div id="pay-card-container"></div>
-    brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
-}
+ 
 
         async function processCardBackend(data) {
             try {
