@@ -329,11 +329,9 @@ async function loginUser() {
 let cardFormInstance = null; 
 
 async function mountCardForm() {
-    // Preenche o email oculto
     const emailField = document.getElementById('form-checkout__cardholderEmail');
     if(emailField) emailField.value = currentUserEmail;
 
-    // Limpa instância anterior
     if (cardFormInstance) {
         try { cardFormInstance.unmount(); } catch(e){}
         cardFormInstance = null;
@@ -346,7 +344,7 @@ async function mountCardForm() {
             amount: "97.97",
             iframe: true,
             form: {
-                id: "form-checkout", // IMPORTANTE: Vincula ao HTML que criamos
+                id: "form-checkout", // <--- ESSENCIAL PARA FUNCIONAR
                 cardNumber: { id: "form-checkout__cardNumber", placeholder: "0000 0000 0000 0000", style: { color: "#ffffff" } },
                 expirationDate: { id: "form-checkout__expirationDate", placeholder: "MM/YY", style: { color: "#ffffff" } },
                 securityCode: { id: "form-checkout__securityCode", placeholder: "123", style: { color: "#ffffff" } },
@@ -362,16 +360,16 @@ async function mountCardForm() {
                     if (error) return console.warn("Erro ao montar:", error);
                     console.log("Formulário carregado!");
                 },
-                // Aqui capturamos o erro 324 se ele acontecer de novo
                 onFormError: (error, event) => {
+                    // SE DER ERRO NOS CAMPOS, CAI AQUI
                     console.error("Erro MP:", error);
-                    // Pega o erro e mostra um alerta legível
                     const msg = Array.isArray(error) ? error[0].message : JSON.stringify(error);
-                    alert("Erro nos dados: " + msg); 
+                    alert("Verifique os dados: " + msg); 
                 },
                 onSubmit: event => {
                     event.preventDefault();
                     
+                    // O SDK já validou tudo, agora pegamos os dados
                     const {
                         paymentMethodId,
                         issuerId,
@@ -384,7 +382,7 @@ async function mountCardForm() {
                     } = cardFormInstance.getCardFormData();
 
                     if (!token) {
-                        alert("Dados do cartão inválidos ou incompletos.");
+                        alert("Erro ao gerar token. Verifique o cartão.");
                         return;
                     }
 
@@ -393,6 +391,7 @@ async function mountCardForm() {
                     btn.innerHTML = 'Processando...';
                     btn.disabled = true;
 
+                    // Manda para o seu backend
                     processCardBackend({
                         token,
                         issuerId,
@@ -407,6 +406,7 @@ async function mountCardForm() {
                             },
                         },
                     }).then(() => {
+                         // Restaura o botão depois de 2s se não tiver redirecionado
                          setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 2000);
                     });
                 }

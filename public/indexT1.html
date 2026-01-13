@@ -541,7 +541,7 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
             </div>
             <div class="input-wrapper" style="flex: 2;">
                 <label style="font-size: 12px; color: #888; margin-bottom: 5px; display: block;">Número do Documento</label>
-                <input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="CPF ou CNPJ" oninput="this.value = this.value.replace(/[^0-9]/g, '')" maxlength="14" />
+                <input type="text" id="form-checkout__identificationNumber" class="auth-input" placeholder="Só números" maxlength="14" oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
             </div>
         </div>
 
@@ -560,7 +560,6 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
     </form>
     <button class="switch-btn" onclick="resetPaymentView()">Voltar</button>
 </div>
-
                 <div id="pay-stripe" style="display:none;">
                     <div style="margin: 30px 0; text-align: center;">
                         <i class="fa-brands fa-stripe fa-3x" style="color: #635bff; margin-bottom: 15px;"></i>
