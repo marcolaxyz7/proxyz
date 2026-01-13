@@ -133,6 +133,52 @@ app.post('/api/create-payment', async (req, res) => {
     }
 });
 
+// --- NOVA ROTA: PROCESSAR PAGAMENTO VIA BRICK (CARTÃO/DÉBITO) ---
+app.post('/api/process-brick', async (req, res) => {
+    const { formData, userId, email } = req.body;
+    
+    try {
+        const payment = new Payment(client);
+        
+        // Dados do pagamento
+        const body = {
+            ...formData, // Pega o token e dados que o Brick mandou
+            transaction_amount: 1.00, // <--- VALOR FIXO DE SEGURANÇA (R$ 1,00)
+            description: 'Acesso Próxyz Library',
+            payer: {
+                email: email,
+                ...formData.payer
+            },
+            notification_url: process.env.WEBHOOK_URL
+        };
+
+        // Cria a cobrança no Mercado Pago
+        const result = await payment.create({ body });
+        
+        // Define status para salvar no banco
+        const statusVenda = result.status === 'approved' ? 'paid' : 'pending';
+        
+        // Salva na tabela sales
+        await pool.query(
+            'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, ?, ?, ?)',
+            [userId, 1.00, statusVenda, result.id, 'BrickCard']
+        );
+
+        // Se aprovou, ativa o usuário
+        if (result.status === 'approved') {
+            await pool.query('UPDATE users SET status = "active" WHERE id = ?', [userId]);
+            return res.json({ status: 'approved' });
+        }
+
+        // Retorna o status (pode ser 'in_process', 'rejected', etc)
+        res.json({ status: result.status });
+
+    } catch (error) {
+        console.error("Erro Brick:", error);
+        res.status(500).json({ error: 'Erro ao processar pagamento via Brick.' });
+    }
+});
+
 app.post('/api/cancel-register', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.json({ ok: true });

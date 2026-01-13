@@ -324,90 +324,80 @@ async function loginUser() {
         }
 
         // 6. CARTÃO (BRICK/FORM)
-        let cardFormInstance = null; 
+        // --- SUBSTITUA A FUNÇÃO mountCardForm POR ESTA ---
+let brickController = null;
 
 async function mountCardForm() {
-    const emailField = document.getElementById('form-checkout__cardholderEmail');
-    if(emailField) emailField.value = currentUserEmail;
-
-    if (cardFormInstance) {
-        try { cardFormInstance.unmount(); } catch(e){}
-        cardFormInstance = null;
-    }
-
-    setTimeout(() => {
-        console.log("Iniciando Mercado Pago...");
-        
-        cardFormInstance = mp.cardForm({
-            amount: "1.00", // <--- VALOR CORRIGIDO PARA R$ 1,00
-            iframe: true,
-            form: {
-                id: "form-checkout", // Importante: ID do form que criamos no HTML
-                cardNumber: { id: "form-checkout__cardNumber", placeholder: "0000 0000 0000 0000", style: { color: "#ffffff" } },
-                expirationDate: { id: "form-checkout__expirationDate", placeholder: "MM/YY", style: { color: "#ffffff" } },
-                securityCode: { id: "form-checkout__securityCode", placeholder: "123", style: { color: "#ffffff" } },
-                cardholderName: { id: "form-checkout__cardholderName" },
-                issuer: { id: "form-checkout__issuer" },
-                installments: { id: "form-checkout__installments" },
-                identificationType: { id: "form-checkout__identificationType" },
-                identificationNumber: { id: "form-checkout__identificationNumber" },
-                cardholderEmail: { id: "form-checkout__cardholderEmail" },
+    const settings = {
+        initialization: {
+            amount: 1.00, // Valor fixo de 1 real
+            payer: {
+                email: currentUserEmail,
             },
-            callbacks: {
-                onFormMounted: error => { 
-                    if (error) return console.warn("Erro ao montar:", error);
-                    console.log("Formulário carregado!");
-                },
-                onFormError: (error, event) => {
-                    console.error("Erro MP:", error);
-                    const msg = Array.isArray(error) ? error[0].message : JSON.stringify(error);
-                    alert("Verifique os dados: " + msg); 
-                },
-                onSubmit: event => {
-                    event.preventDefault();
-                    
-                    const {
-                        paymentMethodId,
-                        issuerId,
-                        cardholderEmail: email,
-                        amount,
-                        token,
-                        installments,
-                        identificationNumber,
-                        identificationType,
-                    } = cardFormInstance.getCardFormData();
-
-                    if (!token) {
-                        alert("Erro ao processar cartão.");
-                        return;
-                    }
-
-                    const btn = document.getElementById('form-checkout__submit');
-                    const oldText = btn.innerHTML;
-                    btn.innerHTML = 'Processando...';
-                    btn.disabled = true;
-
-                    // Envia para o backend
-                    processCardBackend({
-                        token,
-                        issuerId,
-                        paymentMethodId,
-                        amount, // Aqui vai 1.00 que definimos lá em cima
-                        installments: 1,
-                        payer: {
-                            email,
-                            identification: {
-                                type: identificationType, 
-                                number: identificationNumber
-                            },
-                        },
-                    }).then(() => {
-                         setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 2000);
-                    });
+        },
+        customization: {
+            visual: {
+                style: {
+                    theme: 'dark', // Tema escuro para combinar com seu site
                 }
             },
-        });
-    }, 100);
+            paymentMethods: {
+                creditCard: "all",
+                debitCard: "all", // <--- AQUI HABILITA O DÉBITO
+                ticket: "all",
+                bankTransfer: "all",
+                maxInstallments: 1
+            }
+        },
+        callbacks: {
+            onReady: () => {
+                // Brick carregou
+                console.log('Brick pronto');
+            },
+            onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                // Quando o usuário clica em pagar
+                return new Promise((resolve, reject) => {
+                    fetch(`${API_URL}/process-brick`, { // <--- Nova rota que vamos criar
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            formData, 
+                            userId: currentUserId,
+                            email: currentUserEmail
+                        })
+                    })
+                    .then((response) => response.json())
+                    .then((response) => {
+                        if (response.status === 'approved') {
+                            showMsg('Sucesso!', 'Pagamento Aprovado!', 'success');
+                            currentUserId = null;
+                            document.getElementById('authModal').style.display = 'none';
+                            switchStep('step-login');
+                            resolve();
+                        } else {
+                            showMsg('Recusado', 'Pagamento não autorizado.', 'error');
+                            reject();
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        reject();
+                    });
+                });
+            },
+            onError: (error) => {
+                console.error(error);
+            },
+        },
+    };
+
+    const bricksBuilder = mp.bricks();
+    // Limpa se já existir
+    document.getElementById('pay-card-container').innerHTML = ''; 
+    
+    // Cria o Brick na div onde ficava o form antigo
+    // IMPORTANTE: No HTML, certifique-se que dentro de <div id="pay-card"> tenha uma <div id="pay-card-container"></div>
+    brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
 }
 
         async function processCardBackend(data) {
