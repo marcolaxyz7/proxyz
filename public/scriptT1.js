@@ -40,31 +40,34 @@ const PRICING_DISPLAY = {
     'AUD': { text: 'A$ 1.00', val: 1.00 }
 };
 
-// 2. Função que esconde/mostra os botões
+// 1. CORREÇÃO DA LÓGICA DE MOEDA (Esconde Stripe no BR, Esconde Pix fora)
 function updatePriceUI() {
     const currency = getUserCurrency();
     
-    // Atualiza o Texto do Preço
-    const priceInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
+    // Força R$ 1.00 ou $ 1.00 visualmente
+    const displayValue = currency === 'BRL' ? 'R$ 1.00' : '$ 1.00'; 
     const el = document.getElementById('price-display');
-    if(el) el.innerText = `VALOR: ${priceInfo.text}`;
+    if(el) el.innerText = `VALOR: ${displayValue}`;
 
-    // PEGA OS BOTÕES PELO ID
+    // Pega os botões
     const btnPix = document.getElementById('btn-opt-pix');
-    const btnCard = document.getElementById('btn-opt-card'); // Esse botão vai abrir o Brick
+    const btnCard = document.getElementById('btn-opt-card');
     const btnStripe = document.getElementById('btn-opt-stripe');
 
-    // LÓGICA DE EXIBIÇÃO
     if (currency === 'BRL') {
-        // --- BRASILEIRO: Vê Pix e Cartão (Brick), Não vê Stripe ---
-        if(btnPix) btnPix.style.display = 'block';     
-        if(btnCard) btnCard.style.display = 'block';   
-        if(btnStripe) btnStripe.style.display = 'none'; 
+        // --- SE FOR BRASIL ---
+        // Mostra Pix e Cartão (Brick)
+        if(btnPix) btnPix.style.display = 'flex'; // ou 'block'
+        if(btnCard) btnCard.style.display = 'flex';
+        // Esconde Stripe
+        if(btnStripe) btnStripe.style.display = 'none';
     } else {
-        // --- GRINGO: Vê Stripe, Não vê Pix nem Cartão BR ---
+        // --- SE FOR GRINGO ---
+        // Esconde Pix e Cartão BR
         if(btnPix) btnPix.style.display = 'none';
         if(btnCard) btnCard.style.display = 'none';
-        if(btnStripe) btnStripe.style.display = 'block';
+        // Mostra só Stripe
+        if(btnStripe) btnStripe.style.display = 'flex';
     }
 }
 
@@ -158,26 +161,27 @@ function updatePriceUI() {
     }, 100);
 }
 
+// 2. CORREÇÃO DO CARTÃO (Remove Parcelamento)
 let brickController = null;
 
 async function mountCardForm() {
-    // Limpa qualquer coisa que tinha antes
+    // Limpa container anterior
     const container = document.getElementById('pay-card-container');
     if(container) container.innerHTML = '';
 
     const settings = {
         initialization: {
-            amount: 1.00, // <--- GARANTA QUE ESTÁ 1.00 AQUI
+            amount: 1.00, // Valor fixo
             payer: { email: currentUserEmail },
         },
         customization: {
             visual: {
-                style: { theme: 'dark' } // Combina com seu site
+                style: { theme: 'dark' } // Tema escuro
             },
             paymentMethods: {
                 creditCard: "all",
-                debitCard: "all", // Habilita Débito
-                maxInstallments: 1
+                debitCard: "all",
+                maxInstallments: 1, // <--- AQUI: REMOVE A OPÇÃO DE PARCELAR
             }
         },
         callbacks: {
@@ -210,7 +214,6 @@ async function mountCardForm() {
     };
 
     const bricksBuilder = mp.bricks();
-    // AQUI É O PULO DO GATO: Tem que ter essa div no seu HTML
     brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
 }
 

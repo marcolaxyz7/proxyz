@@ -45,16 +45,27 @@ app.get('/api/config', (req, res) => {
     res.json({ publicKey: process.env.MP_PUBLIC_KEY });
 });
 
+// --- NO SERVER.JS (Substitua a rota /api/register inteira por esta) ---
 app.post('/api/register', async (req, res) => {
     const { name, email, whatsapp, password } = req.body;
     try {
         const [user] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        
+        // Se já existe e está ATIVO, bloqueia
         if (user.length > 0 && user[0].status === 'active') {
             return res.status(400).json({ error: 'E-mail já cadastrado.' });
         }
+
+        // Se existe e está PENDENTE, deleta para recriar (Limpa vendas antes)
         if (user.length > 0 && user[0].status === 'pending') {
-            await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]);
-            await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]);
+            try {
+                await pool.query('DELETE FROM prompt_logs WHERE user_id = ?', [user[0].id]); // Limpa logs se tiver
+                await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]); // Limpa vendas
+                await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]); // Deleta user
+            } catch (delError) {
+                console.error("Erro ao limpar usuário pendente:", delError);
+                // Continua mesmo se der erro, tenta inserir
+            }
         }
 
         const hash = await bcrypt.hash(password, 10);
@@ -64,7 +75,7 @@ app.post('/api/register', async (req, res) => {
         );
         res.json({ userId: result.insertId, email });
     } catch (err) {
-        console.error(err);
+        console.error("Erro Registro:", err);
         res.status(500).json({ error: 'Erro no cadastro.' });
     }
 });
