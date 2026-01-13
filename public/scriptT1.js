@@ -324,9 +324,7 @@ async function loginUser() {
         }
 
         // 6. CARTÃO (BRICK/FORM)
-        // scriptT1.js - Versão Debug
-
-let cardFormInstance = null; 
+        let cardFormInstance = null; 
 
 async function mountCardForm() {
     const emailField = document.getElementById('form-checkout__cardholderEmail');
@@ -341,10 +339,10 @@ async function mountCardForm() {
         console.log("Iniciando Mercado Pago...");
         
         cardFormInstance = mp.cardForm({
-            amount: "1.00",
+            amount: "1.00", // <--- VALOR CORRIGIDO PARA R$ 1,00
             iframe: true,
             form: {
-                id: "form-checkout", // <--- ESSENCIAL PARA FUNCIONAR
+                id: "form-checkout", // Importante: ID do form que criamos no HTML
                 cardNumber: { id: "form-checkout__cardNumber", placeholder: "0000 0000 0000 0000", style: { color: "#ffffff" } },
                 expirationDate: { id: "form-checkout__expirationDate", placeholder: "MM/YY", style: { color: "#ffffff" } },
                 securityCode: { id: "form-checkout__securityCode", placeholder: "123", style: { color: "#ffffff" } },
@@ -361,7 +359,6 @@ async function mountCardForm() {
                     console.log("Formulário carregado!");
                 },
                 onFormError: (error, event) => {
-                    // SE DER ERRO NOS CAMPOS, CAI AQUI
                     console.error("Erro MP:", error);
                     const msg = Array.isArray(error) ? error[0].message : JSON.stringify(error);
                     alert("Verifique os dados: " + msg); 
@@ -369,7 +366,6 @@ async function mountCardForm() {
                 onSubmit: event => {
                     event.preventDefault();
                     
-                    // O SDK já validou tudo, agora pegamos os dados
                     const {
                         paymentMethodId,
                         issuerId,
@@ -382,7 +378,7 @@ async function mountCardForm() {
                     } = cardFormInstance.getCardFormData();
 
                     if (!token) {
-                        alert("Erro ao gerar token. Verifique o cartão.");
+                        alert("Erro ao processar cartão.");
                         return;
                     }
 
@@ -391,12 +387,12 @@ async function mountCardForm() {
                     btn.innerHTML = 'Processando...';
                     btn.disabled = true;
 
-                    // Manda para o seu backend
+                    // Envia para o backend
                     processCardBackend({
                         token,
                         issuerId,
                         paymentMethodId,
-                        amount,
+                        amount, // Aqui vai 1.00 que definimos lá em cima
                         installments: 1,
                         payer: {
                             email,
@@ -406,7 +402,6 @@ async function mountCardForm() {
                             },
                         },
                     }).then(() => {
-                         // Restaura o botão depois de 2s se não tiver redirecionado
                          setTimeout(() => { btn.innerHTML = oldText; btn.disabled = false; }, 2000);
                     });
                 }

@@ -77,7 +77,7 @@ app.post('/api/create-payment', async (req, res) => {
         let body = {};
         
         // 1. DEFINA O VALOR AQUI (Para usar em tudo)
-        const AMOUNT_BRL = 1.00; 
+        const AMOUNT_BRL = 1.00; w
 
         if (type === 'card') {
             body = {
