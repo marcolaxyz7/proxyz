@@ -73,6 +73,11 @@ app.post('/api/create-payment', async (req, res) => {
     const { userId, email, type, token, issuerId, paymentMethodId, payer } = req.body;
     
     try {
+
+        console.log("--- DEBUG CHAVES ---");
+        console.log("Token recebido do Front:", token ? token.substring(0, 5) + "..." : "SEM TOKEN");
+        console.log("Meu Access Token (Backend):", process.env.MP_ACCESS_TOKEN ? process.env.MP_ACCESS_TOKEN.substring(0, 10) + "..." : "FALTA NO .ENV");
+
         const payment = new Payment(client);
         let body = {};
         
