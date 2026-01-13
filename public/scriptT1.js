@@ -119,25 +119,41 @@ function updatePriceUI() {
         
         function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // 3. NAVEGAÇÃO DE PAGAMENTO
-        function resetPaymentView() {
-            // Esconde todas as telas
-            document.getElementById('pay-options').style.display = 'block';
-            document.getElementById('pay-pix').style.display = 'none';
-            document.getElementById('pay-card').style.display = 'none';
-            document.getElementById('pay-stripe').style.display = 'none'; // Novo
+       
+        // --- SUBSTITUA A FUNÇÃO resetPaymentView POR ESTA ---
+function resetPaymentView() {
+    // 1. Garante que os containers existem antes de tentar acessar o style
+    const opts = document.getElementById('pay-options');
+    const pix = document.getElementById('pay-pix');
+    const card = document.getElementById('pay-card');
+    const stripe = document.getElementById('pay-stripe');
 
-            // Reseta Checkboxes e Botões para garantir segurança
-            document.getElementById('legalCheckPix').checked = false;
-            document.getElementById('btn-finish-pix').disabled = true;
+    if(opts) opts.style.display = 'block';
+    if(pix) pix.style.display = 'none';
+    if(card) card.style.display = 'none';
+    if(stripe) stripe.style.display = 'none';
 
-            document.getElementById('legalCheckCard').checked = false;
-            if(document.getElementById('form-checkout__submit')) 
-                document.getElementById('form-checkout__submit').disabled = true;
+    // 2. Reseta Checkboxes de forma segura (verifica se existem primeiro)
+    const checkPix = document.getElementById('legalCheckPix');
+    if(checkPix) checkPix.checked = false;
+    
+    const btnFinishPix = document.getElementById('btn-finish-pix');
+    if(btnFinishPix) btnFinishPix.disabled = true;
 
-            document.getElementById('legalCheckStripe').checked = false;
-            document.getElementById('btn-stripe-go').disabled = true;
-        }
+    // O erro estava aqui: legalCheckCard não existe mais no HTML do Brick
+    const checkCard = document.getElementById('legalCheckCard');
+    if(checkCard) checkCard.checked = false; 
+    
+    // O botão antigo também pode não existir
+    const btnSubmitOld = document.getElementById('form-checkout__submit');
+    if(btnSubmitOld) btnSubmitOld.disabled = true;
+
+    const checkStripe = document.getElementById('legalCheckStripe');
+    if(checkStripe) checkStripe.checked = false;
+    
+    const btnStripe = document.getElementById('btn-stripe-go');
+    if(btnStripe) btnStripe.disabled = true;
+}
 
         function showPixView() {
             document.getElementById('pay-options').style.display = 'none';

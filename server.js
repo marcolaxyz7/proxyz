@@ -45,26 +45,26 @@ app.get('/api/config', (req, res) => {
     res.json({ publicKey: process.env.MP_PUBLIC_KEY });
 });
 
-// --- NO SERVER.JS (Substitua a rota /api/register inteira por esta) ---
+// --- NO SERVER.JS (Substitua a rota /api/register) ---
 app.post('/api/register', async (req, res) => {
     const { name, email, whatsapp, password } = req.body;
     try {
         const [user] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
         
-        // Se já existe e está ATIVO, bloqueia
+        // 1. Se já existe e está ATIVO, bloqueia
         if (user.length > 0 && user[0].status === 'active') {
             return res.status(400).json({ error: 'E-mail já cadastrado.' });
         }
 
-        // Se existe e está PENDENTE, deleta para recriar (Limpa vendas antes)
+        // 2. Se existe e está PENDENTE, limpa TUDO para recriar
         if (user.length > 0 && user[0].status === 'pending') {
             try {
-                await pool.query('DELETE FROM prompt_logs WHERE user_id = ?', [user[0].id]); // Limpa logs se tiver
-                await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]); // Limpa vendas
-                await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]); // Deleta user
+                // A ordem é importante para evitar erro de Chave Estrangeira
+                await pool.query('DELETE FROM prompt_logs WHERE user_id = ?', [user[0].id]); // <--- ADICIONADO ISSO
+                await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]);
+                await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]);
             } catch (delError) {
                 console.error("Erro ao limpar usuário pendente:", delError);
-                // Continua mesmo se der erro, tenta inserir
             }
         }
 
