@@ -45,7 +45,6 @@ app.get('/api/config', (req, res) => {
     res.json({ publicKey: process.env.MP_PUBLIC_KEY });
 });
 
-// --- NO SERVER.JS (Substitua a rota /api/register) ---
 app.post('/api/register', async (req, res) => {
     const { name, email, whatsapp, password } = req.body;
     try {
@@ -59,8 +58,8 @@ app.post('/api/register', async (req, res) => {
         // 2. Se existe e está PENDENTE, limpa TUDO para recriar
         if (user.length > 0 && user[0].status === 'pending') {
             try {
-                // A ordem é importante para evitar erro de Chave Estrangeira
-                await pool.query('DELETE FROM prompt_logs WHERE user_id = ?', [user[0].id]); // <--- ADICIONADO ISSO
+                // A ordem é importante! Primeiro logs, depois vendas, depois usuário.
+                await pool.query('DELETE FROM prompt_logs WHERE user_id = ?', [user[0].id]); // <--- Faltava essa linha no seu arquivo!
                 await pool.query('DELETE FROM sales WHERE user_id = ?', [user[0].id]);
                 await pool.query('DELETE FROM users WHERE id = ?', [user[0].id]);
             } catch (delError) {

@@ -120,41 +120,32 @@ function updatePriceUI() {
         function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
        
-        // --- SUBSTITUA A FUNÇÃO resetPaymentView POR ESTA ---
-function resetPaymentView() {
-    // 1. Garante que os containers existem antes de tentar acessar o style
+        function resetPaymentView() {
     const opts = document.getElementById('pay-options');
     const pix = document.getElementById('pay-pix');
     const card = document.getElementById('pay-card');
     const stripe = document.getElementById('pay-stripe');
 
+    // Esconde/Mostra as divs se elas existirem
     if(opts) opts.style.display = 'block';
     if(pix) pix.style.display = 'none';
     if(card) card.style.display = 'none';
     if(stripe) stripe.style.display = 'none';
 
-    // 2. Reseta Checkboxes de forma segura (verifica se existem primeiro)
+    // Reseta Pix
     const checkPix = document.getElementById('legalCheckPix');
     if(checkPix) checkPix.checked = false;
-    
-    const btnFinishPix = document.getElementById('btn-finish-pix');
-    if(btnFinishPix) btnFinishPix.disabled = true;
+    const btnPix = document.getElementById('btn-finish-pix');
+    if(btnPix) btnPix.disabled = true;
 
-    // O erro estava aqui: legalCheckCard não existe mais no HTML do Brick
-    const checkCard = document.getElementById('legalCheckCard');
-    if(checkCard) checkCard.checked = false; 
-    
-    // O botão antigo também pode não existir
-    const btnSubmitOld = document.getElementById('form-checkout__submit');
-    if(btnSubmitOld) btnSubmitOld.disabled = true;
-
+    // Reseta Stripe
     const checkStripe = document.getElementById('legalCheckStripe');
     if(checkStripe) checkStripe.checked = false;
-    
     const btnStripe = document.getElementById('btn-stripe-go');
     if(btnStripe) btnStripe.disabled = true;
+    
+    // NÃO tentamos limpar o checkbox do cartão antigo, pois ele não existe mais.
 }
-
         function showPixView() {
             document.getElementById('pay-options').style.display = 'none';
             document.getElementById('pay-pix').style.display = 'block';
