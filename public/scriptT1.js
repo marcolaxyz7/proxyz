@@ -29,7 +29,7 @@ audioError.volume = 0.5;
 
         // --- TABELA DE PREÇOS (Mesma do Backend) ---
 const PRICING_DISPLAY = {
-    'BRL': { text: 'R$ 97,97', val: 97.97 },
+    'BRL': { text: 'R$ 1.00', val: 1.00 },
     'USD': { text: '$ 19.90', val: 19.90 },
     'EUR': { text: '€ 19.90', val: 19.90 },
     'JPY': { text: '¥ 3000', val: 3000 },
@@ -341,7 +341,7 @@ async function mountCardForm() {
         console.log("Iniciando Mercado Pago...");
         
         cardFormInstance = mp.cardForm({
-            amount: "97.97",
+            amount: "1.00",
             iframe: true,
             form: {
                 id: "form-checkout", // <--- ESSENCIAL PARA FUNCIONAR
