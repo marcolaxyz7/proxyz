@@ -171,28 +171,34 @@ function updatePriceUI() {
 // 2. CORREÇÃO DO CARTÃO (Remove Parcelamento)
 let brickController = null;
 
+// --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
+
 async function mountCardForm() {
-    // Limpa container anterior
+    // 1. Limpa o container para não duplicar
     const container = document.getElementById('pay-card-container');
     if(container) container.innerHTML = '';
 
     const settings = {
         initialization: {
-            amount: 1.00, // Valor fixo
+            amount: 1.00, // Valor deve ser número (1.00)
             payer: { email: currentUserEmail },
         },
         customization: {
             visual: {
-                style: { theme: 'dark' } // Tema escuro
+                style: { theme: 'dark' },
+                hidePaymentButton: false // Garante que o botão apareça
             },
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                maxInstallments: 1, // <--- AQUI: REMOVE A OPÇÃO DE PARCELAR
+                maxInstallments: 1, // <--- ISSO FORÇA À VISTA (Se o navegador atualizar)
+                minInstallments: 1
             }
         },
         callbacks: {
-            onReady: () => console.log('Brick pronto'),
+            onReady: () => {
+                console.log('Brick pronto');
+            },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
                 return new Promise((resolve, reject) => {
                     fetch(`${API_URL}/process-brick`, {

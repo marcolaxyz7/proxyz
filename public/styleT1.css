@@ -435,3 +435,32 @@ footer { padding: 60px 5%; background: #020202; border-top: 1px solid #111; disp
         display: none;
     }
 }
+
+/* Limita a altura do Brick e cria scroll se passar disso */
+#pay-card-container {
+    max-height: 450px; /* Altura máxima (ajuste se precisar) */
+    overflow-y: auto;  /* Cria a barra de rolagem vertical */
+    overflow-x: hidden; /* Evita rolagem lateral */
+    
+    /* Estética: Borda arredondada e um fundo leve para destacar */
+    background: rgba(0,0,0,0.2); 
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+/* Opcional: Personalizar a barra de rolagem para ficar bonita (estilo Dark) */
+#pay-card-container::-webkit-scrollbar {
+    width: 8px;
+}
+#pay-card-container::-webkit-scrollbar-track {
+    background: #111; 
+    border-radius: 4px;
+}
+#pay-card-container::-webkit-scrollbar-thumb {
+    background: #444; 
+    border-radius: 4px;
+}
+#pay-card-container::-webkit-scrollbar-thumb:hover {
+    background: #cc0000; /* Vermelho do seu site */
+}
