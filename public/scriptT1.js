@@ -43,31 +43,55 @@ const PRICING_DISPLAY = {
 // 1. CORREÇÃO DA LÓGICA DE MOEDA (Esconde Stripe no BR, Esconde Pix fora)
 function updatePriceUI() {
     const currency = getUserCurrency();
-    
-    // Força R$ 1.00 ou $ 1.00 visualmente
-    const displayValue = currency === 'BRL' ? 'R$ 1.00' : '$ 1.00'; 
+    const displayValue = currency === 'BRL' ? 'R$ 5.00' : '$ 5.00'; // Ajuste o preço visual aqui
     const el = document.getElementById('price-display');
     if(el) el.innerText = `VALOR: ${displayValue}`;
 
-    // Pega os botões
-    const btnPix = document.getElementById('btn-opt-pix');
-    const btnCard = document.getElementById('btn-opt-card');
+    const btnMP = document.getElementById('btn-mp-pro');
     const btnStripe = document.getElementById('btn-opt-stripe');
 
     if (currency === 'BRL') {
-        // --- SE FOR BRASIL ---
-        // Mostra Pix e Cartão (Brick)
-        if(btnPix) btnPix.style.display = 'flex'; // ou 'block'
-        if(btnCard) btnCard.style.display = 'flex';
-        // Esconde Stripe
+        if(btnMP) btnMP.style.display = 'flex';
         if(btnStripe) btnStripe.style.display = 'none';
     } else {
-        // --- SE FOR GRINGO ---
-        // Esconde Pix e Cartão BR
-        if(btnPix) btnPix.style.display = 'none';
-        if(btnCard) btnCard.style.display = 'none';
-        // Mostra só Stripe
+        if(btnMP) btnMP.style.display = 'none';
         if(btnStripe) btnStripe.style.display = 'flex';
+    }
+}
+
+async function startCheckoutPro() {
+    const btn = document.getElementById('btn-mp-pro');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_URL}/create-preference`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userId: currentUserId, 
+                email: currentUserEmail,
+                title: 'Acesso Próxyz Library',
+                price: 5.00 // <--- VALOR REAL QUE VAI SER COBRADO
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.init_point) {
+            // REDIRECIONA O USUÁRIO PARA O MERCADO PAGO
+            window.location.href = data.init_point;
+        } else {
+            alert('Erro ao gerar pagamento.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Erro de conexão.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 
@@ -146,110 +170,7 @@ function updatePriceUI() {
     
     // NÃO tentamos limpar o checkbox do cartão antigo, pois ele não existe mais.
 }
-        function showPixView() {
-            document.getElementById('pay-options').style.display = 'none';
-            document.getElementById('pay-pix').style.display = 'block';
-            generatePixPayment();
-        }
-
-        function showCardView() {
-    // 1. Esconde as opções e mostra o container do cartão
-    document.getElementById('pay-options').style.display = 'none';
-    document.getElementById('pay-card').style.display = 'block';
-    
-    // 2. Aguarda um pouquinho para a div aparecer e chama o Brick
-    setTimeout(() => {
-        // Se o MP estiver carregado, monta o formulário novo (Brick)
-        if(mp) {
-            mountCardForm(); 
-        } else {
-            console.error("SDK do Mercado Pago não carregou.");
-        }
-    }, 100);
-}
-
-// 2. CORREÇÃO DO CARTÃO (Remove Parcelamento)
-let brickController = null;
-
-// --- SUBSTITUA A FUNÇÃO mountCardForm POR ESTA ---
-async function mountCardForm() {
-    const container = document.getElementById('pay-card-container');
-    if(container) container.innerHTML = '';
-
-    const settings = {
-        initialization: {
-            amount: 5.00, // <--- MUDEI PARA 5.00 AQUI
-            payer: {
-                email: currentUserEmail,
-                entityType: 'individual',
-            },
-            installments: 1
-        },
-        customization: {
-            visual: {
-                style: { theme: 'dark' },
-                hidePaymentButton: false
-            },
-            paymentMethods: {
-                creditCard: "all",
-                debitCard: "all",
-                ticket: "all", // Agora funciona pq é R$ 5,00
-                maxInstallments: 1,
-                minInstallments: 1
-            }
-        },
-        callbacks: {
-            onReady: () => {
-                console.log('Brick pronto');
-                removeGreenText(); // Chama a limpeza visual
-            },
-            onSubmit: async ({ selectedPaymentMethod, formData }) => {
-                // Força installments: 1
-                const cleanFormData = { ...formData, installments: 1 };
-                
-                return new Promise((resolve, reject) => {
-                    fetch(`${API_URL}/process-brick`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ 
-                            formData: cleanFormData, 
-                            userId: currentUserId, 
-                            email: currentUserEmail 
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === 'approved') {
-                            showMsg('Sucesso!', 'Pagamento Aprovado!', 'success');
-                            currentUserId = null;
-                            document.getElementById('authModal').style.display = 'none';
-                            switchStep('step-login');
-                            resolve();
-                        } else {
-                            // Se for pendente (boleto) ou recusado
-                            if(data.status === 'pending' || data.status === 'in_process') {
-                                showMsg('Processando', 'Pagamento em análise (se foi boleto, verifique o e-mail).', 'info');
-                                resolve(); // Resolve para não dar erro no Brick
-                            } else {
-                                showMsg('Recusado', 'Pagamento negado.', 'error');
-                                reject();
-                            }
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        reject();
-                    });
-                });
-            },
-            onError: (error) => console.error("Erro Brick:", error),
-        },
-    };
-
-    const bricksBuilder = mp.bricks();
-    brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
-}
-
+  
 // Mantenha a função removeGreenText logo abaixo
 function removeGreenText() {
     const observer = new MutationObserver(() => {
@@ -420,33 +341,6 @@ async function loginUser() {
             switchStep('step-login');
         }
 
-        // 5. PIX
-        async function generatePixPayment() {
-            const container = document.getElementById('pay-content-pix');
-            container.innerHTML = '<p>Gerando Pix...</p>';
-            try {
-                const res = await fetch(`${API_URL}/create-payment`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUserId, email:currentUserEmail, type:'pix'})});
-                const data = await res.json();
-                if(data.qr_code_base64) {
-                    container.innerHTML = `<div class="pix-box"><img src="data:image/png;base64,${data.qr_code_base64}" width="180"></div><textarea readonly style="width:100%; background:#111; color:#ccc; border:1px solid #333; font-size:0.7rem;">${data.qr_code}</textarea><button class="btn-main" onclick="navigator.clipboard.writeText('${data.qr_code}'); alert('Copiado!')" style="padding:5px;">COPIAR</button>`;
-                }
-            } catch(e) { container.innerHTML = '<p style="color:#cc0000">Erro ao gerar Pix.</p>'; }
-        }
-
-        async function checkPaymentAndFinish() {
-            const btn = document.getElementById('btn-finish-pix');
-            btn.innerHTML = 'Verificando...';
-            const res = await fetch(`${API_URL}/check-status/${currentUserId}`);
-            const data = await res.json();
-            if(data.status === 'active') {
-                showMsg('Sucesso!', 'Conta ativada!', 'success');
-                currentUserId = null; 
-                document.getElementById('authModal').style.display = 'none';
-                switchStep('step-login');
-            } else { showMsg('Aguardando', 'Pagamento ainda não confirmado.', 'info'); }
-            btn.innerHTML = 'JÁ FIZ O PAGAMENTO';
-        }
- 
 
         async function processCardBackend(data) {
             try {
@@ -518,31 +412,6 @@ async function requestPasswordReset() {
     }
 }
 
-// VERIFICA SE VOLTOU DO STRIPE
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-    const paymentStatus = urlParams.get('payment');
-
-    if (paymentStatus === 'success' && sessionId) {
-        // Abre o modal de carregamento ou feedback
-        showMsg('Processando...', 'Validando seu pagamento...', 'info');
-        
-        // Chama o backend para confirmar e liberar o acesso
-        fetch(`${API_URL}/check-stripe-payment/${sessionId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'paid') {
-                    showMsg('Sucesso!', 'Pagamento confirmado! Faça login.', 'success');
-                    // Remove os parâmetros da URL para ficar limpo
-                    window.history.replaceState({}, document.title, "indexT1.html");
-                    openModal('login');
-                } else {
-                    showMsg('Atenção', 'Pagamento ainda não confirmado.', 'error');
-                }
-            })
-            .catch(err => console.error(err));
-    }
-
     // --- DETECTOR DE MOEDA ---
 function getUserCurrency() {
     const lang = navigator.language || navigator.userLanguage; // Ex: 'pt-BR', 'en-US'
@@ -577,3 +446,41 @@ function getUserCurrency() {
             if (side === 'left') { document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '0'); document.getElementById('prizeDisplay').classList.add('active'); } 
             else { openModal('signup'); resetLuckySection(); }
         }
+
+   // --- VERIFICADOR UNIFICADO DE PAGAMENTOS (STRIPE E MERCADO PAGO) ---
+const urlParams = new URLSearchParams(window.location.search);
+const paymentStatus = urlParams.get('payment'); // Pega o status ('success', 'mp_approved', etc.)
+const sessionId = urlParams.get('session_id');  // Só existe no Stripe
+
+// 1. CASO STRIPE (Identificado por 'success' E presença de session_id)
+if (paymentStatus === 'success' && sessionId) {
+    showMsg('Processando...', 'Validando Stripe...', 'info');
+    
+    fetch(`${API_URL}/check-stripe-payment/${sessionId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'paid') {
+                showMsg('Sucesso!', 'Pagamento Stripe confirmado!', 'success');
+                window.history.replaceState({}, document.title, "indexT1.html"); // Limpa URL
+                openModal('login');
+            } else {
+                showMsg('Atenção', 'Pagamento Stripe pendente.', 'error');
+            }
+        })
+        .catch(err => console.error(err));
+} 
+
+// 2. CASO MERCADO PAGO (Identificado pelos nossos códigos 'mp_')
+else if (paymentStatus === 'mp_approved') {
+    showMsg('Sucesso!', 'Pagamento via Mercado Pago confirmado!', 'success');
+    window.history.replaceState({}, document.title, "indexT1.html"); // Limpa URL
+    openModal('login');
+} 
+else if (paymentStatus === 'mp_pending') {
+    showMsg('Aguardando', 'Seu pagamento (Pix/Boleto) está sendo processado.', 'info');
+    window.history.replaceState({}, document.title, "indexT1.html");
+} 
+else if (paymentStatus === 'mp_failure') {
+    showMsg('Erro', 'O pagamento não foi concluído. Tente novamente.', 'error');
+    window.history.replaceState({}, document.title, "indexT1.html");
+}

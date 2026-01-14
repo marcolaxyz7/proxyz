@@ -3,11 +3,11 @@ const cors = require('cors');
 const pool = require('./db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { MercadoPagoConfig, Payment } = require('mercadopago');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { MercadoPagoConfig, Payment, Preference } = require('mercadopago'); // <--- Adicionei 'Preference'
 require('dotenv').config();
 
 // IMPORTA OS PROMPTS DO OUTRO ARQUIVO
@@ -76,6 +76,52 @@ app.post('/api/register', async (req, res) => {
     } catch (err) {
         console.error("Erro Registro:", err);
         res.status(500).json({ error: 'Erro no cadastro.' });
+    }
+});
+
+app.post('/api/create-preference', async (req, res) => {
+    const { userId, email, title, price } = req.body;
+
+    try {
+        const preference = new Preference(client);
+
+        const body = {
+            items: [
+                {
+                    id: 'proxyz-access',
+                    title: title || 'Acesso Próxyz Library',
+                    quantity: 1,
+                    unit_price: Number(price) // Garante que é número (ex: 5.00)
+                }
+            ],
+            payer: {
+                email: email
+            },
+            external_reference: String(userId), // Isso nos ajuda a saber quem pagou
+            back_urls: {
+                // URLs para onde o usuário volta depois de pagar
+                success: 'https://xn--prxyz-1ta.com/indexT1.html?payment=mp_approved',
+                failure: 'https://xn--prxyz-1ta.com/indexT1.html?payment=mp_failure',
+                pending: 'https://xn--prxyz-1ta.com/indexT1.html?payment=mp_pending'
+            },
+            auto_return: 'approved',
+            notification_url: process.env.WEBHOOK_URL // Importante para aprovação automática
+        };
+
+        const result = await preference.create({ body });
+        
+        // Salvamos uma intenção de venda no banco
+        await pool.query(
+            'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, "pending", ?, "CheckoutPro")',
+            [userId, price, result.id]
+        );
+
+        // Retorna o link de pagamento (init_point)
+        res.json({ init_point: result.init_point });
+
+    } catch (error) {
+        console.error("Erro Criar Preferência:", error);
+        res.status(500).json({ error: 'Erro ao gerar link de pagamento.' });
     }
 });
 
