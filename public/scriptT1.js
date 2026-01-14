@@ -173,6 +173,8 @@ let brickController = null;
 
 // --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
 
+// --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
+
 async function mountCardForm() {
     // 1. Limpa o container para não duplicar
     const container = document.getElementById('pay-card-container');
@@ -180,8 +182,9 @@ async function mountCardForm() {
 
     const settings = {
         initialization: {
-            amount: 1.00, // Valor deve ser número (1.00)
+            amount: 1.00, // Valor fixo
             payer: { email: currentUserEmail },
+            installments: 1 // <--- ADICIONE ISSO: Força a inicialização já em 1x (remove dropdown desnecessário)
         },
         customization: {
             visual: {
@@ -191,7 +194,8 @@ async function mountCardForm() {
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                maxInstallments: 1, // <--- ISSO FORÇA À VISTA (Se o navegador atualizar)
+                ticket: "all", // Garante compatibilidade
+                maxInstallments: 1, // <--- Mantém travado em 1
                 minInstallments: 1
             }
         },
@@ -200,11 +204,18 @@ async function mountCardForm() {
                 console.log('Brick pronto');
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                // Adicionamos installments: 1 manualmente no formData caso o Brick não envie
+                const cleanFormData = { ...formData, installments: 1 };
+                
                 return new Promise((resolve, reject) => {
                     fetch(`${API_URL}/process-brick`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ formData, userId: currentUserId, email: currentUserEmail })
+                        body: JSON.stringify({ 
+                            formData: cleanFormData, 
+                            userId: currentUserId, 
+                            email: currentUserEmail 
+                        })
                     })
                     .then(res => res.json())
                     .then(data => {
