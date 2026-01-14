@@ -92,7 +92,7 @@ app.post('/api/create-payment', async (req, res) => {
         let body = {};
         
         // 1. DEFINA O VALOR AQUI (Para usar em tudo)
-        const AMOUNT_BRL = 1.00;
+        const AMOUNT_BRL = 5.00;
 
         if (type === 'card') {
             body = {
@@ -153,7 +153,7 @@ app.post('/api/process-brick', async (req, res) => {
         // Dados do pagamento
         const body = {
             ...formData, // Pega o token e dados que o Brick mandou
-            transaction_amount: 1.00, // <--- VALOR FIXO DE SEGURANÇA (R$ 1,00)
+            transaction_amount: 5.00, // <--- VALOR FIXO DE SEGURANÇA (R$ 1,00)
             description: 'Acesso Próxyz Library',
             payer: {
                 email: email,

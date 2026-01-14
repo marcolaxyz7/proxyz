@@ -171,18 +171,19 @@ function updatePriceUI() {
 // 2. CORREÇÃO DO CARTÃO (Remove Parcelamento)
 let brickController = null;
 
+// --- SUBSTITUA A FUNÇÃO mountCardForm POR ESTA ---
 async function mountCardForm() {
     const container = document.getElementById('pay-card-container');
     if(container) container.innerHTML = '';
 
     const settings = {
         initialization: {
-            amount: 1.00,
+            amount: 5.00,
             payer: {
                 email: currentUserEmail,
                 entityType: 'individual',
             },
-            installments: 1 // Força sistema a entender que é à vista
+            installments: 1 // Força à vista
         },
         customization: {
             visual: {
@@ -192,8 +193,7 @@ async function mountCardForm() {
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                ticket: "all", // <--- MANTENHA ASSIM, MAS O MP VAI IGNORAR SE FOR BAIXO. 
-                // SE O ERRO PERSISTIR, REMOVA ESTA LINHA DO TICKET INTEIRA.
+                // A LINHA DO TICKET FOI REMOVIDA AQUI PARA NÃO TRAVAR
                 maxInstallments: 1,
                 minInstallments: 1
             }
@@ -201,11 +201,10 @@ async function mountCardForm() {
         callbacks: {
             onReady: () => {
                 console.log('Brick pronto');
-                // --- VIGILANTE: REMOVE O TEXTO VERDE NA FORÇA BRUTA ---
+                // Chama o vigilante para remover textos indesejados
                 removeGreenText();
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
-                // Adicionamos manualmente installments: 1
                 const cleanFormData = { ...formData, installments: 1 };
                 
                 return new Promise((resolve, reject) => {
@@ -227,27 +226,37 @@ async function mountCardForm() {
                             switchStep('step-login');
                             resolve();
                         } else {
-                            // Se o status não for approved (ex: in_process ou rejected)
-                            console.log("Status MP:", data.status);
-                            showMsg('Atenção', `Status do pagamento: ${data.status}`, 'error');
+                            showMsg('Atenção', `Status: ${data.status}`, 'error');
                             reject();
                         }
                     })
                     .catch((err) => {
-                        console.error("Erro no fetch process-brick:", err);
+                        console.error(err);
                         reject();
                     });
                 });
             },
-            onError: (error) => {
-                console.error("Erro interno do Brick:", error);
-                // Se der erro de "ticket", tente remover a linha 'ticket: "all"' acima
-            },
+            onError: (error) => console.error("Erro Brick:", error),
         },
     };
 
     const bricksBuilder = mp.bricks();
     brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
+}
+
+// Mantenha a função removeGreenText logo abaixo
+function removeGreenText() {
+    const observer = new MutationObserver(() => {
+        const elements = document.querySelectorAll('#pay-card-container span, #pay-card-container div');
+        elements.forEach(el => {
+            if (el.innerText && (el.innerText.includes('Parcelamento') || el.innerText.includes('x R$'))) {
+                el.style.display = 'none';
+                el.style.visibility = 'hidden';
+            }
+        });
+    });
+    const container = document.getElementById('pay-card-container');
+    if(container) observer.observe(container, { childList: true, subtree: true });
 }
 
 // --- FUNÇÃO EXTRA PARA APAGAR O TEXTO VERDE (Adicione fora da função acima) ---
