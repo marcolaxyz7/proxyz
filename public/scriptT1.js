@@ -180,8 +180,7 @@ async function mountCardForm() {
             amount: 1.00,
             payer: {
                 email: currentUserEmail,
-                // CORREÇÃO DO ERRO "entityType":
-                entityType: 'individual', 
+                entityType: 'individual',
             },
             installments: 1 // Força sistema a entender que é à vista
         },
@@ -193,7 +192,8 @@ async function mountCardForm() {
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                ticket: "all",
+                ticket: "all", // <--- MANTENHA ASSIM, MAS O MP VAI IGNORAR SE FOR BAIXO. 
+                // SE O ERRO PERSISTIR, REMOVA ESTA LINHA DO TICKET INTEIRA.
                 maxInstallments: 1,
                 minInstallments: 1
             }
@@ -201,8 +201,11 @@ async function mountCardForm() {
         callbacks: {
             onReady: () => {
                 console.log('Brick pronto');
+                // --- VIGILANTE: REMOVE O TEXTO VERDE NA FORÇA BRUTA ---
+                removeGreenText();
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                // Adicionamos manualmente installments: 1
                 const cleanFormData = { ...formData, installments: 1 };
                 
                 return new Promise((resolve, reject) => {
@@ -224,19 +227,48 @@ async function mountCardForm() {
                             switchStep('step-login');
                             resolve();
                         } else {
-                            showMsg('Recusado', 'Pagamento negado.', 'error');
+                            // Se o status não for approved (ex: in_process ou rejected)
+                            console.log("Status MP:", data.status);
+                            showMsg('Atenção', `Status do pagamento: ${data.status}`, 'error');
                             reject();
                         }
                     })
-                    .catch(() => reject());
+                    .catch((err) => {
+                        console.error("Erro no fetch process-brick:", err);
+                        reject();
+                    });
                 });
             },
-            onError: (error) => console.error(error),
+            onError: (error) => {
+                console.error("Erro interno do Brick:", error);
+                // Se der erro de "ticket", tente remover a linha 'ticket: "all"' acima
+            },
         },
     };
 
     const bricksBuilder = mp.bricks();
     brickController = await bricksBuilder.create("payment", "pay-card-container", settings);
+}
+
+// --- FUNÇÃO EXTRA PARA APAGAR O TEXTO VERDE (Adicione fora da função acima) ---
+function removeGreenText() {
+    // Cria um observador que fica vigiando o HTML do cartão
+    const observer = new MutationObserver(() => {
+        // Procura qualquer texto que fale de parcelas
+        const elements = document.querySelectorAll('#pay-card-container span, #pay-card-container div');
+        elements.forEach(el => {
+            if (el.innerText && (el.innerText.includes('Parcelamento') || el.innerText.includes('x R$'))) {
+                el.style.display = 'none'; // Esconde o elemento
+                el.style.visibility = 'hidden';
+            }
+        });
+    });
+
+    // Começa a vigiar o container do cartão
+    const container = document.getElementById('pay-card-container');
+    if(container) {
+        observer.observe(container, { childList: true, subtree: true });
+    }
 }
 
         // NOVA FUNÇÃO: View do Stripe

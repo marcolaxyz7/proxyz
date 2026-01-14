@@ -257,13 +257,17 @@ app.post('/api/webhook', async (req, res) => {
 });
 
 // --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
-// Substitua pelos dados do seu e-mail 'Proxyz'
-// --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
+// --- NO ARQUIVO server.js (Substitua a configuração atual do transporter) ---
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com', // Força o host explícito
+    port: 587,              // Porta 587 é melhor aceita no Render que a 465
+    secure: false,          // false para porta 587 (usa STARTTLS)
     auth: {
-        user: process.env.EMAIL_USER, // Lê do .env
-        pass: process.env.EMAIL_PASS  // Lê do .env (Seguro!)
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false // Ajuda a evitar erros de certificado em alguns servidores
     }
 });
 
