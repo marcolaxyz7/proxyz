@@ -484,3 +484,25 @@ else if (paymentStatus === 'mp_failure') {
     showMsg('Erro', 'O pagamento não foi concluído. Tente novamente.', 'error');
     window.history.replaceState({}, document.title, "indexT1.html");
 }
+
+// --- FUNÇÃO PARA LIBERAR O BOTÃO DE PAGAMENTO ---
+function toggleMPButton() {
+    const chk = document.getElementById('check-terms-mp');
+    const btn = document.getElementById('btn-mp-pro');
+    
+    if (chk && btn) {
+        if (chk.checked) {
+            // HABILITA O BOTÃO (Visual Aceso)
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.boxShadow = '0 0 15px rgba(204, 0, 0, 0.4)'; // Volta o brilho
+        } else {
+            // DESABILITA O BOTÃO (Visual Apagado)
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.boxShadow = 'none'; // Tira o brilho
+        }
+    }
+}

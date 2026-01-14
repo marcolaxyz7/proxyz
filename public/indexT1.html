@@ -478,10 +478,19 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 <p id="price-display" style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR: R$ 97,97</p>
                 
               <div id="pay-options">
-    <button id="btn-mp-pro" class="pay-option-btn" onclick="startCheckoutPro()" style="background: #009ee3; border-color: #009ee3;">
+    
+    <div class="legal-check-wrapper" style="justify-content: center; margin-bottom: 15px;">
+        <input type="checkbox" id="check-terms-mp" onchange="toggleMPButton()">
+        <span style="color: #ccc; font-size: 0.9rem;">
+            Li e aceito os <a href="#" onclick="openLegalModal('modalTerms')" style="color: #cc0000; text-decoration: underline;">Termos de Uso</a>
+        </span>
+    </div>
+
+    <button id="btn-mp-pro" class="pay-option-btn" onclick="startCheckoutPro()" disabled 
+        style="background: #cc0000; border-color: #cc0000; box-shadow: none; opacity: 0.5; cursor: not-allowed; transition: 0.3s;">
         <i class="fa-solid fa-hand-holding-dollar" style="color: white;"></i> 
         PAGAR COM MERCADO PAGO
-        <span style="font-size:0.7rem; color:#eee;">Pix, Cartão e Boleto (Ambiente Seguro)</span>
+        <span style="font-size:0.7rem; color:#fff; opacity: 0.9;">Pix, Cartão e Boleto (Ambiente Seguro)</span>
     </button>
 
     <button id="btn-opt-stripe" class="pay-option-btn" onclick="showStripeView()">
@@ -491,7 +500,6 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
     
     <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
 </div>
-
                 <div id="pay-pix" style="display:none;">
                     <div id="pay-content-pix" style="margin: 20px 0;">
                         <p style="color:#888;">Gerando QR Code...</p>
