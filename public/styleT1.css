@@ -464,3 +464,15 @@ footer { padding: 60px 5%; background: #020202; border-top: 1px solid #111; disp
 #pay-card-container::-webkit-scrollbar-thumb:hover {
     background: #cc0000; /* Vermelho do seu site */
 }
+
+/* Esconde as etiquetas de parcelamento do Mercado Pago na marra */
+.svelte-1049103, 
+.svelte-1d3h55u,
+span[class*="installments"],
+div[class*="installments-badge"],
+.benefit-text,
+.installments-text {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}

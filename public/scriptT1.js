@@ -171,39 +171,30 @@ function updatePriceUI() {
 // 2. CORREÇÃO DO CARTÃO (Remove Parcelamento)
 let brickController = null;
 
-// --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
-
-// --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
-
-// --- SUBSTITUA A FUNÇÃO mountCardForm NO scriptT1.js ---
-
 async function mountCardForm() {
-    // 1. Limpa o container para não duplicar
     const container = document.getElementById('pay-card-container');
     if(container) container.innerHTML = '';
 
     const settings = {
         initialization: {
             amount: 1.00,
-            payer: { email: currentUserEmail },
-            installments: 1 // <--- [IMPORTANTE] Isso avisa ao 'motor' que é à vista, removendo badges automáticas
+            payer: {
+                email: currentUserEmail,
+                // CORREÇÃO DO ERRO "entityType":
+                entityType: 'individual', 
+            },
+            installments: 1 // Força sistema a entender que é à vista
         },
         customization: {
             visual: {
                 style: { theme: 'dark' },
-                hidePaymentButton: false,
-                texts: {
-                    // [TRUQUE] Substitui os textos de parcelamento por um espaço em branco
-                    installmentsSectionTitle: " ", 
-                    selectInstallments: " ",
-                    card_installments_title: " ",
-                    formTitle: "Pagamento Seguro" // Opcional: define um título fixo
-                }
+                hidePaymentButton: false
             },
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                maxInstallments: 1, // Trava a seleção (dropdown)
+                ticket: "all",
+                maxInstallments: 1,
                 minInstallments: 1
             }
         },
@@ -212,7 +203,6 @@ async function mountCardForm() {
                 console.log('Brick pronto');
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
-                // Garante que enviamos 1 parcela mesmo se o form não mandar
                 const cleanFormData = { ...formData, installments: 1 };
                 
                 return new Promise((resolve, reject) => {
@@ -440,11 +430,12 @@ async function loginUser() {
             }
         }
 
-        async function sendRecoveryEmail() {
-    // Substitua 'recoverEmailInput' pelo ID real do input de e-mail no seu modal de recuperação
-    // Substitua 'btn-recover' pelo ID do botão que envia
-    const emailInput = document.getElementById('recoverEmailInput'); 
-    const btn = document.getElementById('btn-recover');
+  // --- SUBSTITUA A FUNÇÃO sendRecoveryEmail POR ESTA ---
+
+async function requestPasswordReset() {
+    // Pegamos os elementos pelos IDs que estão no seu HTML
+    const emailInput = document.getElementById('forgotEmail'); // Corrigido para 'forgotEmail' que é o ID no HTML
+    const btn = document.getElementById('btn-forgot');         // Corrigido para 'btn-forgot' que é o ID no HTML
     
     if(!emailInput || !emailInput.value) {
         alert('Por favor, digite seu e-mail.');
@@ -466,7 +457,6 @@ async function loginUser() {
 
         if (res.ok) {
             alert('E-mail enviado! Verifique sua caixa de entrada (e spam).');
-            // Opcional: fechar modal ou limpar input
             emailInput.value = '';
             closeModal(); 
         } else {
