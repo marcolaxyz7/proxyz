@@ -178,12 +178,12 @@ async function mountCardForm() {
 
     const settings = {
         initialization: {
-            amount: 5.00,
+            amount: 5.00, // <--- MUDEI PARA 5.00 AQUI
             payer: {
                 email: currentUserEmail,
                 entityType: 'individual',
             },
-            installments: 1 // Força à vista
+            installments: 1
         },
         customization: {
             visual: {
@@ -193,7 +193,7 @@ async function mountCardForm() {
             paymentMethods: {
                 creditCard: "all",
                 debitCard: "all",
-                // A LINHA DO TICKET FOI REMOVIDA AQUI PARA NÃO TRAVAR
+                ticket: "all", // Agora funciona pq é R$ 5,00
                 maxInstallments: 1,
                 minInstallments: 1
             }
@@ -201,10 +201,10 @@ async function mountCardForm() {
         callbacks: {
             onReady: () => {
                 console.log('Brick pronto');
-                // Chama o vigilante para remover textos indesejados
-                removeGreenText();
+                removeGreenText(); // Chama a limpeza visual
             },
             onSubmit: async ({ selectedPaymentMethod, formData }) => {
+                // Força installments: 1
                 const cleanFormData = { ...formData, installments: 1 };
                 
                 return new Promise((resolve, reject) => {
@@ -226,8 +226,14 @@ async function mountCardForm() {
                             switchStep('step-login');
                             resolve();
                         } else {
-                            showMsg('Atenção', `Status: ${data.status}`, 'error');
-                            reject();
+                            // Se for pendente (boleto) ou recusado
+                            if(data.status === 'pending' || data.status === 'in_process') {
+                                showMsg('Processando', 'Pagamento em análise (se foi boleto, verifique o e-mail).', 'info');
+                                resolve(); // Resolve para não dar erro no Brick
+                            } else {
+                                showMsg('Recusado', 'Pagamento negado.', 'error');
+                                reject();
+                            }
                         }
                     })
                     .catch((err) => {
@@ -474,9 +480,9 @@ async function loginUser() {
   // --- SUBSTITUA A FUNÇÃO sendRecoveryEmail POR ESTA ---
 
 async function requestPasswordReset() {
-    // Pegamos os elementos pelos IDs que estão no seu HTML
-    const emailInput = document.getElementById('forgotEmail'); // Corrigido para 'forgotEmail' que é o ID no HTML
-    const btn = document.getElementById('btn-forgot');         // Corrigido para 'btn-forgot' que é o ID no HTML
+    // Atenção aos IDs aqui: 'forgotEmail' e 'btn-forgot'
+    const emailInput = document.getElementById('forgotEmail'); 
+    const btn = document.getElementById('btn-forgot');
     
     if(!emailInput || !emailInput.value) {
         alert('Por favor, digite seu e-mail.');

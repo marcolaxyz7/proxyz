@@ -150,10 +150,9 @@ app.post('/api/process-brick', async (req, res) => {
     try {
         const payment = new Payment(client);
         
-        // Dados do pagamento
         const body = {
-            ...formData, // Pega o token e dados que o Brick mandou
-            transaction_amount: 5.00, // <--- VALOR FIXO DE SEGURANÇA (R$ 1,00)
+            ...formData,
+            transaction_amount: 5.00, // <--- MUDEI PARA 5.00 AQUI
             description: 'Acesso Próxyz Library',
             payer: {
                 email: email,
@@ -257,17 +256,17 @@ app.post('/api/webhook', async (req, res) => {
 });
 
 // --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
-// --- NO ARQUIVO server.js (Substitua a configuração atual do transporter) ---
+// --- CORREÇÃO NODEMAILER (PORTA 587 PARA RENDER) ---
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com', // Força o host explícito
-    port: 587,              // Porta 587 é melhor aceita no Render que a 465
+    host: 'smtp.gmail.com', // Host explícito do Gmail
+    port: 587,              // Porta liberada (não use 465 ou 25)
     secure: false,          // false para porta 587 (usa STARTTLS)
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        pass: process.env.EMAIL_PASS // Senha de App (não a senha normal)
     },
     tls: {
-        rejectUnauthorized: false // Ajuda a evitar erros de certificado em alguns servidores
+        rejectUnauthorized: false // Evita erros de certificado
     }
 });
 
