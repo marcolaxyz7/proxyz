@@ -325,13 +325,13 @@ app.post('/api/webhook', async (req, res) => {
 });
 
 // --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
-// --- CORREÇÃO NODEMAILER (PORTA 587 PARA RENDER) ---
-// --- CONFIGURAÇÃO DE E-MAIL (CORREÇÃO TIMEOUT) ---
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // O modo 'service' configura host e portas automaticamente
+    host: 'smtp.gmail.com',
+    port: 465,          // Porta SSL (muito mais estável no Render que a 587)
+    secure: true,       // Precisa ser true para porta 465
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS 
+        pass: process.env.EMAIL_PASS
     }
 });
 
