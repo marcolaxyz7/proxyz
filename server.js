@@ -320,26 +320,34 @@ const transporter = nodemailer.createTransport({
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
     
+    // LOG 1: Avisa que a rota foi chamada
+    console.log("1. Tentativa de reset para:", email); 
+    
     try {
         // 1. Verifica se usuário existe
         const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+        
         if (users.length === 0) {
+            // LOG 2: Avisa se o email não existe no banco
+            console.log("2. Usuário não encontrado no banco."); 
             return res.status(404).json({ error: 'E-mail não encontrado.' });
         }
 
         const user = users[0];
+        // LOG 3: Confirma que achou o usuário
+        console.log("3. Usuário encontrado. ID:", user.id); 
 
         // 2. Gera um Token Temporário (válido por 1 hora)
-        // Usamos o segredo do JWT + a senha atual do usuário (se ele mudar a senha, o token invalida)
         const secret = process.env.JWT_SECRET + user.password_hash;
         const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: '1h' });
 
         // 3. Cria o Link de Recuperação
+        // OBS: Se estiver testando no PC, talvez precise trocar o link para localhost, mas para produção deixe assim.
         const link = `https://xn--prxyz-1ta.com/reset-password.html?id=${user.id}&token=${token}`;
 
         // 4. Envia o E-mail
         const mailOptions = {
-            from: '"Suporte Próxyz" <seu_email_proxyz@gmail.com>',
+            from: '"Suporte Próxyz" <seu_email_proxyz@gmail.com>', // Confirme se este e-mail está certo
             to: email,
             subject: 'Redefinição de Senha - PRÓXYZ',
             html: `
@@ -356,11 +364,19 @@ app.post('/api/forgot-password', async (req, res) => {
             `
         };
 
+        // LOG 4: Antes de tentar enviar (onde costuma travar)
+        console.log("4. Tentando enviar e-mail via Nodemailer...");
+        
         await transporter.sendMail(mailOptions);
+        
+        // LOG 5: Sucesso total
+        console.log("5. E-mail enviado com sucesso!");
+        
         res.json({ message: 'E-mail enviado com sucesso!' });
 
     } catch (error) {
-        console.error(error);
+        // LOG DE ERRO: Mostra o motivo exato da falha
+        console.error("ERRO NO PROCESSO:", error);
         res.status(500).json({ error: 'Erro ao enviar e-mail.' });
     }
 });
