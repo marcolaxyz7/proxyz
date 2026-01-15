@@ -325,16 +325,20 @@ app.post('/api/webhook', async (req, res) => {
 });
 
 // --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
+// --- CONFIGURAÇÃO DE E-MAIL (MODO DEBUG) ---
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,          // Porta SSL (muito mais estável no Render que a 587)
-    secure: true,       // Precisa ser true para porta 465
+    port: 465,
+    secure: true,
+    logger: true, // <--- ISSO VAI MOSTRAR TUDO NO LOG
+    debug: true,  // <--- ISSO TAMBÉM
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
-    }
+    },
+    // Adicione esse tempo limite para não rodar infinito (10 segundos)
+    connectionTimeout: 10000 
 });
-
 // --- ROTA 1: SOLICITAR RECUPERAÇÃO (Envia o E-mail) ---
 app.post('/api/forgot-password', async (req, res) => {
     const { email } = req.body;
