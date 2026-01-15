@@ -366,7 +366,7 @@ app.post('/api/forgot-password', async (req, res) => {
 
         // 4. Envia o E-mail
         const mailOptions = {
-            from: '"Suporte Próxyz" <seu_email_proxyz@gmail.com>', // Confirme se este e-mail está certo
+            from: `"Suporte Próxyz" <${process.env.EMAIL_USER}>`, // Confirme se este e-mail está certo
             to: email,
             subject: 'Redefinição de Senha - PRÓXYZ',
             html: `
