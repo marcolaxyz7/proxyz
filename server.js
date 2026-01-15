@@ -287,17 +287,40 @@ app.get('/api/prompts', async (req, res) => {
 
 app.post('/api/webhook', async (req, res) => {
     const { type, data } = req.body;
+    
+    // 1. Responde OK para o Mercado Pago não ficar reenviando (Isso é regra deles)
     res.sendStatus(200);
+
     if (type === 'payment') {
         try {
             const payment = new Payment(client);
             const info = await payment.get({ id: data.id });
+
+            // Só nos interessa se estiver APROVADO
             if (info.status === 'approved') {
-                await pool.query('UPDATE sales SET status = "paid" WHERE transaction_id = ?', [data.id]);
-                const [sale] = await pool.query('SELECT user_id FROM sales WHERE transaction_id = ?', [data.id]);
-                if (sale.length) await pool.query('UPDATE users SET status = "active" WHERE id = ?', [sale[0].user_id]);
+                
+                // AQUI ESTÁ O TRUQUE: Pegamos o ID do usuário direto da "etiqueta" que mandamos na criação
+                const userId = info.external_reference;
+
+                if (userId) {
+                    console.log(`Webhook: Pagamento aprovado para User ID ${userId}`);
+
+                    // 1. Ativa o usuário (O mais importante)
+                    await pool.query('UPDATE users SET status = "active" WHERE id = ?', [userId]);
+
+                    // 2. Atualiza a venda para "paid"
+                    // Procura a venda pendente desse usuário e marca como paga
+                    // Também atualizamos o transaction_id para o ID Real do Pagamento
+                    await pool.query(
+                        'UPDATE sales SET status = "paid", transaction_id = ? WHERE user_id = ? AND status = "pending"', 
+                        [data.id, userId]
+                    );
+                }
             }
-        } catch(e) {}
+        } catch (error) {
+            console.error("Erro no Webhook:", error);
+            // Não enviamos erro 500 para não travar o Mercado Pago, apenas logamos
+        }
     }
 });
 
