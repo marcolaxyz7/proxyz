@@ -493,19 +493,6 @@ app.get('/api/stripe-cancel', async (req, res) => {
     const { userId } = req.query;
 
     if (userId) {
-        try {
-            // 1. Verifica se o usuário existe e se está 'pending' (Segurança para não apagar usuários ativos)
-            const [user] = await pool.query('SELECT status FROM users WHERE id = ?', [userId]);
-            
-            if (user.length > 0 && user[0].status === 'pending') {
-                // 2. Deleta vendas e usuário
-                await pool.query('DELETE FROM sales WHERE user_id = ?', [userId]);
-                await pool.query('DELETE FROM users WHERE id = ?', [userId]);
-                console.log(`Usuário ${userId} deletado após cancelamento no Stripe.`);
-            }
-        } catch (err) {
-            console.error("Erro ao limpar usuário do Stripe:", err);
-        }
     }
 
     // 3. Redireciona o usuário de volta para a tela inicial

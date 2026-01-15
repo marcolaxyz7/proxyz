@@ -118,10 +118,6 @@ async function startCheckoutPro() {
         function openModal(step) { document.getElementById('authModal').style.display = 'flex'; switchStep(step==='login'?'step-login':'step-signup'); }
         
         function closeModal() {
-            if (document.getElementById('step-payment').classList.contains('active') && currentUserId) {
-                cancelRegistration(); // Limpa se fechar no meio
-                return;
-            }
             document.getElementById('authModal').style.display = 'none';
         }
 
@@ -169,42 +165,6 @@ async function startCheckoutPro() {
     if(btnStripe) btnStripe.disabled = true;
     
     // NÃO tentamos limpar o checkbox do cartão antigo, pois ele não existe mais.
-}
-  
-// Mantenha a função removeGreenText logo abaixo
-function removeGreenText() {
-    const observer = new MutationObserver(() => {
-        const elements = document.querySelectorAll('#pay-card-container span, #pay-card-container div');
-        elements.forEach(el => {
-            if (el.innerText && (el.innerText.includes('Parcelamento') || el.innerText.includes('x R$'))) {
-                el.style.display = 'none';
-                el.style.visibility = 'hidden';
-            }
-        });
-    });
-    const container = document.getElementById('pay-card-container');
-    if(container) observer.observe(container, { childList: true, subtree: true });
-}
-
-// --- FUNÇÃO EXTRA PARA APAGAR O TEXTO VERDE (Adicione fora da função acima) ---
-function removeGreenText() {
-    // Cria um observador que fica vigiando o HTML do cartão
-    const observer = new MutationObserver(() => {
-        // Procura qualquer texto que fale de parcelas
-        const elements = document.querySelectorAll('#pay-card-container span, #pay-card-container div');
-        elements.forEach(el => {
-            if (el.innerText && (el.innerText.includes('Parcelamento') || el.innerText.includes('x R$'))) {
-                el.style.display = 'none'; // Esconde o elemento
-                el.style.visibility = 'hidden';
-            }
-        });
-    });
-
-    // Começa a vigiar o container do cartão
-    const container = document.getElementById('pay-card-container');
-    if(container) {
-        observer.observe(container, { childList: true, subtree: true });
-    }
 }
 
         // NOVA FUNÇÃO: View do Stripe
