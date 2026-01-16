@@ -324,20 +324,21 @@ app.post('/api/webhook', async (req, res) => {
     }
 });
 
-// --- CONFIGURAÇÃO DE E-MAIL (NODEMAILER) ---
-// --- CONFIGURAÇÃO DE E-MAIL (MODO DEBUG) ---
+// --- CONFIGURAÇÃO DE E-MAIL (TENTATIVA PORTA 587) ---
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    logger: true, // <--- ISSO VAI MOSTRAR TUDO NO LOG
-    debug: true,  // <--- ISSO TAMBÉM
+    port: 587,            // Porta padrão de submissão (às vezes o firewall libera esta)
+    secure: false,        // TEM que ser false na porta 587 (ele usa STARTTLS depois)
+    logger: true,         // Mantém o log para vermos o que acontece
+    debug: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
-    // Adicione esse tempo limite para não rodar infinito (10 segundos)
-    connectionTimeout: 10000 
+    tls: {
+        rejectUnauthorized: false // Ajuda a evitar erros de certificado no servidor Linux
+    },
+    connectionTimeout: 10000 // 10 segundos para desistir se estiver bloqueado
 });
 // --- ROTA 1: SOLICITAR RECUPERAÇÃO (Envia o E-mail) ---
 app.post('/api/forgot-password', async (req, res) => {
