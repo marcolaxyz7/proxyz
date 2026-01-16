@@ -171,93 +171,100 @@ footer {
     margin: 0 auto;
 }
 
-/* --- ADAPTAÇÃO PARA MOBILE (Só ativa se a tela for menor que 768px) --- */
+/* --- CSS EXCLUSIVO PARA CELULAR (Mobile) --- */
 @media (max-width: 768px) {
 
-    /* 1. Ajustar o Layout Principal */
+    /* 1. LAYOUT GERAL E MENU */
     body {
-        flex-direction: column; /* Empilha tudo verticalmente */
+        flex-direction: column; /* Coloca sidebar em cima (mas ela fica hidden) e conteúdo embaixo */
     }
 
-    /* 2. Sidebar (Menu Lateral) */
+    /* A Sidebar (Menu) já configuramos antes, mantemos a lógica de esconder */
     .sidebar {
-        position: fixed; /* Fixa na tela */
-        left: -260px; /* Esconde fora da tela na esquerda */
-        top: 0;
-        bottom: 0;
-        z-index: 1000; /* Fica por cima de tudo */
-        transition: left 0.3s ease; /* Animação suave */
-        width: 250px;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Sombra para destacar */
-    }
-
-    /* Classe especial para mostrar o menu quando clicar */
-    .sidebar.active {
-        left: 0; /* Traz de volta para a tela */
-    }
-
-    /* 3. Conteúdo Principal (Onde ficam os cards) */
-    .main-content {
-        margin-left: 0 !important; /* Remove o espaço deixado para a sidebar */
-        width: 100%;
-        padding: 15px; /* Um pouco de respiro nas bordas */
-    }
-
-    /* 4. Cabeçalho (Topo) */
-    .top-bar {
-        padding: 10px;
-        flex-wrap: wrap; /* Permite quebrar linha se não couber */
-        gap: 10px;
-    }
-
-    /* Ajuste da barra de pesquisa no mobile */
-    .search-bar {
-        width: 100%; /* Ocupa a linha toda */
-        order: 2; /* Joga para baixo do nome do usuário/menu */
-        margin-right: 0;
-    }
-    
-    .search-bar input {
-        width: 100%;
-    }
-
-    /* 5. Cards dos Prompts */
-    .prompt-grid {
-        grid-template-columns: 1fr; /* Uma coluna só */
-        gap: 15px;
-    }
-
-    .prompt-card {
-        width: 100%; /* Ocupa a largura total disponível */
-        max-width: none; /* Remove limite de largura */
-    }
-
-    /* 6. Botão de Menu (Hambúrguer) - Estilo */
-    #mobile-menu-btn {
-        display: block !important; /* Mostra o botão que estava escondido */
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        margin-right: 15px;
-    }
-    
-    /* Overlay Escuro (Fundo preto quando abre o menu) */
-    #menu-overlay {
-        display: none; /* Escondido por padrão */
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999; /* Fica logo abaixo da sidebar */
+        left: -280px; /* Escondida */
+        top: 0; bottom: 0; z-index: 2000;
+        transition: 0.3s;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+    }
+    .sidebar.active { left: 0; } /* Aparece quando clica */
+
+    /* 2. CABEÇALHO (Header) - Arrumando a Pesquisa */
+    .header-bar {
+        flex-wrap: wrap; /* Permite quebrar linha */
+        gap: 10px; /* Espaço menor entre os itens */
+    }
+
+    /* O Botão do Menu fica na esquerda */
+    #mobile-menu-btn {
+        display: block !important; /* Garante que aparece */
+        order: 1; 
+        font-size: 1.5rem; color: #fff; background: none; border: none;
+    }
+
+    /* A Info do Usuário vai para a direita */
+    .user-info {
+        order: 2;
+        margin-left: auto; /* Empurra para o canto direito */
+    }
+    .user-info span { display: none; } /* Esconde o nome "Membro" pra economizar espaço */
+
+    /* A Barra de Pesquisa vai para a linha de baixo (ocupando tudo) */
+    .search-box {
+        order: 3; /* Fica por último */
+        width: 100%; /* Ocupa a largura total */
+        max-width: none; /* Remove limite de tamanho */
+        margin-top: 5px;
     }
     
-    #menu-overlay.active {
-        display: block;
+    /* 3. CARDS EM 2 COLUNAS */
+    .dash-grid {
+        /* Força 2 colunas de tamanho igual */
+        grid-template-columns: 1fr 1fr !important; 
+        gap: 10px; /* Diminui o espaço entre eles pra caber melhor */
     }
+
+    .dash-card {
+        min-height: 200px; /* Diminui um pouco a altura mínima */
+        padding: 15px; /* Menos borda interna */
+    }
+
+    .dash-card h3 {
+        font-size: 1rem; /* Diminui a fonte do título */
+        padding-right: 0;
+        margin-bottom: 5px;
+    }
+
+    /* Ajuste do botão copiar para não ficar gigante */
+    .copy-btn {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+    
+    /* Badge (Aviso Vermelho) menor */
+    .card-badge {
+        font-size: 0.6rem;
+        top: 10px; right: 10px;
+        padding: 2px 4px;
+    }
+    
+    /* Remove a margem esquerda do conteúdo principal */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 15px; /* Padding menor no corpo */
+    }
+    
+    /* Ajuste do Rodapé para não quebrar */
+    footer {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        font-size: 0.75rem;
+    }
+    .footer-left, .footer-right { justify-content: center; }
 }
 
-/* Esconde o botão de menu no PC por padrão */
-#mobile-menu-btn {
-    display: none;
+/* O botão de menu deve sumir no PC */
+@media (min-width: 769px) {
+    #mobile-menu-btn { display: none; }
 }
