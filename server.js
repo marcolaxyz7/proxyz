@@ -6,7 +6,14 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// --- DEBUG DE VARIÁVEIS ---
+console.log("---------------------------------------------------");
+console.log("DEBUG STRIPE KEY:", process.env.STRIPE_SECRET_KEY ? "A chave existe (Oculta)" : "CHAVE ESTÁ UNDEFINED (Vazia)");
+console.log("---------------------------------------------------");
+
+// Só inicia o Stripe se a chave existir, senão usa uma string vazia para não derrubar o site agora
+const stripeKey = process.env.STRIPE_SECRET_KEY || "sk_test_placeholder_para_nao_travar";
+const stripe = require('stripe')(stripeKey);
 const { MercadoPagoConfig, Payment, Preference } = require('mercadopago'); // <--- Adicionei 'Preference'
 require('dotenv').config();
 
