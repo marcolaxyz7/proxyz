@@ -1,11 +1,26 @@
 const express = require('express');
 const cors = require('cors');
+// 1. MOVI O DOTENV PARA CIMA (IMPORTANTE)
+require('dotenv').config(); 
+
+// --- DEBUG OBRIGATÓRIO (PARA ACHARMOS O ERRO) ---
+console.log("========================================");
+console.log("🔍 TESTE DE VARIÁVEIS DO BANCO:");
+console.log("HOST:", process.env.DB_HOST);
+console.log("USER:", process.env.DB_USER);
+console.log("NAME:", process.env.DB_NAME);
+console.log("SENHA:", process.env.DB_PASS ? "EXISTE (OK)" : "VAZIA (ERRO)");
+console.log("========================================");
+
+// Agora sim importamos o banco
 const pool = require('./db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
+
+// ... O RESTO DO CÓDIGO CONTINUA IGUAL ...
 // --- DEBUG DE VARIÁVEIS ---
 console.log("---------------------------------------------------");
 console.log("DEBUG STRIPE KEY:", process.env.STRIPE_SECRET_KEY ? "A chave existe (Oculta)" : "CHAVE ESTÁ UNDEFINED (Vazia)");
