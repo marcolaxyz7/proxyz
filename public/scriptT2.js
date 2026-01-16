@@ -258,3 +258,28 @@ async function logCopyAction(promptId) {
         console.log(`Consumo do prompt ${promptId} registrado.`);
     } catch (e) { console.error("Erro ao registrar cópia", e); }
 }
+
+// --- MENU MOBILE ---
+function toggleMobileMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('menu-overlay');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+// Fechar o menu se clicar no fundo escuro
+document.getElementById('menu-overlay').addEventListener('click', () => {
+    toggleMobileMenu();
+});
+
+// Fechar o menu automaticamente ao clicar em uma categoria (opcional, mas bom)
+const sidebarButtons = document.querySelectorAll('.sidebar button');
+sidebarButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Só fecha se estiver no mobile (verificando se a tela é pequena)
+        if (window.innerWidth <= 768) {
+            toggleMobileMenu();
+        }
+    });
+});

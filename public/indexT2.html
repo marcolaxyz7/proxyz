@@ -13,6 +13,8 @@
 </head>
 <body>
 
+    <div id="menu-overlay"></div>
+
     <aside class="sidebar">
         <div class="sidebar-logo">
             <img src="l.png" alt="Logo">
@@ -36,6 +38,10 @@
 
     <main class="main-content">
         <div class="header-bar">
+            <button id="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+
             <div class="search-box">
                 <i class="fa-solid fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Pesquisar prompt..." onkeyup="searchPrompts()">
@@ -59,29 +65,29 @@
         </div>
 
         <div id="view-tutorial" class="view-section">
-    <div class="video-wrapper" style="text-align: center; max-width: 800px; margin: 0 auto;">
-        
-        <video id="videoPlayer" width="100%" controls style="border-radius: 8px; border: 1px solid #333;">
-            Seu navegador não suporta a tag de vídeo.
-        </video>
+            <div class="video-wrapper" style="text-align: center; max-width: 800px; margin: 0 auto;">
+                
+                <video id="videoPlayer" width="100%" controls style="border-radius: 8px; border: 1px solid #333;">
+                    Seu navegador não suporta a tag de vídeo.
+                </video>
 
-        <audio id="audioPlayer" style="display:none;">
-        </audio>
+                <audio id="audioPlayer" style="display:none;">
+                </audio>
 
-    </div>
+            </div>
 
-    <div style="max-width:800px; margin: 30px auto; color:#ccc; line-height:1.6;">
-        <h3>Guia Rápido:</h3>
-        <ol>
-            <li>Selecione uma categoria na barra lateral ou use a busca.</li>
-            <li>Escolha o prompt desejado.</li>
-            <li style="color: #fff; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 10px 0;">
-                <strong>Importante:</strong> Ao ler o prompt, localize os textos entre <strong>colchetes [ ... ]</strong>. Substitua-os pelo seu tema ou nicho para que a IA saiba exatamente onde atuar.
-            </li>
-            <li>Clique em "Copiar Prompt", faça a substituição e envie para a IA.</li>
-        </ol>
-    </div>
-</div>
+            <div style="max-width:800px; margin: 30px auto; color:#ccc; line-height:1.6;">
+                <h3>Guia Rápido:</h3>
+                <ol>
+                    <li>Selecione uma categoria na barra lateral ou use a busca.</li>
+                    <li>Escolha o prompt desejado.</li>
+                    <li style="color: #fff; background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; margin: 10px 0;">
+                        <strong>Importante:</strong> Ao ler o prompt, localize os textos entre <strong>colchetes [ ... ]</strong>. Substitua-os pelo seu tema ou nicho para que a IA saiba exatamente onde atuar.
+                    </li>
+                    <li>Clique em "Copiar Prompt", faça a substituição e envie para a IA.</li>
+                </ol>
+            </div>
+        </div>
 
         <div class="modal-overlay" id="msgModal" style="display: none;">
             <div class="auth-card" style="max-width: 400px; border-color: #333;">
@@ -91,9 +97,6 @@
                 <button class="btn-main" onclick="closeMsgModal()" style="width: 100%;">ENTENDI</button>
             </div>
         </div>
-
-        <div class="modal-overlay" id="msgModal" style="display: none;">
-            </div>
 
         <footer>
             <div class="footer-left">

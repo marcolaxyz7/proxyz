@@ -170,3 +170,94 @@ footer {
     background-color: #000; /* Fundo preto para ver se o player está lá */
     margin: 0 auto;
 }
+
+/* --- ADAPTAÇÃO PARA MOBILE (Só ativa se a tela for menor que 768px) --- */
+@media (max-width: 768px) {
+
+    /* 1. Ajustar o Layout Principal */
+    body {
+        flex-direction: column; /* Empilha tudo verticalmente */
+    }
+
+    /* 2. Sidebar (Menu Lateral) */
+    .sidebar {
+        position: fixed; /* Fixa na tela */
+        left: -260px; /* Esconde fora da tela na esquerda */
+        top: 0;
+        bottom: 0;
+        z-index: 1000; /* Fica por cima de tudo */
+        transition: left 0.3s ease; /* Animação suave */
+        width: 250px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* Sombra para destacar */
+    }
+
+    /* Classe especial para mostrar o menu quando clicar */
+    .sidebar.active {
+        left: 0; /* Traz de volta para a tela */
+    }
+
+    /* 3. Conteúdo Principal (Onde ficam os cards) */
+    .main-content {
+        margin-left: 0 !important; /* Remove o espaço deixado para a sidebar */
+        width: 100%;
+        padding: 15px; /* Um pouco de respiro nas bordas */
+    }
+
+    /* 4. Cabeçalho (Topo) */
+    .top-bar {
+        padding: 10px;
+        flex-wrap: wrap; /* Permite quebrar linha se não couber */
+        gap: 10px;
+    }
+
+    /* Ajuste da barra de pesquisa no mobile */
+    .search-bar {
+        width: 100%; /* Ocupa a linha toda */
+        order: 2; /* Joga para baixo do nome do usuário/menu */
+        margin-right: 0;
+    }
+    
+    .search-bar input {
+        width: 100%;
+    }
+
+    /* 5. Cards dos Prompts */
+    .prompt-grid {
+        grid-template-columns: 1fr; /* Uma coluna só */
+        gap: 15px;
+    }
+
+    .prompt-card {
+        width: 100%; /* Ocupa a largura total disponível */
+        max-width: none; /* Remove limite de largura */
+    }
+
+    /* 6. Botão de Menu (Hambúrguer) - Estilo */
+    #mobile-menu-btn {
+        display: block !important; /* Mostra o botão que estava escondido */
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        margin-right: 15px;
+    }
+    
+    /* Overlay Escuro (Fundo preto quando abre o menu) */
+    #menu-overlay {
+        display: none; /* Escondido por padrão */
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 999; /* Fica logo abaixo da sidebar */
+    }
+    
+    #menu-overlay.active {
+        display: block;
+    }
+}
+
+/* Esconde o botão de menu no PC por padrão */
+#mobile-menu-btn {
+    display: none;
+}
