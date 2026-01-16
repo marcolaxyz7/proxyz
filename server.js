@@ -522,7 +522,7 @@ app.get('/api/video-tutorial', (req, res) => {
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => { 
         if (err) return res.status(401).send('Token inválido');
         
-        const videoPath = path.join(__dirname, 'videos_secretos', 'tut1', 'tut1.mp4');
+        const videoPath = path.join(__dirname, 'videos_secretos', 'Tut1', 'tut1.mp4');
 
         fs.stat(videoPath, (err, stats) => {
             if (err) {

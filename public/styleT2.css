@@ -122,81 +122,65 @@ footer {
 #menu-overlay { display: none; }
 
 /* ==========================================================
-   CSS EXCLUSIVO PARA CELULAR (Mobile - Telas menores que 768px)
+   CSS EXCLUSIVO PARA CELULAR (Mobile) - VERSÃO CORRIGIDA
    ========================================================== */
 @media (max-width: 768px) {
     
-    /* 1. ESTRUTURA GERAL */
+    /* 1. LAYOUT GERAL */
     body { flex-direction: column; } 
-    
-    .sidebar {
-        position: fixed; left: -280px; top: 0; bottom: 0;
-        box-shadow: 5px 0 15px rgba(0,0,0,0.9);
-    }
-    .sidebar.active { left: 0; }
-    
-    #menu-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); z-index: 900;
-        display: none;
-    }
-    #menu-overlay.active { display: block; }
+    .main-content { padding: 15px; margin-left: 0 !important; width: 100%; }
 
-    /* 2. CABEÇALHO (Header) - Ajuste Fino */
+    /* 2. CABEÇALHO (Onde está o erro) */
     .header-bar {
-        flex-wrap: wrap; /* Permite quebrar linha */
-        gap: 10px;
+        display: flex !important;
+        flex-wrap: wrap !important; /* Obriga a quebrar linha */
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 15px;
         margin-bottom: 20px;
     }
 
-    /* Botão Menu (Lado Esquerdo Superior) */
+    /* Botão Menu (Topo Esquerda) */
     #mobile-menu-btn {
         display: block !important;
-        order: 1; /* Primeiro item */
-        font-size: 1.4rem; background: none; border: none; color: #fff; cursor: pointer;
-        padding-right: 15px;
+        order: 1; 
+        font-size: 1.5rem; background: none; border: none; color: #fff;
     }
 
-    /* User Info (Lado Direito Superior) */
+    /* Info do Usuário (Topo Direita) */
     .user-info {
-        order: 2; /* Segundo item (mesma linha do menu) */
-        margin-left: auto; /* Empurra para a direita */
+        order: 2; 
+        margin-left: auto; /* Empurra pra direita */
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
     }
     
-    /* >>> AQUI ESTÁ A CORREÇÃO: MOSTRAR O NOME <<< */
-    .user-info span { 
-        display: inline-block !important; /* Força aparecer */
+    /* Nome do Usuário (FORÇAR A APARECER) */
+    .user-info span#userName { 
+        display: inline-block !important; 
         font-size: 0.9rem;
-        max-width: 120px; /* Limita tamanho pra não quebrar */
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        max-width: 100px; /* Evita que nome longo quebre tudo */
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
+    .user-avatar { width: 30px; height: 30px; } /* Avatar menor */
 
-    /* Barra de Busca (Linha de Baixo - Ocupa tudo) */
+    /* Barra de Busca (Linha de Baixo Sozinha) */
     .search-box {
-        order: 3; /* Vai para baixo */
-        width: 100%; max-width: none;
+        order: 3; /* Força ser o 3º item */
+        width: 100% !important; /* Ocupa a linha toda */
+        flex-basis: 100% !important; /* Garante a quebra de linha no Flexbox */
+        max-width: none !important;
         margin-top: 5px;
     }
 
-    /* 3. CONTEÚDO E CARDS */
-    .main-content { padding: 15px; margin-left: 0 !important; }
-
-    /* Força 2 Colunas */
+    /* 3. CARDS (2 por linha) */
     .dash-grid {
         grid-template-columns: 1fr 1fr !important;
         gap: 10px;
     }
-
-    .dash-card {
-        min-height: 200px; /* Card mais compacto */
-        padding: 15px;
-    }
-
-    .dash-card h3 { font-size: 1rem; margin-bottom: 5px; padding-right: 0; }
-    .copy-btn { padding: 8px; font-size: 0.8rem; }
-    .card-badge { font-size: 0.6rem; top: 10px; right: 10px; padding: 2px 4px; }
-
-    /* Footer Ajustado */
+    .dash-card { min-height: 200px; padding: 15px; }
+    
+    /* Footer */
     footer { flex-direction: column; gap: 15px; text-align: center; }
-    .footer-left, .footer-right { justify-content: center; }
 }
