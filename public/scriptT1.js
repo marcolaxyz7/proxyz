@@ -31,19 +31,20 @@ audioError.volume = 0.5;
 
 // 1. Forcei o valor para 1.00 aqui para testes
 const PRICING_DISPLAY = {
-    'BRL': { text: 'R$ 1.00', val: 1.00 }, // <--- AQUI ESTAVA 97.97, MUDEI PRA 1.00
-    'USD': { text: '$ 1.00', val: 1.00 },
-    'EUR': { text: '€ 1.00', val: 1.00 },
-    'JPY': { text: '¥ 150', val: 150 },
-    'GBP': { text: '£ 1.00', val: 1.00 },
-    'CAD': { text: 'C$ 1.00', val: 1.00 },
-    'AUD': { text: 'A$ 1.00', val: 1.00 }
+    'BRL': { text: 'R$ 97.97', val: 97.97 },
+    'USD': { text: '$ 19.90', val: 19.90 },
+    'EUR': { text: '€ 19.90', val: 19.90 },
+    'JPY': { text: '¥ 3.000', val: 3000 },
+    'GBP': { text: '£ 14.90', val: 14.90 },
+    'CAD': { text: 'C$ 29.90', val: 29.90 },
+    'AUD': { text: 'A$ 29.90', val: 29.90 }
 };
 
 // 1. CORREÇÃO DA LÓGICA DE MOEDA (Esconde Stripe no BR, Esconde Pix fora)
 function updatePriceUI() {
     const currency = getUserCurrency();
-    const displayValue = currency === 'BRL' ? 'R$ 5.00' : '$ 5.00'; // Ajuste o preço visual aqui
+    const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
+    const displayValue = displayInfo.text;
     const el = document.getElementById('price-display');
     if(el) el.innerText = `VALOR: ${displayValue}`;
 
@@ -73,7 +74,7 @@ async function startCheckoutPro() {
                 userId: currentUserId, 
                 email: currentUserEmail,
                 title: 'Acesso Próxyz Library',
-                price: 5.00 // <--- VALOR REAL QUE VAI SER COBRADO
+                price: 97.97 // <--- VALOR REAL QUE VAI SER COBRADO
             })
         });
 

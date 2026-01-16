@@ -284,7 +284,7 @@ app.post('/api/create-payment', async (req, res) => {
     const { userId, email, type, token, issuerId, paymentMethodId, payer } = req.body;
     try {
         const payment = new Payment(client);
-        const AMOUNT_BRL = 5.00; // Valor fixo
+        const AMOUNT_BRL = 97.97; // Valor fixo
         let body = {};
 
         if (type === 'card') {
@@ -343,7 +343,7 @@ app.post('/api/process-brick', async (req, res) => {
         
         const body = {
             ...formData,
-            transaction_amount: 5.00, 
+            transaction_amount: 97.97, 
             description: 'Acesso Próxyz Library',
             payer: {
                 email: email,
