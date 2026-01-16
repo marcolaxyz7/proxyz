@@ -567,6 +567,6 @@ app.get('/api/audio-tutorial', (req, res) => {
     });
 });
 
-// A Hostinger vai preencher o process.env.PORT automaticamente
+// --- INICIALIZAÇÃO ---
 const PORT = process.env.PORT || 3000; 
 app.listen(PORT, () => console.log(`🔥 Server ON porta ${PORT}`));
