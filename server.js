@@ -246,7 +246,12 @@ app.post('/api/reset-password/:id/:token', async (req, res) => {
 
 // Rota: Criar Preferência (Checkout Pro)
 app.post('/api/create-preference', async (req, res) => {
-    const { userId, email, title, price } = req.body;
+    // REMOVI "price" DO REQ.BODY PARA EVITAR ERROS OU FRAUDES
+    const { userId, email, title } = req.body;
+    
+    // TRAVA DE SEGURANÇA: Preço fixo no Backend
+    const AMOUNT = 97.97; 
+
     try {
         const preference = new Preference(client);
         const body = {
@@ -254,7 +259,7 @@ app.post('/api/create-preference', async (req, res) => {
                 id: 'proxyz-access',
                 title: title || 'Acesso Próxyz Library',
                 quantity: 1,
-                unit_price: Number(price)
+                unit_price: AMOUNT // Usa a variável fixa do servidor
             }],
             payer: { email: email },
             external_reference: String(userId),
@@ -271,7 +276,7 @@ app.post('/api/create-preference', async (req, res) => {
         
         await pool.query(
             'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, "pending", ?, "CheckoutPro")',
-            [userId, price, result.id]
+            [userId, AMOUNT, result.id]
         );
 
         res.json({ init_point: result.init_point });
@@ -279,61 +284,6 @@ app.post('/api/create-preference', async (req, res) => {
     } catch (error) {
         console.error("Erro Criar Preferência:", error);
         res.status(500).json({ error: 'Erro ao gerar link de pagamento.' });
-    }
-});
-
-// Rota: Pagamento Transparente (Pix e Cartão Simples)
-app.post('/api/create-payment', async (req, res) => {
-    const { userId, email, type, token, issuerId, paymentMethodId, payer } = req.body;
-    try {
-        const payment = new Payment(client);
-        const AMOUNT_BRL = 97.97; // Valor fixo
-        let body = {};
-
-        if (type === 'card') {
-            body = {
-                transaction_amount: AMOUNT_BRL,
-                token: token,
-                description: 'Acesso Próxyz Library',
-                payment_method_id: paymentMethodId,
-                issuer_id: issuerId,
-                installments: 1,
-                payer: { email: email, identification: payer.identification },
-                notification_url: process.env.WEBHOOK_URL
-            };
-        } else {
-            body = {
-                transaction_amount: AMOUNT_BRL,
-                description: 'Acesso Próxyz Library',
-                payment_method_id: 'pix',
-                payer: { email: email },
-                notification_url: process.env.WEBHOOK_URL
-            };
-        }
-
-        const result = await payment.create({ body });
-        const statusVenda = result.status === 'approved' ? 'paid' : 'pending';
-        const pixInfo = type === 'pix' ? result.point_of_interaction.transaction_data.qr_code : 'CARD';
-
-        await pool.query(
-            'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, ?, ?, ?)',
-            [userId, AMOUNT_BRL, statusVenda, result.id, pixInfo]
-        );
-
-        if (result.status === 'approved') {
-            await pool.query('UPDATE users SET status = "active" WHERE id = ?', [userId]);
-            return res.json({ status: 'approved' });
-        }
-
-        res.json({
-            status: result.status,
-            qr_code: type === 'pix' ? pixInfo : null,
-            qr_code_base64: type === 'pix' ? result.point_of_interaction.transaction_data.qr_code_base64 : null
-        });
-
-    } catch (error) {
-        console.error("Erro MP:", error);
-        res.status(500).json({ error: 'Erro ao processar pagamento.' });
     }
 });
 

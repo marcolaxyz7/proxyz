@@ -29,9 +29,8 @@ audioError.volume = 0.5;
 
        // --- CORREÇÃO DE PREÇO E UI (NO SCRIPT T1) ---
 
-// 1. Forcei o valor para 1.00 aqui para testes
 const PRICING_DISPLAY = {
-    'BRL': { text: 'R$ 97.97', val: 97.97 },
+    'BRL': { text: 'R$ 97.97', val: 97.97 }, // Preço BR Correto
     'USD': { text: '$ 19.90', val: 19.90 },
     'EUR': { text: '€ 19.90', val: 19.90 },
     'JPY': { text: '¥ 3.000', val: 3000 },
@@ -40,29 +39,38 @@ const PRICING_DISPLAY = {
     'AUD': { text: 'A$ 29.90', val: 29.90 }
 };
 
-// 1. CORREÇÃO DA LÓGICA DE MOEDA (Esconde Stripe no BR, Esconde Pix fora)
+// 2. LÓGICA DE MOEDA (Brasil = MP / Fora = Stripe)
 function updatePriceUI() {
-    const currency = getUserCurrency();
+    const currency = getUserCurrency(); // Detecta a moeda do navegador
+    
+    // Pega as informações da tabela acima (fallback para USD se não achar)
     const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
-    const displayValue = displayInfo.text;
+    
+    // Atualiza o texto na tela
     const el = document.getElementById('price-display');
-    if(el) el.innerText = `VALOR: ${displayValue}`;
+    if(el) el.innerText = `VALOR: ${displayInfo.text}`;
 
-    const btnMP = document.getElementById('btn-mp-pro');
-    const btnStripe = document.getElementById('btn-opt-stripe');
+    // Botões de pagamento
+    const btnMP = document.getElementById('btn-mp-pro'); // Botão Mercado Pago
+    const btnStripe = document.getElementById('btn-opt-stripe'); // Botão Stripe
 
     if (currency === 'BRL') {
+        // SE FOR BRASIL: Mostra MP, Esconde Stripe
         if(btnMP) btnMP.style.display = 'flex';
         if(btnStripe) btnStripe.style.display = 'none';
     } else {
+        // SE FOR GRINGO: Esconde MP, Mostra Stripe
         if(btnMP) btnMP.style.display = 'none';
         if(btnStripe) btnStripe.style.display = 'flex';
     }
 }
 
+// 3. INICIAR CHECKOUT MERCADO PAGO (BRASIL)
 async function startCheckoutPro() {
     const btn = document.getElementById('btn-mp-pro');
     const originalText = btn.innerHTML;
+    
+    // Feedback visual
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
     btn.disabled = true;
 
@@ -73,15 +81,15 @@ async function startCheckoutPro() {
             body: JSON.stringify({ 
                 userId: currentUserId, 
                 email: currentUserEmail,
-                title: 'Acesso Próxyz Library',
-                price: 97.97 // <--- VALOR REAL QUE VAI SER COBRADO
+                title: 'Acesso Próxyz Library'
+                // NÃO enviamos mais o "price" aqui, o servidor define 97.97
             })
         });
 
         const data = await res.json();
 
         if (data.init_point) {
-            // REDIRECIONA O USUÁRIO PARA O MERCADO PAGO
+            // REDIRECIONA O USUÁRIO
             window.location.href = data.init_point;
         } else {
             alert('Erro ao gerar pagamento.');
@@ -300,36 +308,6 @@ async function loginUser() {
             currentUserId = null;
             document.getElementById('authModal').style.display = 'none';
             switchStep('step-login');
-        }
-
-
-        async function processCardBackend(data) {
-            try {
-                const res = await fetch(`${API_URL}/create-payment`, {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userId: currentUserId, 
-                        email: currentUserEmail, 
-                        type: 'card',
-                        installments: 1, // Força à vista
-                        ...data 
-                    })
-                });
-                
-                const result = await res.json();
-                
-                if (result.status === 'approved') {
-                    showMsg('Sucesso!', 'Pagamento Aprovado! Bem-vindo.', 'success');
-                    currentUserId = null; 
-                    document.getElementById('authModal').style.display = 'none';
-                    switchStep('step-login');
-                } else {
-                    showMsg('Recusado', 'Pagamento negado pelo banco.', 'error');
-                }
-            } catch (e) {
-                showMsg('Erro', 'Falha ao processar cartão.', 'error');
-            }
         }
 
   // --- SUBSTITUA A FUNÇÃO sendRecoveryEmail POR ESTA ---
