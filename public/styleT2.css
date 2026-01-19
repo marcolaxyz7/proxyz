@@ -122,54 +122,65 @@ footer {
 #menu-overlay { display: none; }
 
 /* ==========================================================
-   CSS EXCLUSIVO PARA CELULAR (Mobile) - VERSÃO CORRIGIDA
+   CSS EXCLUSIVO PARA CELULAR (Mobile) - CORREÇÃO BLINDADA
    ========================================================== */
 @media (max-width: 768px) {
     
     /* 1. LAYOUT GERAL */
-    body { flex-direction: column; overflow-x: hidden; } 
-    .main-content { padding: 15px; margin-left: 0 !important; width: 100%; }
+    body { 
+        flex-direction: column; 
+        overflow-x: hidden; 
+        position: relative; /* Garante contexto */
+    } 
+    .main-content { 
+        padding: 15px; 
+        margin-left: 0 !important; 
+        width: 100%; 
+    }
 
-    /* 2. SIDEBAR (OFF-CANVAS) - O SEGREDO ESTÁ AQUI */
+    /* 2. SIDEBAR (OFF-CANVAS) */
     .sidebar {
-        position: fixed;        /* Fixa na tela */
+        position: fixed !important;
         top: 0;
-        left: -100%;           /* Começa ESCONDIDA fora da tela à esquerda */
-        width: 80%;            /* Largura confortável */
+        left: 0; /* Fixa na esquerda */
+        width: 80% !important;
         max-width: 300px;
-        height: 100vh;         /* Altura total */
-        z-index: 2000;         /* Fica acima de tudo */
-        box-shadow: 5px 0 15px rgba(0,0,0,0.5); /* Sombra para destacar */
-        transition: left 0.3s ease; /* Animação suave */
+        height: 100vh;
+        z-index: 2000;
+        background: #000;
+        
+        /* O SEGREDO: Usar Transform para esconder */
+        transform: translateX(-100%); 
+        transition: transform 0.3s ease-in-out;
+        
+        /* Sombras e Bordas */
+        box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+        border-right: 1px solid #222;
     }
 
-    /* Classe que o JS adiciona para mostrar a sidebar */
+    /* Quando tiver a classe .active, desliza para dentro */
     .sidebar.active {
-        left: 0; /* Traz para dentro da tela */
+        transform: translateX(0) !important;
     }
 
-    /* OVERLAY (Fundo escuro atrás da sidebar) */
+    /* OVERLAY (Fundo escuro) */
     #menu-overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.7); /* Fundo escuro transparente */
-        z-index: 1500; /* Atrás da sidebar, mas na frente do conteúdo */
+        background: rgba(0,0,0,0.8);
+        z-index: 1500;
         display: none; /* Escondido por padrão */
-        backdrop-filter: blur(2px); /* Efeito de desfoque */
-        opacity: 0;
-        transition: opacity 0.3s;
+        backdrop-filter: blur(3px);
     }
 
     #menu-overlay.active {
-        display: block;
-        opacity: 1;
+        display: block !important;
     }
 
     /* 3. CABEÇALHO */
     .header-bar {
         display: flex !important;
         flex-wrap: wrap !important;
-        align-items: center !important;
         justify-content: space-between !important;
         gap: 15px;
         margin-bottom: 20px;
@@ -177,7 +188,7 @@ footer {
 
     #mobile-menu-btn {
         display: block !important;
-        order: 1; font-size: 1.5rem; background: none; border: none; color: #fff;
+        order: 1; font-size: 1.5rem; background: none; border: none; color: #fff; cursor: pointer;
     }
 
     .user-info {
@@ -185,7 +196,8 @@ footer {
     }
     
     .user-info span#userName { 
-        display: inline-block !important; font-size: 0.9rem; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        display: inline-block !important; font-size: 0.9rem; max-width: 100px; 
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .user-avatar { width: 30px; height: 30px; }
 
@@ -193,7 +205,7 @@ footer {
         order: 3; width: 100% !important; flex-basis: 100% !important; max-width: none !important; margin-top: 5px;
     }
 
-    /* 4. CARDS */
+    /* 4. CARDS & FOOTER */
     .dash-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
     .dash-card { min-height: 200px; padding: 15px; }
     footer { flex-direction: column; gap: 15px; text-align: center; }

@@ -189,7 +189,7 @@ function renderPrompts(promptsList) {
     });
 }
 
-function filterByCategory(category, btnElement) {
+    function filterByCategory(category, btnElement) {
     switchView('indexT2');
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
@@ -204,14 +204,13 @@ function filterByCategory(category, btnElement) {
     const searchInp = document.getElementById('searchInput');
     if(searchInp) searchInp.value = '';
 
-    // --- NOVA LÓGICA: FECHAR MENU NO MOBILE ---
-    // Se a tela for pequena, fechamos a sidebar automaticamente após o clique
+    // --- CORREÇÃO: FECHAMENTO FORÇADO ---
+    // Remove a classe .active diretamente, sem perguntar se já tem.
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
-        // Só fecha se estiver aberta para evitar bugs
-        if (sidebar && sidebar.classList.contains('active')) {
-            toggleMobileMenu();
-        }
+        const overlay = document.getElementById('menu-overlay');
+        if(sidebar) sidebar.classList.remove('active');
+        if(overlay) overlay.classList.remove('active');
     }
 }
 
@@ -248,12 +247,12 @@ function switchView(viewId, btn) {
         btn.classList.add('active');
     }
 
-    // --- NOVA LÓGICA: FECHAR MENU NO MOBILE ---
+    // --- CORREÇÃO: FECHAMENTO FORÇADO ---
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
-        if (sidebar && sidebar.classList.contains('active')) {
-            toggleMobileMenu();
-        }
+        const overlay = document.getElementById('menu-overlay');
+        if(sidebar) sidebar.classList.remove('active');
+        if(overlay) overlay.classList.remove('active');
     }
 }
 
