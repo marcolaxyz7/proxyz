@@ -90,63 +90,55 @@ function updatePriceUI() {
 }
 
 
-// --- 4. O PORTEIRO (Lógica Inteligente do Modal) ---
+// --- 4. O PORTEIRO (Lógica do Modal) ---
 function resetPaymentView() {
-    const opts = document.getElementById('pay-options');   // Container BR (Menu)
-    const stripeView = document.getElementById('pay-stripe'); // Container Gringo (Stripe)
+    const opts = document.getElementById('pay-options');   
+    const stripeView = document.getElementById('pay-stripe'); 
     const currency = getUserCurrency();
 
-    // 1. Reseta os estados (desmarca checkboxes e desabilita botões)
+    // 1. Reseta os estados (Desabilita botões visualmente)
     const checkStripe = document.getElementById('legalCheckStripe');
     if(checkStripe) { checkStripe.checked = false; toggleStripeButton(); }
     
     const checkMP = document.getElementById('check-terms-mp');
     if(checkMP) { checkMP.checked = false; toggleMPButton(); }
 
-    // 2. Elementos Específicos para Esconder/Mostrar
-    const btnStripeOption = document.getElementById('btn-opt-stripe'); // Botão "Internacional" que aparece pro BR
-    
-    // --- LÓGICA DE EXIBIÇÃO ---
+    // Referência ao botão "Internacional" que precisa sumir no BR
+    const btnStripeOption = document.getElementById('btn-opt-stripe'); 
+
+    // 2. LÓGICA DE EXIBIÇÃO
     if (currency === 'BRL') {
         // === CASO BRASIL ===
-        // Mostra o container principal
+        // Mostra o container de opções (onde fica o Mercado Pago)
         if(opts) opts.style.display = 'block';
         if(stripeView) stripeView.style.display = 'none';
 
-        // DENTRO DO MENU BR:
-        // Esconde o botão "Internacional" (O brasileiro só vê o MP)
-        if(btnStripeOption) btnStripeOption.style.display = 'none';
+        // TRAVA DE SEGURANÇA: Esconde o botão Internacional
+        if(btnStripeOption) {
+            btnStripeOption.style.display = 'none';
+            btnStripeOption.style.visibility = 'hidden'; // Garante que suma
+        }
 
     } else {
         // === CASO GRINGO ===
-        // Esconde o menu e mostra a tela do Stripe DIRETO
+        // Esconde o menu BR e mostra o formulário Stripe direto
         if(opts) opts.style.display = 'none';
         if(stripeView) stripeView.style.display = 'block';
-
-        // CORREÇÃO DO BOTÃO "VOLTAR" PARA GRINGOS:
-        // Como não tem menu para voltar, mudamos o botão para "Cancelar"
-        // para evitar que ele fique preso num loop.
-        const backBtn = stripeView.querySelector('.switch-btn');
-        if(backBtn) {
-            backBtn.innerText = 'Cancelar e Sair';
-            backBtn.onclick = function() { cancelRegistration(); }; 
-        }
     }
 }
 
-// --- 5. FUNÇÕES DE TRAVA DOS BOTÕES (Termos) ---
-
+// --- 5. TRAVAS DOS BOTÕES ---
 function toggleStripeButton() {
     const chk = document.getElementById('legalCheckStripe');
     const btn = document.getElementById('btn-stripe-go');
     
     if (chk && btn) {
         if (chk.checked) {
-            // HABILITA
+            // HABILITA (Aceso e com brilho roxo)
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
-            btn.style.boxShadow = '0 0 15px rgba(100, 100, 255, 0.4)'; 
+            btn.style.boxShadow = '0 0 15px rgba(99, 91, 255, 0.4)'; 
         } else {
             // DESABILITA
             btn.disabled = true;
