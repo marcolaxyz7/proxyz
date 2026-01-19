@@ -144,7 +144,7 @@ async function loadPrompts(token) {
     }
 }
 
-// --- RENDERIZAÇÃO DA SIDEBAR ---
+// --- RENDERIZAÇÃO DA SIDEBAR (CORRIGIDA PARA MOBILE) ---
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
     container.innerHTML = ''; 
@@ -159,16 +159,17 @@ function renderSidebarCategories() {
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
         
-        // --- AQUI ESTÁ A CORREÇÃO ---
+        // --- AQUI ESTÁ O SEGREDO ---
+        // Definimos o clique diretamente na criação do botão
         btn.onclick = () => {
-            // 1. Faz o filtro normal
+            // 1. Filtra os prompts (Lógica normal)
             filterByCategory(cat, btn); 
             
-            // 2. Fecha o menu se for mobile (verifica a largura da tela)
+            // 2. VERIFICA SE É MOBILE E FECHA O MENU
             if (window.innerWidth <= 768) {
                 toggleMobileMenu();
             }
-        };
+        }; 
         
         container.appendChild(btn);
     });

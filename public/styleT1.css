@@ -477,29 +477,33 @@ div[class*="installments-badge"],
     visibility: hidden !important;
 }
 
-/* --- CAMPO DE SENHA COM OLINHO --- */
+/* --- CORREÇÃO: ÍCONE DENTRO DO CAMPO (FORÇADO) --- */
+
+/* 1. O envelope (wrapper) vira a referência */
 .password-wrapper {
-    position: relative;
+    position: relative !important; 
     width: 100%;
-    margin-bottom: 15px; /* Ajuste conforme seu espaçamento padrão */
+    display: block; /* Garante que o envelope ocupe a linha toda */
 }
 
-.password-wrapper input {
+/* 2. O input ganha espaço na direita para o texto não bater no olho */
+.password-wrapper input.auth-input {
     width: 100%;
-    /* Mantém o estilo original do auth-input, o wrapper só posiciona */
+    box-sizing: border-box; /* O padding não aumenta a largura total */
+    padding-right: 45px !important; 
 }
 
+/* 3. O ícone flutua exatamente para dentro */
 .password-wrapper i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: absolute !important;
+    right: 15px !important;     /* Cola na direita */
+    top: 50% !important;        /* Centraliza na altura */
+    transform: translateY(-50%) !important; /* Corrige o centro exato */
+    z-index: 10 !important;     /* Garante que fique POR CIMA do input */
     cursor: pointer;
-    color: #888; /* Cor cinza discreta */
-    z-index: 10;
-    transition: color 0.3s;
+    color: #999;
 }
 
 .password-wrapper i:hover {
-    color: #cc0000; /* Fica vermelho quando passa o mouse */
+    color: #cc0000;
 }
