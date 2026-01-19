@@ -127,7 +127,7 @@ async function loadPrompts(token) {
     }
 }
 
-// Substitua APENAS a função renderSidebarCategories por esta:
+// --- RENDERIZAÇÃO DA SIDEBAR (COM CORREÇÃO PARA FECHAR NO MOBILE) ---
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
     container.innerHTML = ''; 
@@ -142,12 +142,12 @@ function renderSidebarCategories() {
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
         
-        // --- AQUI ESTÁ A CORREÇÃO ---
+        // --- AQUI ESTÁ A LÓGICA DO FECHAMENTO ---
         btn.onclick = () => {
-            // 1. Faz o filtro (sua lógica original)
+            // 1. Filtra os prompts (Lógica normal)
             filterByCategory(cat, btn); 
             
-            // 2. Se for celular, fecha o menu
+            // 2. Se for celular, fecha o menu automaticamente
             if (window.innerWidth <= 768) {
                 toggleMobileMenu();
             }
