@@ -428,7 +428,9 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 <h2>ACESSE SUA CONTA</h2>
                 <p style="color:#666; margin-bottom:20px;">Bem-vindo de volta.</p>
                 <input type="email" id="loginEmail" class="auth-input" placeholder="Seu e-mail">
-                <input type="password" id="loginPass" class="auth-input" placeholder="Sua senha">
+                <div class="password-wrapper">
+                    <input type="password" id="loginPass" class="auth-input" placeholder="Sua senha" style="padding-right: 40px;"> <i class="fa-solid fa-eye" id="btn-toggle-login" onclick="togglePassword('loginPass', 'btn-toggle-login')"></i>
+                </div>
                 <button class="btn-main" style="width:100%; margin-top:10px;" onclick="loginUser()">ENTRAR</button>
                 <br>
                 <button class="switch-btn" onclick="switchStep('step-signup')">Não tenho conta. Cadastrar.</button>
@@ -456,8 +458,13 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 </div>
 
                 <div class="input-wrapper">
-                    <span class="field-error" id="err-pass">Mínimo 8 caracteres</span>
-                    <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha" oninput="clearError(this)">
+                    <div class="password-wrapper" style="margin-bottom: 0;">
+                        <span class="field-error" id="err-pass">Mínimo 8 caracteres</span>
+                        
+                        <input type="password" id="regPass" class="auth-input" placeholder="Crie uma senha" oninput="clearError(this)" style="padding-right: 40px;">
+                        
+                        <i class="fa-solid fa-eye" id="btn-toggle-reg" onclick="togglePassword('regPass', 'btn-toggle-reg')"></i>
+                    </div>
                 </div>
 
                 <button class="btn-main" style="width:100%; margin-top:10px;" onclick="validateAndGoToPayment()">IR PARA PAGAMENTO &rarr;</button>

@@ -158,7 +158,18 @@ function renderSidebarCategories() {
         const btn = document.createElement('button');
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
-        btn.onclick = () => filterByCategory(cat, btn); 
+        
+        // --- AQUI ESTÁ A CORREÇÃO ---
+        btn.onclick = () => {
+            // 1. Faz o filtro normal
+            filterByCategory(cat, btn); 
+            
+            // 2. Fecha o menu se for mobile (verifica a largura da tela)
+            if (window.innerWidth <= 768) {
+                toggleMobileMenu();
+            }
+        };
+        
         container.appendChild(btn);
     });
 }

@@ -430,3 +430,21 @@ else if (paymentStatus === 'mp_failure') {
     showMsg('Erro', 'Pagamento não concluído.', 'error');
     window.history.replaceState({}, document.title, "indexT1.html");
 }
+
+// --- FUNÇÃO MOSTRAR/OCULTAR SENHA ---
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+        // MOSTRAR
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash'); // Troca para o olho cortado
+    } else {
+        // OCULTAR
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye'); // Troca para o olho normal
+    }
+}

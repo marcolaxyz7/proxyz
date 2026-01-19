@@ -476,3 +476,30 @@ div[class*="installments-badge"],
     opacity: 0 !important;
     visibility: hidden !important;
 }
+
+/* --- CAMPO DE SENHA COM OLINHO --- */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px; /* Ajuste conforme seu espaçamento padrão */
+}
+
+.password-wrapper input {
+    width: 100%;
+    /* Mantém o estilo original do auth-input, o wrapper só posiciona */
+}
+
+.password-wrapper i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888; /* Cor cinza discreta */
+    z-index: 10;
+    transition: color 0.3s;
+}
+
+.password-wrapper i:hover {
+    color: #cc0000; /* Fica vermelho quando passa o mouse */
+}
