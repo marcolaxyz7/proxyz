@@ -10,60 +10,78 @@ audioError.volume = 0.5;
         let mp = null;
         let cardForm = null;
 
-        // 1. INICIALIZAÇÃO
-        async function initApp() {
-            // Animações
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
-            });
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-            
-            // Mercado Pago (Pega Chave Pública do Backend)
-            try {
-                const res = await fetch(`${API_URL}/config`);
-                const data = await res.json();
-                if(data.publicKey) mp = new MercadoPago(data.publicKey);
-            } catch(e) { console.error("Erro MP Config", e); }
-        }
+  // 1. INICIALIZAÇÃO
+        // Substitua a função initApp por esta versão atualizada:
+
+async function initApp() {
+    // Animações
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+    });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    
+    // Mercado Pago Configuration
+    try {
+        const res = await fetch(`${API_URL}/config`);
+        const data = await res.json();
+        if(data.publicKey) mp = new MercadoPago(data.publicKey);
+    } catch(e) { console.error("Erro MP Config", e); }
+
+    // --- CORREÇÃO 1: Adiciona o "ouvinte" no Checkbox do Stripe ---
+    const checkStripe = document.getElementById('legalCheckStripe');
+    if(checkStripe) {
+        checkStripe.addEventListener('change', toggleStripeButton);
+    }
+
+    // Atualiza preço inicial
+    setTimeout(() => { updatePriceUI(); }, 500);
+}
+        
+        // Chama a função para iniciar tudo
         initApp();
 
-       // --- CORREÇÃO DE PREÇO E UI (NO SCRIPT T1) ---
+       // --- CORREÇÃO DE PREÇO E UI (DADOS) ---
 
-const PRICING_DISPLAY = {
-    'BRL': { text: 'R$ 97.97', val: 97.97 }, // Preço BR Correto
-    'USD': { text: '$ 19.90', val: 19.90 },
-    'EUR': { text: '€ 19.90', val: 19.90 },
-    'JPY': { text: '¥ 3.000', val: 3000 },
-    'GBP': { text: '£ 14.90', val: 14.90 },
-    'CAD': { text: 'C$ 29.90', val: 29.90 },
-    'AUD': { text: 'A$ 29.90', val: 29.90 }
-};
+        const PRICING_DISPLAY = {
+            'BRL': { text: 'R$ 97.97', val: 97.97 }, // Preço BR Correto
+            'USD': { text: '$ 19.90', val: 19.90 },
+            'EUR': { text: '€ 19.90', val: 19.90 },
+            'JPY': { text: '¥ 3.000', val: 3000 },
+            'GBP': { text: '£ 14.90', val: 14.90 },
+            'CAD': { text: 'C$ 29.90', val: 29.90 },
+            'AUD': { text: 'A$ 29.90', val: 29.90 }
+        };
 
-// 2. LÓGICA DE MOEDA (Brasil = MP / Fora = Stripe)
-function updatePriceUI() {
-    const currency = getUserCurrency(); // Detecta a moeda do navegador
-    
-    // Pega as informações da tabela acima (fallback para USD se não achar)
-    const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
-    
-    // Atualiza o texto na tela
-    const el = document.getElementById('price-display');
-    if(el) el.innerText = `VALOR: ${displayInfo.text}`;
+        // 2. LÓGICA DE MOEDA (Brasil = MP / Fora = Stripe)
+        // --- AQUI ESTÁ A CORREÇÃO Nº 3: A FUNÇÃO ROBUSTA ---
+        function updatePriceUI() {
+            const currency = getUserCurrency(); // Detecta a moeda do navegador
+            
+            // Pega as informações da tabela acima (fallback para USD se não achar)
+            const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
+            
+            // Atualiza o texto na tela
+            const el = document.getElementById('price-display');
+            if(el) {
+                el.innerText = `VALOR: ${displayInfo.text}`;
+            } else {
+                console.warn("Aviso: Elemento 'price-display' não encontrado no HTML.");
+            }
 
-    // Botões de pagamento
-    const btnMP = document.getElementById('btn-mp-pro'); // Botão Mercado Pago
-    const btnStripe = document.getElementById('btn-opt-stripe'); // Botão Stripe
+            // Botões de pagamento (Troca entre MP e Stripe)
+            const btnMP = document.getElementById('btn-mp-pro'); 
+            const btnStripe = document.getElementById('btn-opt-stripe'); 
 
-    if (currency === 'BRL') {
-        // SE FOR BRASIL: Mostra MP, Esconde Stripe
-        if(btnMP) btnMP.style.display = 'flex';
-        if(btnStripe) btnStripe.style.display = 'none';
-    } else {
-        // SE FOR GRINGO: Esconde MP, Mostra Stripe
-        if(btnMP) btnMP.style.display = 'none';
-        if(btnStripe) btnStripe.style.display = 'flex';
-    }
-}
+            if (currency === 'BRL') {
+                // SE FOR BRASIL: Mostra MP, Esconde Stripe
+                if(btnMP) btnMP.style.display = 'flex';
+                if(btnStripe) btnStripe.style.display = 'none';
+            } else {
+                // SE FOR GRINGO: Esconde MP, Mostra Stripe
+                if(btnMP) btnMP.style.display = 'none';
+                if(btnStripe) btnStripe.style.display = 'flex';
+            }
+        }
 
 // 3. INICIAR CHECKOUT MERCADO PAGO (BRASIL)
 async function startCheckoutPro() {
@@ -149,31 +167,33 @@ async function startCheckoutPro() {
         function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
 
        
-        function resetPaymentView() {
+        // Substitua a função resetPaymentView antiga por esta:
+
+function resetPaymentView() {
     const opts = document.getElementById('pay-options');
-    const pix = document.getElementById('pay-pix');
-    const card = document.getElementById('pay-card');
-    const stripe = document.getElementById('pay-stripe');
+    const stripeView = document.getElementById('pay-stripe');
+    const currency = getUserCurrency(); // Detecta a moeda
 
-    // Esconde/Mostra as divs se elas existirem
-    if(opts) opts.style.display = 'block';
-    if(pix) pix.style.display = 'none';
-    if(card) card.style.display = 'none';
-    if(stripe) stripe.style.display = 'none';
-
-    // Reseta Pix
-    const checkPix = document.getElementById('legalCheckPix');
-    if(checkPix) checkPix.checked = false;
-    const btnPix = document.getElementById('btn-finish-pix');
-    if(btnPix) btnPix.disabled = true;
-
-    // Reseta Stripe
+    // 1. Reseta os formulários
     const checkStripe = document.getElementById('legalCheckStripe');
     if(checkStripe) checkStripe.checked = false;
-    const btnStripe = document.getElementById('btn-stripe-go');
-    if(btnStripe) btnStripe.disabled = true;
     
-    // NÃO tentamos limpar o checkbox do cartão antigo, pois ele não existe mais.
+    // Reseta botão Stripe (chama a função que acabamos de criar)
+    toggleStripeButton();
+
+    const checkPix = document.getElementById('legalCheckPix'); // (Caso ainda exista no HTML)
+    if(checkPix) checkPix.checked = false;
+
+    // 2. LÓGICA INTELIGENTE DE EXIBIÇÃO
+    if (currency === 'BRL') {
+        // Se for BRASIL -> Mostra as opções (Onde tem o botão do Mercado Pago)
+        if(opts) opts.style.display = 'block';
+        if(stripeView) stripeView.style.display = 'none';
+    } else {
+        // Se for GRINGO -> PULA o menu e vai DIRETO para o Stripe Final
+        if(opts) opts.style.display = 'none';
+        if(stripeView) stripeView.style.display = 'block';
+    }
 }
 
         // NOVA FUNÇÃO: View do Stripe
@@ -442,6 +462,28 @@ function toggleMPButton() {
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
             btn.style.boxShadow = 'none'; // Tira o brilho
+        }
+    }
+}
+
+// --- NOVA FUNÇÃO: TRAVA O BOTÃO STRIPE ---
+function toggleStripeButton() {
+    const chk = document.getElementById('legalCheckStripe');
+    const btn = document.getElementById('btn-stripe-go');
+    
+    if (chk && btn) {
+        if (chk.checked) {
+            // HABILITA
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.boxShadow = '0 0 15px rgba(100, 100, 255, 0.4)'; // Brilho azulado pro Stripe
+        } else {
+            // DESABILITA
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.boxShadow = 'none';
         }
     }
 }
