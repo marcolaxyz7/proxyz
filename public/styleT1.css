@@ -507,3 +507,10 @@ div[class*="installments-badge"],
 .password-wrapper i:hover {
     color: #cc0000;
 }
+
+/* Correção Force Brute para o Olinho */
+.password-wrapper i {
+    z-index: 9999 !important;      /* Garante que fique na frente de tudo */
+    pointer-events: all !important; /* Força o ícone a ser clicável */
+    cursor: pointer !important;
+}

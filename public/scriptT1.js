@@ -431,20 +431,21 @@ else if (paymentStatus === 'mp_failure') {
     window.history.replaceState({}, document.title, "indexT1.html");
 }
 
-// --- FUNÇÃO MOSTRAR/OCULTAR SENHA ---
+// --- FUNÇÃO DO OLINHO (Coloque no final do arquivo) ---
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     
+    // Teste de segurança para não travar se o ID estiver errado
+    if (!input || !icon) return console.warn("Erro: Input ou Ícone não encontrados", inputId, iconId);
+
     if (input.type === 'password') {
-        // MOSTRAR
-        input.type = 'text';
+        input.type = 'text'; // Mostra a senha
         icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash'); // Troca para o olho cortado
+        icon.classList.add('fa-eye-slash');
     } else {
-        // OCULTAR
-        input.type = 'password';
+        input.type = 'password'; // Esconde a senha
         icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye'); // Troca para o olho normal
+        icon.classList.add('fa-eye');
     }
 }

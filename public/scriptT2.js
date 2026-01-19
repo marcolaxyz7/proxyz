@@ -144,9 +144,10 @@ async function loadPrompts(token) {
     }
 }
 
-// --- RENDERIZAÇÃO DA SIDEBAR (CORRIGIDA PARA MOBILE) ---
+// --- RENDERIZAÇÃO DA SIDEBAR (Versão Agressiva para Mobile) ---
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
+    if(!container) return; // Segurança
     container.innerHTML = ''; 
 
     const categories = [...new Set(allPrompts.map(p => p.category))].sort();
@@ -159,15 +160,19 @@ function renderSidebarCategories() {
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
         
-        // --- AQUI ESTÁ O SEGREDO ---
-        // Definimos o clique diretamente na criação do botão
+        // --- AÇÃO DO CLIQUE ---
         btn.onclick = () => {
-            // 1. Filtra os prompts (Lógica normal)
+            // 1. Carrega os prompts
             filterByCategory(cat, btn); 
             
-            // 2. VERIFICA SE É MOBILE E FECHA O MENU
+            // 2. FORÇA O FECHAMENTO DO MENU (Sem Toggle)
             if (window.innerWidth <= 768) {
-                toggleMobileMenu();
+                const sidebar = document.querySelector('.sidebar');
+                const overlay = document.getElementById('menu-overlay');
+                
+                // Remove a classe 'active' diretamente para garantir que feche
+                if(sidebar) sidebar.classList.remove('active');
+                if(overlay) overlay.classList.remove('active');
             }
         }; 
         
