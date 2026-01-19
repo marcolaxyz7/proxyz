@@ -283,3 +283,13 @@ sidebarButtons.forEach(btn => {
         }
     });
 });
+
+// Fecha o menu sidebar se clicar em algo dentro dele (apenas no mobile)
+function checkMobileClick(e) {
+    if (window.innerWidth <= 768) {
+        // Se o clique foi em um botão ou filho de botão
+        if (e.target.closest('button')) {
+            toggleMobileMenu(); // Fecha o menu
+        }
+    }
+}

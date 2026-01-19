@@ -121,66 +121,41 @@ footer {
 #mobile-menu-btn { display: none; }
 #menu-overlay { display: none; }
 
-/* ==========================================================
-   CSS EXCLUSIVO PARA CELULAR (Mobile) - VERSÃO CORRIGIDA
-   ========================================================== */
+/* --- CSS MOBILE CORRIGIDO (Copie e cole no final) --- */
 @media (max-width: 768px) {
-    
-    /* 1. LAYOUT GERAL */
-    body { flex-direction: column; } 
-    .main-content { padding: 15px; margin-left: 0 !important; width: 100%; }
+    /* Esconde o logo antigo da sidebar no mobile, pois criamos um header novo */
+    .sidebar > .sidebar-logo { display: none; }
 
-    /* 2. CABEÇALHO (Onde está o erro) */
-    .header-bar {
-        display: flex !important;
-        flex-wrap: wrap !important; /* Obriga a quebrar linha */
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 15px;
+    /* Cabeçalho da Sidebar (Logo + Botão Fechar) */
+    .sidebar-header-mobile {
+        display: flex; justify-content: space-between; align-items: center;
         margin-bottom: 20px;
     }
-
-    /* Botão Menu (Topo Esquerda) */
-    #mobile-menu-btn {
-        display: block !important;
-        order: 1; 
-        font-size: 1.5rem; background: none; border: none; color: #fff;
+    .close-sidebar-btn {
+        background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
     }
 
-    /* Info do Usuário (Topo Direita) */
-    .user-info {
-        order: 2; 
-        margin-left: auto; /* Empurra pra direita */
-        display: flex !important;
-        align-items: center;
-        gap: 10px;
+    /* HEADER PRINCIPAL */
+    .header-bar {
+        display: flex; flex-direction: column; gap: 15px; /* Empilha as linhas */
     }
+
+    /* Linha de Cima (Menu, User, Sair) */
+    .top-row {
+        display: flex; justify-content: space-between; align-items: center; width: 100%;
+    }
+    .left-group { display: flex; align-items: center; gap: 15px; }
     
-    /* Nome do Usuário (FORÇAR A APARECER) */
-    .user-info span#userName { 
-        display: inline-block !important; 
-        font-size: 0.9rem;
-        max-width: 100px; /* Evita que nome longo quebre tudo */
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .user-avatar { width: 30px; height: 30px; } /* Avatar menor */
-
-    /* Barra de Busca (Linha de Baixo Sozinha) */
-    .search-box {
-        order: 3; /* Força ser o 3º item */
-        width: 100% !important; /* Ocupa a linha toda */
-        flex-basis: 100% !important; /* Garante a quebra de linha no Flexbox */
-        max-width: none !important;
-        margin-top: 5px;
-    }
-
-    /* 3. CARDS (2 por linha) */
-    .dash-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 10px;
-    }
-    .dash-card { min-height: 200px; padding: 15px; }
+    #mobile-menu-btn { display: block !important; font-size: 1.4rem; background: none; border: none; color: white; }
     
-    /* Footer */
-    footer { flex-direction: column; gap: 15px; text-align: center; }
+    /* Ajuste do Usuário */
+    .user-info { display: flex; align-items: center; gap: 8px; }
+    .user-info span { display: inline-block !important; font-size: 0.9rem; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    /* Linha de Baixo (Busca) */
+    .search-box { width: 100%; margin: 0; }
+
+    /* Ajuste do Conteúdo */
+    .main-content { padding: 15px; margin-left: 0; }
+    .dash-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
 }

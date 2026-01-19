@@ -30,7 +30,10 @@ const app = express();
 app.set('trust proxy', 1); 
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://xn--prxyz-1ta.com', // Só seu site pode chamar a API
+    optionsSuccessStatus: 200
+}));
 
 // Importa os dados dos prompts (arquivo prompts.js)
 const promptsData = require('./prompts');
@@ -357,7 +360,7 @@ app.post('/api/process-brick', async (req, res) => {
         
         await pool.query(
             'INSERT INTO sales (user_id, amount, status, transaction_id, pix_code) VALUES (?, ?, ?, ?, ?)',
-            [userId, 1.00, statusVenda, result.id, 'BrickCard']
+            [userId, 97.97, statusVenda, result.id, 'BrickCard']
         );
 
         if (result.status === 'approved') {
