@@ -4,7 +4,6 @@ let allPrompts = [];
 // --- SONS DO SISTEMA ---
 const audioSuccess = new Audio('success.wav');
 const audioError = new Audio('error.wav');
-// Ajuste o volume para não assustar o usuário (0.0 a 1.0)
 audioSuccess.volume = 0.5;
 audioError.volume = 0.5;
 
@@ -35,34 +34,32 @@ const categoryIcons = {
 function showMsg(title, text, type = 'info') {
     const modal = document.getElementById('msgModal');
     const icon = document.getElementById('msgIcon');
+    if(!modal) return;
+
     document.getElementById('msgTitle').innerText = title;
     document.getElementById('msgText').innerText = text;
 
     icon.className = 'msg-icon fa-solid';
-    
-    // Reseta classes antigas
     icon.classList.remove('msg-success', 'msg-error', 'msg-info', 'fa-check-circle', 'fa-circle-xmark', 'fa-circle-exclamation');
 
     if (type === 'success') {
         icon.classList.add('fa-check-circle', 'msg-success');
-        // Toca o som de sucesso (reseta o tempo para tocar rápido se clicar várias vezes)
         audioSuccess.currentTime = 0;
-        audioSuccess.play().catch(e => console.log("Interação necessária para som"));
-        
+        audioSuccess.play().catch(e => {});
     } else if (type === 'error') {
         icon.classList.add('fa-circle-xmark', 'msg-error');
-        // Toca o som de erro
         audioError.currentTime = 0;
-        audioError.play().catch(e => console.log("Interação necessária para som"));
-        
+        audioError.play().catch(e => {});
     } else {
         icon.classList.add('fa-circle-exclamation', 'msg-info');
-        // Opcional: Se quiser um som neutro para 'info', adicione aqui
     }
 
     modal.style.display = 'flex';
 }
-function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
+function closeMsgModal() { 
+    const modal = document.getElementById('msgModal');
+    if(modal) modal.style.display = 'none'; 
+}
 
 // --- LOGOUT ---
 function logout() {
@@ -71,7 +68,7 @@ function logout() {
     window.location.href = 'indexT1.html';
 }
 
-// --- INICIALIZAÇÃO UNIFICADA ---
+// --- INICIALIZAÇÃO ---
 document.addEventListener('DOMContentLoaded', () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -80,46 +77,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const user = JSON.parse(localStorage.getItem('user'));
-    if (user) document.getElementById('userName').innerText = user.name;
+    if (user && document.getElementById('userName')) {
+        document.getElementById('userName').innerText = user.name;
+    }
 
-    // 1. Carrega os Prompts
+    // Carrega dados
     loadPrompts(token);
-
-    // 2. Configura o Vídeo e Áudio Seguro
     setupSecureVideo(token);
 });
 
-// --- FUNÇÃO DE VÍDEO/ÁUDIO SEGURO ---
+// --- VÍDEO/ÁUDIO SEGURO ---
 function setupSecureVideo(token) {
     const video = document.getElementById('videoPlayer');
     const audio = document.getElementById('audioPlayer');
 
-    if (video && token) {
-        // Define o source com o token
-        video.src = `${API_URL}/video-tutorial?token=${token}`;
-    }
+    if (video && token) video.src = `${API_URL}/video-tutorial?token=${token}`;
+    if (audio && token) audio.src = `${API_URL}/audio-tutorial?token=${token}`;
 
-    if (audio && token) {
-        audio.src = `${API_URL}/audio-tutorial?token=${token}`;
-    }
-
-    // Sincronização
     if (video && audio) {
         video.onplay = () => { audio.play(); };
         video.onpause = () => { audio.pause(); };
         video.onseeking = () => { audio.currentTime = video.currentTime; };
         video.onseeked = () => { audio.currentTime = video.currentTime; };
-        video.onended = () => { 
-            audio.pause(); 
-            audio.currentTime = 0; 
-        };
-        // Opcional: sincronizar volume
+        video.onended = () => { audio.pause(); audio.currentTime = 0; };
         video.onvolumechange = () => {
             if(video.muted) audio.muted = true;
-            else {
-                audio.muted = false;
-                audio.volume = video.volume;
-            }
+            else { audio.muted = false; audio.volume = video.volume; }
         };
     }
 }
@@ -144,10 +127,9 @@ async function loadPrompts(token) {
     }
 }
 
-// --- RENDERIZAÇÃO DA SIDEBAR (Versão Agressiva para Mobile) ---
+// Substitua APENAS a função renderSidebarCategories por esta:
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
-    if(!container) return; // Segurança
     container.innerHTML = ''; 
 
     const categories = [...new Set(allPrompts.map(p => p.category))].sort();
@@ -160,19 +142,14 @@ function renderSidebarCategories() {
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
         
-        // --- AÇÃO DO CLIQUE ---
+        // --- AQUI ESTÁ A CORREÇÃO ---
         btn.onclick = () => {
-            // 1. Carrega os prompts
+            // 1. Faz o filtro (sua lógica original)
             filterByCategory(cat, btn); 
             
-            // 2. FORÇA O FECHAMENTO DO MENU (Sem Toggle)
+            // 2. Se for celular, fecha o menu
             if (window.innerWidth <= 768) {
-                const sidebar = document.querySelector('.sidebar');
-                const overlay = document.getElementById('menu-overlay');
-                
-                // Remove a classe 'active' diretamente para garantir que feche
-                if(sidebar) sidebar.classList.remove('active');
-                if(overlay) overlay.classList.remove('active');
+                toggleMobileMenu();
             }
         }; 
         
@@ -183,9 +160,10 @@ function renderSidebarCategories() {
 function renderPrompts(promptsList) {
     const grid = document.getElementById('promptsGrid');
     const countSpan = document.getElementById('prompt-count');
+    if(!grid) return;
     
     grid.innerHTML = ''; 
-    countSpan.innerText = `${promptsList.length} Prompts`;
+    if(countSpan) countSpan.innerText = `${promptsList.length} Prompts`;
 
     if(promptsList.length === 0) {
         grid.innerHTML = '<p style="color:#666; grid-column: 1/-1; text-align:center; padding: 40px;">Nenhum prompt encontrado.</p>';
@@ -227,24 +205,31 @@ function filterByCategory(category, btnElement) {
     if(btnElement) btnElement.classList.add('active');
 
     const displayTitle = category === 'all' ? 'TODOS OS PROMPTS' : category.replace(/^\d+\.\s+/, '').toUpperCase();
-    document.getElementById('page-title').innerText = displayTitle;
+    const titleEl = document.getElementById('page-title');
+    if(titleEl) titleEl.innerText = displayTitle;
     
     if (category === 'all') renderPrompts(allPrompts);
     else renderPrompts(allPrompts.filter(p => p.category === category));
     
-    document.getElementById('searchInput').value = '';
+    const searchInp = document.getElementById('searchInput');
+    if(searchInp) searchInp.value = '';
 }
 
 function searchPrompts() {
-    const term = document.getElementById('searchInput').value.toLowerCase();
+    const inp = document.getElementById('searchInput');
+    if(!inp) return;
+    const term = inp.value.toLowerCase();
+    
     const filtered = allPrompts.filter(p => 
         p.title.toLowerCase().includes(term) || 
         p.description.toLowerCase().includes(term) ||
         p.content.toLowerCase().includes(term)
     );
     renderPrompts(filtered);
+    
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('page-title').innerText = 'RESULTADOS DA BUSCA';
+    const titleEl = document.getElementById('page-title');
+    if(titleEl) titleEl.innerText = 'RESULTADOS DA BUSCA';
 }
 
 function copyToClipboard(text) {
@@ -255,7 +240,8 @@ function copyToClipboard(text) {
 
 function switchView(viewId, btn) {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-    document.getElementById('view-' + viewId).classList.add('active');
+    const target = document.getElementById('view-' + viewId);
+    if(target) target.classList.add('active');
     
     if(btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -272,32 +258,17 @@ async function logCopyAction(promptId) {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ promptId })
         });
-        console.log(`Consumo do prompt ${promptId} registrado.`);
-    } catch (e) { console.error("Erro ao registrar cópia", e); }
+    } catch (e) { console.error("Erro log copy", e); }
 }
 
-// --- MENU MOBILE ---
+// --- MENU MOBILE (TOGGLE) ---
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('menu-overlay');
-    
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
+    if(sidebar) sidebar.classList.toggle('active');
+    if(overlay) overlay.classList.toggle('active');
 }
 
-// Fechar o menu se clicar no fundo escuro
-document.getElementById('menu-overlay').addEventListener('click', () => {
-    toggleMobileMenu();
-});
-
-// Fechar o menu automaticamente ao clicar em uma categoria (opcional, mas bom)
-const sidebarButtons = document.querySelectorAll('.sidebar button');
-sidebarButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        // Só fecha se estiver no mobile (verificando se a tela é pequena)
-        if (window.innerWidth <= 768) {
-            toggleMobileMenu();
-        }
-    });
-});
-
+// Event Listeners Mobile
+const ovl = document.getElementById('menu-overlay');
+if(ovl) ovl.addEventListener('click', toggleMobileMenu);

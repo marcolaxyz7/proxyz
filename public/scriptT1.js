@@ -431,20 +431,17 @@ else if (paymentStatus === 'mp_failure') {
     window.history.replaceState({}, document.title, "indexT1.html");
 }
 
-// --- FUNÇÃO DO OLINHO (Coloque no final do arquivo) ---
+// Coloque no final do arquivo public/scriptT1.js
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     
-    // Teste de segurança para não travar se o ID estiver errado
-    if (!input || !icon) return console.warn("Erro: Input ou Ícone não encontrados", inputId, iconId);
-
     if (input.type === 'password') {
-        input.type = 'text'; // Mostra a senha
+        input.type = 'text';
         icon.classList.remove('fa-eye');
         icon.classList.add('fa-eye-slash');
     } else {
-        input.type = 'password'; // Esconde a senha
+        input.type = 'password';
         icon.classList.remove('fa-eye-slash');
         icon.classList.add('fa-eye');
     }
