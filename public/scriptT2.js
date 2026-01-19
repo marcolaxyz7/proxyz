@@ -127,7 +127,6 @@ async function loadPrompts(token) {
     }
 }
 
-// --- RENDERIZAÇÃO DA SIDEBAR (COM CORREÇÃO PARA FECHAR NO MOBILE) ---
 function renderSidebarCategories() {
     const container = document.getElementById('category-list');
     container.innerHTML = ''; 
@@ -142,16 +141,8 @@ function renderSidebarCategories() {
         btn.className = 'nav-btn';
         btn.innerHTML = `<i class="fa-solid ${iconClass}"></i> ${cleanName}`;
         
-        // --- AQUI ESTÁ A LÓGICA DO FECHAMENTO ---
-        btn.onclick = () => {
-            // 1. Filtra os prompts (Lógica normal)
-            filterByCategory(cat, btn); 
-            
-            // 2. Se for celular, fecha o menu automaticamente
-            if (window.innerWidth <= 768) {
-                toggleMobileMenu();
-            }
-        }; 
+        // Agora só chamamos o filtro. O filtro cuidará de fechar o menu.
+        btn.onclick = () => filterByCategory(cat, btn);
         
         container.appendChild(btn);
     });
@@ -198,7 +189,6 @@ function renderPrompts(promptsList) {
     });
 }
 
-// --- FILTROS E UTILITÁRIOS ---
 function filterByCategory(category, btnElement) {
     switchView('indexT2');
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -213,6 +203,16 @@ function filterByCategory(category, btnElement) {
     
     const searchInp = document.getElementById('searchInput');
     if(searchInp) searchInp.value = '';
+
+    // --- NOVA LÓGICA: FECHAR MENU NO MOBILE ---
+    // Se a tela for pequena, fechamos a sidebar automaticamente após o clique
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.sidebar');
+        // Só fecha se estiver aberta para evitar bugs
+        if (sidebar && sidebar.classList.contains('active')) {
+            toggleMobileMenu();
+        }
+    }
 }
 
 function searchPrompts() {
@@ -246,6 +246,14 @@ function switchView(viewId, btn) {
     if(btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+    }
+
+    // --- NOVA LÓGICA: FECHAR MENU NO MOBILE ---
+    if (window.innerWidth <= 768) {
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar && sidebar.classList.contains('active')) {
+            toggleMobileMenu();
+        }
     }
 }
 
