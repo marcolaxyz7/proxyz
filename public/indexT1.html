@@ -477,43 +477,51 @@ O Estilo Desejado é: [INSERIR ESTILO - ex: Cyberpunk, Pintura a Óleo Renascent
                 <h2>ESCOLHA O PAGAMENTO</h2>
                 <p id="price-display" style="color:#cc0000; font-weight:bold; margin-top:10px;">VALOR: R$ 97,97</p>
                 
-              <div id="pay-options">
-    
-   <div class="legal-check-wrapper" style="justify-content: center; margin-bottom: 15px;">
-    <input type="checkbox" id="check-terms-mp" onchange="toggleMPButton()">
-    <span style="color: #ccc; font-size: 0.9rem;">
-        Li e aceito os <a href="#" onclick="openLegalModal('modalTermos')" style="color: #cc0000; text-decoration: underline;">Termos de Uso</a>
-    </span>
-</div>
+                <div id="pay-options">
+                    <div class="legal-check-wrapper" style="justify-content: center; margin-bottom: 15px;">
+                        <input type="checkbox" id="check-terms-mp" onchange="toggleMPButton()">
+                        <span style="color: #ccc; font-size: 0.9rem;">
+                            Li e aceito os <a href="#" onclick="openLegalModal('modalTermos')" style="color: #cc0000; text-decoration: underline;">Termos de Uso</a>
+                        </span>
+                    </div>
 
-    <button id="btn-mp-pro" class="pay-option-btn" onclick="startCheckoutPro()" disabled 
-        style="background: #cc0000; border-color: #cc0000; box-shadow: none; opacity: 0.5; cursor: not-allowed; transition: 0.3s;">
-        <i class="fa-solid fa-hand-holding-dollar" style="color: white;"></i> 
-        PAGAR COM MERCADO PAGO
-        <span style="font-size:0.7rem; color:#fff; opacity: 0.9;">Pix, Cartão e Boleto (Ambiente Seguro)</span>
-    </button>
+                    <button id="btn-mp-pro" class="pay-option-btn" onclick="startCheckoutPro()" disabled 
+                        style="background: #cc0000; border-color: #cc0000; box-shadow: none; opacity: 0.5; cursor: not-allowed; transition: 0.3s;">
+                        <i class="fa-solid fa-hand-holding-dollar" style="color: white;"></i> 
+                        PAGAR COM MERCADO PAGO
+                        <span style="font-size:0.7rem; color:#fff; opacity: 0.9;">Pix, Cartão e Boleto (Ambiente Seguro)</span>
+                    </button>
 
-    <div id="pay-stripe" style="display:none;">
-    <div style="margin: 30px 0; text-align: center;">
-        <i class="fa-brands fa-stripe fa-3x" style="color: #635bff; margin-bottom: 10px;"></i>
-        <p style="color:#ccc; font-size: 0.9rem;">Pagamento Internacional Seguro / Secure Payment</p>
-    </div>
+                    <button id="btn-opt-stripe" class="pay-option-btn" style="display:none;">
+                        <i class="fa-brands fa-stripe-s"></i> INTERNACIONAL (STRIPE)
+                    </button>
+                    
+                    <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
+                </div>
 
-    <div class="legal-check-wrapper" style="justify-content: center; margin-bottom: 15px;">
-        <input type="checkbox" id="legalCheckStripe" onchange="toggleStripeButton()"> <span style="color: #ccc; font-size: 0.9rem;">
-            I agree with the <a href="#" onclick="openLegalModal('modalTermos')" style="color: #635bff; text-decoration: underline;">Terms of Use</a>
-        </span>
-    </div>
+                <div id="pay-stripe" style="display:none;">
+                    <div style="margin: 30px 0; text-align: center;">
+                        <i class="fa-brands fa-stripe fa-3x" style="color: #635bff; margin-bottom: 10px;"></i>
+                        <p style="color:#ccc; font-size: 0.9rem;">Pagamento Internacional Seguro / Secure Payment</p>
+                    </div>
 
-    <button id="btn-stripe-go" class="pay-option-btn" onclick="startStripeCheckout()" disabled 
-        style="background: #635bff; border-color: #635bff; box-shadow: none; opacity: 0.5; cursor: not-allowed; transition: 0.3s; margin-bottom: 10px;">
-        <i class="fa-regular fa-credit-card" style="color: white;"></i>
-        PAY WITH CARD (STRIPE)
-        <span style="font-size:0.7rem; color:#fff; opacity: 0.9;">Credit/Debit Card • Global Secure</span>
-    </button>
-    
-    <button class="btn-cancel" onclick="cancelRegistration()">Cancelar e Sair</button>
-</div>
+                    <div class="legal-check-wrapper" style="justify-content: center; margin-bottom: 15px;">
+                        <input type="checkbox" id="legalCheckStripe" onchange="toggleStripeButton()">
+                        <span style="color: #ccc; font-size: 0.9rem;">
+                            I agree with the <a href="#" onclick="openLegalModal('modalTermos')" style="color: #635bff; text-decoration: underline;">Terms of Use</a>
+                        </span>
+                    </div>
+
+                    <button id="btn-stripe-go" class="pay-option-btn" onclick="startStripeCheckout()" disabled 
+                        style="background: #635bff; border-color: #635bff; box-shadow: none; opacity: 0.5; cursor: not-allowed; transition: 0.3s; margin-bottom: 10px;">
+                        <i class="fa-regular fa-credit-card" style="color: white;"></i>
+                        PAY WITH CARD (STRIPE)
+                        <span style="font-size:0.7rem; color:#fff; opacity: 0.9;">Credit/Debit Card • Global Secure</span>
+                    </button>
+
+                    <button class="switch-btn" onclick="cancelRegistration()">Cancelar / Cancel</button>
+                </div>
+            </div>
                 <div id="pay-pix" style="display:none;">
                     <div id="pay-content-pix" style="margin: 20px 0;">
                         <p style="color:#888;">Gerando QR Code...</p>
