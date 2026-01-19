@@ -1,95 +1,178 @@
 const API_URL = '/api';
 
+// --- SONS ---
 const audioSuccess = new Audio('success.wav');
 const audioError = new Audio('error.wav');
-audioSuccess.volume = 0.5; // Ajuste o volume (0.0 a 1.0)
+audioSuccess.volume = 0.5;
 audioError.volume = 0.5;
 
-        let currentUserId = null;
-        let currentUserEmail = null;
-        let mp = null;
-        let cardForm = null;
+// --- VARIÁVEIS GLOBAIS ---
+let currentUserId = null;
+let currentUserEmail = null;
+let mp = null;
 
-  // 1. INICIALIZAÇÃO
-        // Substitua a função initApp por esta versão atualizada:
+// --- 1. CONFIGURAÇÃO DE PREÇOS (NO TOPO PARA NÃO FALHAR) ---
+const PRICING_DISPLAY = {
+    'BRL': { text: 'R$ 97.97', val: 97.97 },
+    'USD': { text: '$ 19.90', val: 19.90 },
+    'EUR': { text: '€ 19.90', val: 19.90 },
+    'JPY': { text: '¥ 3.000', val: 3000 },
+    'GBP': { text: '£ 14.90', val: 14.90 },
+    'CAD': { text: 'C$ 29.90', val: 29.90 },
+    'AUD': { text: 'A$ 29.90', val: 29.90 }
+};
 
+// --- 2. INICIALIZAÇÃO DO APP ---
 async function initApp() {
-    // Animações
+    // Animações de Scroll
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
     });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     
-    // Mercado Pago Configuration
+    // Configuração do Mercado Pago
     try {
         const res = await fetch(`${API_URL}/config`);
         const data = await res.json();
         if(data.publicKey) mp = new MercadoPago(data.publicKey);
     } catch(e) { console.error("Erro MP Config", e); }
 
-    // --- CORREÇÃO 1: Adiciona o "ouvinte" no Checkbox do Stripe ---
+    // LISTENERS (Ouvintes de eventos)
+    
+    // 1. Trava do Stripe (Termos)
     const checkStripe = document.getElementById('legalCheckStripe');
     if(checkStripe) {
         checkStripe.addEventListener('change', toggleStripeButton);
     }
 
-    // Atualiza preço inicial
+    // 2. Trava do Mercado Pago (Termos)
+    const checkMP = document.getElementById('check-terms-mp');
+    if(checkMP) {
+        checkMP.addEventListener('change', toggleMPButton);
+    }
+
+    // ATUALIZAÇÃO DE UI (Preço e Botões)
+    // Roda imediato e reforça após 0.5s para garantir
+    updatePriceUI();
     setTimeout(() => { updatePriceUI(); }, 500);
 }
-        
-        // Chama a função para iniciar tudo
-        initApp();
 
-       // --- CORREÇÃO DE PREÇO E UI (DADOS) ---
+// Inicia o sistema
+initApp();
 
-        const PRICING_DISPLAY = {
-            'BRL': { text: 'R$ 97.97', val: 97.97 }, // Preço BR Correto
-            'USD': { text: '$ 19.90', val: 19.90 },
-            'EUR': { text: '€ 19.90', val: 19.90 },
-            'JPY': { text: '¥ 3.000', val: 3000 },
-            'GBP': { text: '£ 14.90', val: 14.90 },
-            'CAD': { text: 'C$ 29.90', val: 29.90 },
-            'AUD': { text: 'A$ 29.90', val: 29.90 }
-        };
 
-        // 2. LÓGICA DE MOEDA (Brasil = MP / Fora = Stripe)
-        // --- AQUI ESTÁ A CORREÇÃO Nº 3: A FUNÇÃO ROBUSTA ---
-        function updatePriceUI() {
-            const currency = getUserCurrency(); // Detecta a moeda do navegador
-            
-            // Pega as informações da tabela acima (fallback para USD se não achar)
-            const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
-            
-            // Atualiza o texto na tela
-            const el = document.getElementById('price-display');
-            if(el) {
-                el.innerText = `VALOR: ${displayInfo.text}`;
-            } else {
-                console.warn("Aviso: Elemento 'price-display' não encontrado no HTML.");
-            }
+// --- 3. LÓGICA DE UI E MOEDA ---
 
-            // Botões de pagamento (Troca entre MP e Stripe)
-            const btnMP = document.getElementById('btn-mp-pro'); 
-            const btnStripe = document.getElementById('btn-opt-stripe'); 
+function getUserCurrency() {
+    const lang = navigator.language || navigator.userLanguage; 
+    
+    if (lang.includes('pt')) return 'BRL'; 
+    if (lang === 'pt-PT') return 'EUR';    
+    if (lang.includes('ja')) return 'JPY'; 
+    if (lang.includes('en-GB')) return 'GBP';
+    if (lang.includes('en-CA')) return 'CAD'; 
+    if (lang.includes('en-AU')) return 'AUD'; 
+    if (['es', 'fr', 'de', 'it', 'nl'].some(l => lang.startsWith(l))) return 'EUR';
 
-            if (currency === 'BRL') {
-                // SE FOR BRASIL: Mostra MP, Esconde Stripe
-                if(btnMP) btnMP.style.display = 'flex';
-                if(btnStripe) btnStripe.style.display = 'none';
-            } else {
-                // SE FOR GRINGO: Esconde MP, Mostra Stripe
-                if(btnMP) btnMP.style.display = 'none';
-                if(btnStripe) btnStripe.style.display = 'flex';
-            }
+    return 'USD'; // Padrão Mundial
+}
+
+function updatePriceUI() {
+    const currency = getUserCurrency();
+    const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
+    
+    // Atualiza Texto do Preço
+    const el = document.getElementById('price-display');
+    if(el) el.innerText = `VALOR: ${displayInfo.text}`;
+
+    // A lógica de esconder/mostrar botões agora fica no resetPaymentView
+    // mas podemos reforçar aqui se necessário.
+}
+
+// --- 4. O PORTEIRO (Lógica do Modal de Pagamento) ---
+// Essa função decide se mostra o MENU ou o STRIPE DIRETO
+function resetPaymentView() {
+    const opts = document.getElementById('pay-options'); // Menu com opções (MP, etc)
+    const stripeView = document.getElementById('pay-stripe'); // Tela final do Stripe
+    const currency = getUserCurrency();
+
+    // 1. Reseta Checkboxes e Botões para o estado "desabilitado"
+    const checkStripe = document.getElementById('legalCheckStripe');
+    if(checkStripe) {
+        checkStripe.checked = false;
+        toggleStripeButton(); // Aplica o visual desabilitado
+    }
+    
+    const checkMP = document.getElementById('check-terms-mp');
+    if(checkMP) {
+        checkMP.checked = false;
+        toggleMPButton();
+    }
+
+    // 2. ROTEADOR DE TELAS
+    if (currency === 'BRL') {
+        // BRASILEIRO: Vê o menu (onde tem o botão do Mercado Pago)
+        if(opts) opts.style.display = 'block';
+        if(stripeView) stripeView.style.display = 'none';
+    } else {
+        // ESTRANGEIRO: Pula o menu e cai DIRETO no formulário Stripe
+        if(opts) opts.style.display = 'none';
+        if(stripeView) stripeView.style.display = 'block';
+    }
+}
+
+
+// --- 5. FUNÇÕES DE TRAVA DOS BOTÕES (Termos) ---
+
+function toggleStripeButton() {
+    const chk = document.getElementById('legalCheckStripe');
+    const btn = document.getElementById('btn-stripe-go');
+    
+    if (chk && btn) {
+        if (chk.checked) {
+            // HABILITA
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.boxShadow = '0 0 15px rgba(100, 100, 255, 0.4)'; 
+        } else {
+            // DESABILITA
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.boxShadow = 'none';
         }
+    }
+}
 
-// 3. INICIAR CHECKOUT MERCADO PAGO (BRASIL)
+function toggleMPButton() {
+    const chk = document.getElementById('check-terms-mp');
+    const btn = document.getElementById('btn-mp-pro');
+    
+    if (chk && btn) {
+        if (chk.checked) {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.boxShadow = '0 0 15px rgba(0, 200, 0, 0.4)'; 
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.boxShadow = 'none';
+        }
+    }
+}
+
+
+// --- 6. CHECKOUTS (PAGAMENTO) ---
+
+// Checkout Mercado Pago (Brasil)
 async function startCheckoutPro() {
     const btn = document.getElementById('btn-mp-pro');
     const originalText = btn.innerHTML;
     
-    // Feedback visual
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...';
     btn.disabled = true;
 
     try {
@@ -100,14 +183,11 @@ async function startCheckoutPro() {
                 userId: currentUserId, 
                 email: currentUserEmail,
                 title: 'Acesso Próxyz Library'
-                // NÃO enviamos mais o "price" aqui, o servidor define 97.97
             })
         });
 
         const data = await res.json();
-
         if (data.init_point) {
-            // REDIRECIONA O USUÁRIO
             window.location.href = data.init_point;
         } else {
             alert('Erro ao gerar pagamento.');
@@ -122,125 +202,45 @@ async function startCheckoutPro() {
     }
 }
 
-        // 2. FUNÇÕES DE MODAL
-        function showMsg(title, text, type='info') {
-            document.getElementById('msgTitle').innerText = title;
-            document.getElementById('msgText').innerText = text;
-            const icon = document.getElementById('msgIcon');
-            icon.className = 'msg-icon fa-solid ' + (type === 'success' ? 'fa-check-circle msg-success' : type === 'error' ? 'fa-circle-xmark msg-error' : 'fa-circle-exclamation msg-info');
-            document.getElementById('msgModal').style.display = 'flex';
-            // TOCA O SOM BASEADO NO TIPO
-    if (type === 'success') {
-        audioSuccess.currentTime = 0;
-        audioSuccess.play();
-    } else {
-        // Serve para 'error' e 'info'
-        audioError.currentTime = 0;
-        audioError.play();
-    }
+// Checkout Stripe (Internacional)
+async function startStripeCheckout() {
+    const btn = document.getElementById('btn-stripe-go');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
+    btn.disabled = true;
+
+    const myCurrency = getUserCurrency();
+
+    try {
+        const res = await fetch(`${API_URL}/create-stripe-session`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                userId: currentUserId, 
+                email: currentUserEmail,
+                countryCode: myCurrency 
+            })
+        });
+
+        const data = await res.json();
+        if (data.url) {
+            window.location.href = data.url;
+        } else {
+            alert('Erro ao iniciar Stripe.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
-
-        function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
-        
-        function openModal(step) { document.getElementById('authModal').style.display = 'flex'; switchStep(step==='login'?'step-login':'step-signup'); }
-        
-        function closeModal() {
-            document.getElementById('authModal').style.display = 'none';
-        }
-
-        function switchStep(stepId) {
-            document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
-            document.getElementById(stepId).classList.add('active');
-            document.querySelector('.close-modal').style.display = 'block';
-        }
-
-        // --- AQUI ESTAVA O ERRO: MANTENHA APENAS ESTA VERSÃO ---
-        function openLegalModal(id) { 
-            const modal = document.getElementById(id);
-            // Força o modal de termos a ficar ACIMA do modal de pagamento (que tem z-index 2000)
-            modal.style.zIndex = '2005'; 
-            modal.style.display = 'flex'; 
-        }
-        
-        // APAGUE A LINHA QUE TINHA AQUI (a antiga openLegalModal)
-        
-        function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
-
-       
-        // Substitua a função resetPaymentView antiga por esta:
-
-function resetPaymentView() {
-    const opts = document.getElementById('pay-options');
-    const stripeView = document.getElementById('pay-stripe');
-    const currency = getUserCurrency(); // Detecta a moeda
-
-    // 1. Reseta os formulários
-    const checkStripe = document.getElementById('legalCheckStripe');
-    if(checkStripe) checkStripe.checked = false;
-    
-    // Reseta botão Stripe (chama a função que acabamos de criar)
-    toggleStripeButton();
-
-    const checkPix = document.getElementById('legalCheckPix'); // (Caso ainda exista no HTML)
-    if(checkPix) checkPix.checked = false;
-
-    // 2. LÓGICA INTELIGENTE DE EXIBIÇÃO
-    if (currency === 'BRL') {
-        // Se for BRASIL -> Mostra as opções (Onde tem o botão do Mercado Pago)
-        if(opts) opts.style.display = 'block';
-        if(stripeView) stripeView.style.display = 'none';
-    } else {
-        // Se for GRINGO -> PULA o menu e vai DIRETO para o Stripe Final
-        if(opts) opts.style.display = 'none';
-        if(stripeView) stripeView.style.display = 'block';
+    } catch(e) {
+        console.error(e);
+        alert('Erro de conexão Stripe.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 
-        // NOVA FUNÇÃO: View do Stripe
-        function showStripeView() {
-            document.getElementById('pay-options').style.display = 'none';
-            document.getElementById('pay-stripe').style.display = 'block';
-        }
 
-        async function startStripeCheckout() {
-            const btn = document.getElementById('btn-stripe-go');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Redirecionando...';
-            btn.disabled = true;
+// --- 7. SISTEMA DE LOGIN E CADASTRO ---
 
-            // Pega a moeda detectada
-            const myCurrency = getUserCurrency();
-
-            try {
-                const res = await fetch(`${API_URL}/create-stripe-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        userId: currentUserId, 
-                        email: currentUserEmail,
-                        countryCode: myCurrency // <--- ENVIA A MOEDA AQUI
-                    })
-                });
-
-                const data = await res.json();
-
-                if (data.url) {
-                    window.location.href = data.url;
-                } else {
-                    alert('Erro ao iniciar pagamento.');
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }
-
-            } catch(e) {
-                console.error(e);
-                showMsg('Erro', 'Não foi possível conectar ao Stripe.', 'error');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // 4. LÓGICA DE USUÁRIO
 async function loginUser() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPass').value;
@@ -254,236 +254,175 @@ async function loginUser() {
         const data = await res.json();
         
         if(res.ok) {
-            // [SUCESSO] TOCA O SOM AQUI
             audioSuccess.currentTime = 0;
-            audioSuccess.play().catch(e => console.log("Som bloqueado pelo navegador"));
-
-            // 1. Salva o Token
+            audioSuccess.play().catch(e=>{});
             localStorage.setItem('token', data.token);
-            
-            // 2. SALVA O NOME DO USUÁRIO
             localStorage.setItem('user', JSON.stringify(data.user)); 
-
-            // 3. Redireciona
             window.location.href='indexT2.html';
         
         } else if(res.status===403) {
-            // [PAGAMENTO PENDENTE] TOCA SOM DE ALERTA/ERRO AQUI
+            // Pagamento Pendente -> Manda para Tela de Pagamento
             audioError.currentTime = 0;
-            audioError.play().catch(e => console.log("Som bloqueado"));
+            audioError.play().catch(e=>{});
 
-            currentUserId = data.userId; currentUserEmail = data.email;
+            currentUserId = data.userId; 
+            currentUserEmail = data.email;
+            
             showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
-            openModal('signup'); switchStep('step-payment'); resetPaymentView(); updatePriceUI();
+            openModal('signup'); 
+            switchStep('step-payment'); // Vai para tela de pagamento
+            resetPaymentView(); // <--- AQUI ESTÁ A MÁGICA: Decide qual tela mostrar
+            updatePriceUI();
 
         } else {
-            // [ERRO GERAL - SENHA ERRADA, ETC] TOCA SOM DE ERRO AQUI
             audioError.currentTime = 0;
-            audioError.play().catch(e => console.log("Som bloqueado"));
-
+            audioError.play().catch(e=>{});
             showMsg('Erro', data.error, 'error');
         }
     } catch(e) { 
-        // [ERRO DE CONEXÃO] TOCA SOM DE ERRO AQUI TAMBÉM
         audioError.currentTime = 0;
-        audioError.play().catch(e => console.log("Som bloqueado"));
-
+        audioError.play().catch(e=>{});
         showMsg('Erro', 'Falha na conexão.', 'error'); 
     }
 }
 
-        async function validateAndGoToPayment() {
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const pass = document.getElementById('regPass').value;
-            const whatsapp = document.getElementById('whatsappInput').value.replace(/\D/g,'');
+async function validateAndGoToPayment() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPass').value;
+    const whatsapp = document.getElementById('whatsappInput').value.replace(/\D/g,'');
 
-            let hasError = false;
-            if(!name) { showError('regName', 'Nome obrigatório'); hasError=true; }
-            if(!validateEmail(email)) { showError('regEmail', 'Inválido'); hasError=true; }
-            if(pass.length < 8) { showError('regPass', 'Mínimo 8'); hasError=true; }
-            if(whatsapp.length < 8) { showError('whatsappInput', 'Inválido'); hasError=true; }
-            if(hasError) return;
+    let hasError = false;
+    if(!name) { showError('regName', 'Nome obrigatório'); hasError=true; }
+    if(!validateEmail(email)) { showError('regEmail', 'Inválido'); hasError=true; }
+    if(pass.length < 8) { showError('regPass', 'Mínimo 8'); hasError=true; }
+    if(whatsapp.length < 8) { showError('whatsappInput', 'Inválido'); hasError=true; }
+    if(hasError) return;
 
-            const btn = document.querySelector('#step-signup .btn-main');
-            const txt = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processando...'; btn.disabled = true;
-
-            try {
-                const res = await fetch(`${API_URL}/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password:pass,whatsapp})});
-                const data = await res.json();
-                if(res.ok) {
-                    currentUserId = data.userId; currentUserEmail = data.email;
-                    switchStep('step-payment'); resetPaymentView(); updatePriceUI();
-                } else showMsg('Erro', data.error, 'error');
-            } catch(e) { showMsg('Erro', 'Falha ao criar conta.', 'error'); }
-            finally { btn.innerHTML = txt; btn.disabled = false; }
-        }
-
-        async function cancelRegistration() {
-            if(currentUserId) {
-                try { await fetch(`${API_URL}/cancel-register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUserId}) }); }
-                catch(e){}
-            }
-            currentUserId = null;
-            document.getElementById('authModal').style.display = 'none';
-            switchStep('step-login');
-        }
-
-  // --- SUBSTITUA A FUNÇÃO sendRecoveryEmail POR ESTA ---
-
-async function requestPasswordReset() {
-    // Atenção aos IDs aqui: 'forgotEmail' e 'btn-forgot'
-    const emailInput = document.getElementById('forgotEmail'); 
-    const btn = document.getElementById('btn-forgot');
-    
-    if(!emailInput || !emailInput.value) {
-        alert('Por favor, digite seu e-mail.');
-        return;
-    }
-
-    const originalText = btn.innerText;
-    btn.innerText = 'Enviando...';
+    const btn = document.querySelector('#step-signup .btn-main');
+    const txt = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Criando conta...'; 
     btn.disabled = true;
 
     try {
+        const res = await fetch(`${API_URL}/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,password:pass,whatsapp})});
+        const data = await res.json();
+        if(res.ok) {
+            currentUserId = data.userId; currentUserEmail = data.email;
+            
+            // SUCESSO NO CADASTRO -> MANDA PRO PAGAMENTO
+            switchStep('step-payment'); 
+            resetPaymentView(); // <--- AQUI: Ajusta a tela para Gringo ou BR
+            updatePriceUI();
+        } else showMsg('Erro', data.error, 'error');
+    } catch(e) { showMsg('Erro', 'Falha ao criar conta.', 'error'); }
+    finally { btn.innerHTML = txt; btn.disabled = false; }
+}
+
+async function cancelRegistration() {
+    if(currentUserId) {
+        try { await fetch(`${API_URL}/cancel-register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:currentUserId}) }); }
+        catch(e){}
+    }
+    currentUserId = null;
+    document.getElementById('authModal').style.display = 'none';
+    switchStep('step-login');
+}
+
+async function requestPasswordReset() {
+    const emailInput = document.getElementById('forgotEmail'); 
+    const btn = document.getElementById('btn-forgot');
+    
+    if(!emailInput || !emailInput.value) { alert('Digite seu e-mail.'); return; }
+
+    const originalText = btn.innerText;
+    btn.innerText = 'Enviando...'; btn.disabled = true;
+
+    try {
         const res = await fetch(`${API_URL}/forgot-password`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailInput.value })
         });
-
-        const data = await res.json();
-
         if (res.ok) {
-            alert('E-mail enviado! Verifique sua caixa de entrada (e spam).');
-            emailInput.value = '';
-            closeModal(); 
-        } else {
-            alert(data.error || 'Erro ao enviar.');
-        }
-    } catch (error) {
-        console.error(error);
-        alert('Erro de conexão.');
-    } finally {
-        btn.innerText = originalText;
-        btn.disabled = false;
+            alert('E-mail enviado!'); emailInput.value = ''; closeModal(); 
+        } else { alert('Erro ao enviar.'); }
+    } catch (error) { alert('Erro de conexão.'); } 
+    finally { btn.innerText = originalText; btn.disabled = false; }
+}
+
+
+// --- 8. HELPERS E MODAIS ---
+
+function showMsg(title, text, type='info') {
+    document.getElementById('msgTitle').innerText = title;
+    document.getElementById('msgText').innerText = text;
+    const icon = document.getElementById('msgIcon');
+    icon.className = 'msg-icon fa-solid ' + (type === 'success' ? 'fa-check-circle msg-success' : type === 'error' ? 'fa-circle-xmark msg-error' : 'fa-circle-exclamation msg-info');
+    document.getElementById('msgModal').style.display = 'flex';
+    
+    if (type === 'success') {
+        audioSuccess.currentTime = 0; audioSuccess.play();
+    } else {
+        audioError.currentTime = 0; audioError.play();
     }
 }
 
-    // --- DETECTOR DE MOEDA ---
-function getUserCurrency() {
-    const lang = navigator.language || navigator.userLanguage; // Ex: 'pt-BR', 'en-US'
-    
-    // Mapeamento simples de Região -> Moeda
-    if (lang.includes('pt')) return 'BRL'; // Brasil, Portugal (cuidado, Portugal usa EUR, ver ajuste abaixo)
-    if (lang === 'pt-PT') return 'EUR';    // Correção para Portugal
-    
-    if (lang.includes('ja')) return 'JPY'; // Japão
-    if (lang.includes('en-GB')) return 'GBP'; // Reino Unido
-    if (lang.includes('en-CA')) return 'CAD'; // Canadá
-    if (lang.includes('en-AU')) return 'AUD'; // Austrália
-    
-    // Europa (Simplificado - pega principais línguas do Euro)
-    if (['es', 'fr', 'de', 'it', 'nl'].some(l => lang.startsWith(l))) return 'EUR';
+function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
 
-    return 'USD'; // Resto do mundo
+function openModal(step) { 
+    document.getElementById('authModal').style.display = 'flex'; 
+    switchStep(step==='login'?'step-login':'step-signup'); 
 }
 
-        // Helpers
-        function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }
-        function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-        function showError(id, msg) { const el=document.getElementById(id); el.classList.add('input-invalid'); const sp=el.previousElementSibling; if(sp) {sp.innerText=msg; sp.style.display='block';} }
-        function clearError(i) { i.classList.remove('input-invalid'); i.previousElementSibling.style.display='none'; }
-        
-        function flipCard(el) { el.classList.toggle('flipped'); }
-        function resetLuckySection() {
-            document.getElementById('prizeDisplay').classList.remove('active');
-            document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '1');
-        } 
-        function chooseSide(side) { 
-            if (side === 'left') { document.querySelectorAll('.hand-coin').forEach(c => c.style.opacity = '0'); document.getElementById('prizeDisplay').classList.add('active'); } 
-            else { openModal('signup'); resetLuckySection(); }
-        }
+function closeModal() { document.getElementById('authModal').style.display = 'none'; }
 
-   // --- VERIFICADOR UNIFICADO DE PAGAMENTOS (STRIPE E MERCADO PAGO) ---
+function switchStep(stepId) {
+    document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+    document.querySelector('.close-modal').style.display = 'block';
+}
+
+function openLegalModal(id) { 
+    const modal = document.getElementById(id);
+    modal.style.zIndex = '2005'; 
+    modal.style.display = 'flex'; 
+}
+
+function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
+
+function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function showError(id, msg) { const el=document.getElementById(id); el.classList.add('input-invalid'); const sp=el.previousElementSibling; if(sp) {sp.innerText=msg; sp.style.display='block';} }
+function clearError(i) { i.classList.remove('input-invalid'); i.previousElementSibling.style.display='none'; }
+
+
+// --- 9. VERIFICAÇÃO DE RETORNO (URL) ---
 const urlParams = new URLSearchParams(window.location.search);
-const paymentStatus = urlParams.get('payment'); // Pega o status ('success', 'mp_approved', etc.)
-const sessionId = urlParams.get('session_id');  // Só existe no Stripe
+const paymentStatus = urlParams.get('payment');
+const sessionId = urlParams.get('session_id');
 
-// 1. CASO STRIPE (Identificado por 'success' E presença de session_id)
 if (paymentStatus === 'success' && sessionId) {
     showMsg('Processando...', 'Validando Stripe...', 'info');
-    
     fetch(`${API_URL}/check-stripe-payment/${sessionId}`)
         .then(res => res.json())
         .then(data => {
             if (data.status === 'paid') {
-                showMsg('Sucesso!', 'Pagamento Stripe confirmado!', 'success');
-                window.history.replaceState({}, document.title, "indexT1.html"); // Limpa URL
+                showMsg('Sucesso!', 'Acesso Liberado!', 'success');
+                window.history.replaceState({}, document.title, "indexT1.html");
                 openModal('login');
-            } else {
-                showMsg('Atenção', 'Pagamento Stripe pendente.', 'error');
-            }
-        })
-        .catch(err => console.error(err));
+            } else { showMsg('Atenção', 'Pagamento pendente.', 'error'); }
+        }).catch(err => console.error(err));
 } 
-
-// 2. CASO MERCADO PAGO (Identificado pelos nossos códigos 'mp_')
 else if (paymentStatus === 'mp_approved') {
-    showMsg('Sucesso!', 'Pagamento via Mercado Pago confirmado!', 'success');
-    window.history.replaceState({}, document.title, "indexT1.html"); // Limpa URL
+    showMsg('Sucesso!', 'Pagamento Confirmado!', 'success');
+    window.history.replaceState({}, document.title, "indexT1.html");
     openModal('login');
 } 
 else if (paymentStatus === 'mp_pending') {
-    showMsg('Aguardando', 'Seu pagamento (Pix/Boleto) está sendo processado.', 'info');
+    showMsg('Aguardando', 'Pagamento em processamento.', 'info');
     window.history.replaceState({}, document.title, "indexT1.html");
 } 
 else if (paymentStatus === 'mp_failure') {
-    showMsg('Erro', 'O pagamento não foi concluído. Tente novamente.', 'error');
+    showMsg('Erro', 'Pagamento não concluído.', 'error');
     window.history.replaceState({}, document.title, "indexT1.html");
-}
-
-// --- FUNÇÃO PARA LIBERAR O BOTÃO DE PAGAMENTO ---
-function toggleMPButton() {
-    const chk = document.getElementById('check-terms-mp');
-    const btn = document.getElementById('btn-mp-pro');
-    
-    if (chk && btn) {
-        if (chk.checked) {
-            // HABILITA O BOTÃO (Visual Aceso)
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.style.cursor = 'pointer';
-            btn.style.boxShadow = '0 0 15px rgba(204, 0, 0, 0.4)'; // Volta o brilho
-        } else {
-            // DESABILITA O BOTÃO (Visual Apagado)
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-            btn.style.boxShadow = 'none'; // Tira o brilho
-        }
-    }
-}
-
-// --- NOVA FUNÇÃO: TRAVA O BOTÃO STRIPE ---
-function toggleStripeButton() {
-    const chk = document.getElementById('legalCheckStripe');
-    const btn = document.getElementById('btn-stripe-go');
-    
-    if (chk && btn) {
-        if (chk.checked) {
-            // HABILITA
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            btn.style.cursor = 'pointer';
-            btn.style.boxShadow = '0 0 15px rgba(100, 100, 255, 0.4)'; // Brilho azulado pro Stripe
-        } else {
-            // DESABILITA
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-            btn.style.boxShadow = 'none';
-        }
-    }
 }
