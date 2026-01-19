@@ -12,17 +12,13 @@
     <link rel="stylesheet" href="styleT2.css">
 </head>
 <body>
+
     <div id="menu-overlay"></div>
 
     <aside class="sidebar">
-        <div class="sidebar-header-mobile">
-            <div class="sidebar-logo">
-                <img src="l.png" alt="Logo">
-                <span>PRÓXYZ</span>
-            </div>
-            <button class="close-sidebar-btn" onclick="toggleMobileMenu()">
-                <i class="fa-solid fa-times"></i>
-            </button>
+        <div class="sidebar-logo">
+            <img src="l.png" alt="Logo">
+            <span>PRÓXYZ</span>
         </div>
 
         <button class="nav-btn active" onclick="filterByCategory('all', this)">
@@ -36,33 +32,33 @@
         <div class="divider"></div>
         <div class="cat-title">Áreas de Atuação</div>
 
-        <div id="category-list" class="category-scroll" onclick="checkMobileClick(event)">
+        <div id="category-list" class="category-scroll">
             </div>
     </aside>
 
     <main class="main-content">
         <div class="header-bar">
-            <div class="top-row">
-                <div class="left-group">
-                    <button id="mobile-menu-btn" onclick="toggleMobileMenu()">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <div class="user-info">
-                        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-                        <span id="userName">Membro</span>
-                    </div>
-                </div>
-                
-                <button class="logout-btn" onclick="logout()">
-                    SAIR <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </div>
+            <button id="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
 
             <div class="search-box">
                 <i class="fa-solid fa-search"></i>
                 <input type="text" id="searchInput" placeholder="Pesquisar prompt..." onkeyup="searchPrompts()">
             </div>
+
+            <div class="user-info">
+                <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+                <span id="userName">Membro</span>
+                <button class="logout-btn" onclick="logout()">SAIR</button>
+            </div>
         </div>
+
+        <div id="view-indexT2" class="view-section active">
+            <div class="section-info">
+                <h2 id="page-title">TODOS OS PROMPTS</h2>
+                <span id="prompt-count" style="color:#666; font-size:0.9rem; margin-left: 15px;">Carregando...</span>
+            </div>
 
             <div class="dash-grid" id="promptsGrid">
                 </div>
@@ -109,9 +105,6 @@
             </div>
             <div class="footer-center">
                 &copy; 2025 PRÓXYZ LIBRARY. <br>Todos os direitos reservados.
-            </div>
-            <div class="footer-left">
-                As respostas da IA são para fins informativos e educacionais e não substituem aconselhamento profissional real
             </div>
             <div class="">
                 <i class="fa-brands fa-whatsapp"></i> +55 (14) 99605-4122
