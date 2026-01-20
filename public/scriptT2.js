@@ -189,25 +189,28 @@ function renderPrompts(promptsList) {
     });
 }
 
-    /* --- 2. FUNÇÃO DE FILTRO (Fecha o menu ao clicar) --- */
+   // 2. Função de Filtro (Fecha o menu ao clicar)
 function filterByCategory(category, btnElement) {
-    // Ação padrão
     switchView('indexT2');
+    
+    // Atualiza botões
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
 
+    // Atualiza Título
     const displayTitle = category === 'all' ? 'TODOS OS PROMPTS' : category.replace(/^\d+\.\s+/, '').toUpperCase();
     const titleEl = document.getElementById('page-title');
     if(titleEl) titleEl.innerText = displayTitle;
     
+    // Renderiza Prompts (Seus prompts vão aparecer agora pq a sidebar saiu da frente)
     if (category === 'all') renderPrompts(allPrompts);
     else renderPrompts(allPrompts.filter(p => p.category === category));
     
+    // Limpa busca
     const searchInp = document.getElementById('searchInput');
     if(searchInp) searchInp.value = '';
 
-    // --- CORREÇÃO MOBILE: FECHAR IMEDIATAMENTE ---
-    // Se a largura for de celular, removemos a classe 'active' à força
+    // LÓGICA MOBILE: Fechar a sidebar forçadamente
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
@@ -239,7 +242,7 @@ function copyToClipboard(text) {
     });
 }
 
-/* --- 3. FUNÇÃO DE TROCAR TELA (Fecha o menu ao clicar) --- */
+// 3. Função de Trocar Tela (Tutorial/Home)
 function switchView(viewId, btn) {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     const target = document.getElementById('view-' + viewId);
@@ -250,7 +253,7 @@ function switchView(viewId, btn) {
         btn.classList.add('active');
     }
 
-    // --- CORREÇÃO MOBILE: FECHAR IMEDIATAMENTE ---
+    // LÓGICA MOBILE: Fechar menu
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
@@ -271,12 +274,10 @@ async function logCopyAction(promptId) {
     } catch (e) { console.error("Erro log copy", e); }
 }
 
-/* --- 1. FUNÇÃO PARA ABRIR/FECHAR O MENU (Botão do Topo) --- */
+// 1. Função que o botão do cabeçalho chama (Alterna)
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('menu-overlay');
-    
-    // Simplesmente inverte o estado (se tá fechado abre, se tá aberto fecha)
     if(sidebar) sidebar.classList.toggle('active');
     if(overlay) overlay.classList.toggle('active');
 }
