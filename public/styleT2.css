@@ -195,4 +195,23 @@ footer {
         word-break: break-word; 
         font-size: 1.1rem; 
     }
+
+    footer {
+        flex-direction: column !important;
+        gap: 20px !important;
+        text-align: center !important;
+        padding-bottom: 30px; /* Um respiro no final da tela */
+    }
+
+    /* Centraliza os grupos (Ícone + Texto) */
+    .footer-left, .footer-right {
+        justify-content: center !important;
+        width: 100%; /* Garante que o container ocupe a linha toda */
+    }
+    
+    /* Garante que o texto fique legível */
+    .footer-center {
+        width: 100%;
+        margin: 0;
+    }
 }
