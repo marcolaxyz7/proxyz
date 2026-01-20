@@ -11,7 +11,7 @@ let currentUserId = null;
 let currentUserEmail = null;
 let mp = null;
 
-// --- 1. CONFIGURAÇÃO DE PREÇOS (NO TOPO PARA NÃO FALHAR) ---
+// --- 1. CONFIGURAÇÃO DE PREÇOS ---
 const PRICING_DISPLAY = {
     'BRL': { text: 'R$ 97.97', val: 97.97 },
     'USD': { text: '$ 19.90', val: 19.90 },
@@ -24,48 +24,32 @@ const PRICING_DISPLAY = {
 
 // --- 2. INICIALIZAÇÃO DO APP ---
 async function initApp() {
-    // Animações de Scroll
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
     });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     
-    // Configuração do Mercado Pago
     try {
         const res = await fetch(`${API_URL}/config`);
         const data = await res.json();
         if(data.publicKey) mp = new MercadoPago(data.publicKey);
     } catch(e) { console.error("Erro MP Config", e); }
 
-    // LISTENERS (Ouvintes de eventos)
-    
-    // 1. Trava do Stripe (Termos)
     const checkStripe = document.getElementById('legalCheckStripe');
-    if(checkStripe) {
-        checkStripe.addEventListener('change', toggleStripeButton);
-    }
+    if(checkStripe) checkStripe.addEventListener('change', toggleStripeButton);
 
-    // 2. Trava do Mercado Pago (Termos)
     const checkMP = document.getElementById('check-terms-mp');
-    if(checkMP) {
-        checkMP.addEventListener('change', toggleMPButton);
-    }
+    if(checkMP) checkMP.addEventListener('change', toggleMPButton);
 
-    // ATUALIZAÇÃO DE UI (Preço e Botões)
-    // Roda imediato e reforça após 0.5s para garantir
     updatePriceUI();
     setTimeout(() => { updatePriceUI(); }, 500);
 }
 
-// Inicia o sistema
 initApp();
 
-
 // --- 3. LÓGICA DE UI E MOEDA ---
-
 function getUserCurrency() {
     const lang = navigator.language || navigator.userLanguage; 
-    
     if (lang.includes('pt')) return 'BRL'; 
     if (lang === 'pt-PT') return 'EUR';    
     if (lang.includes('ja')) return 'JPY'; 
@@ -73,22 +57,15 @@ function getUserCurrency() {
     if (lang.includes('en-CA')) return 'CAD'; 
     if (lang.includes('en-AU')) return 'AUD'; 
     if (['es', 'fr', 'de', 'it', 'nl'].some(l => lang.startsWith(l))) return 'EUR';
-
-    return 'USD'; // Padrão Mundial
+    return 'USD';
 }
 
 function updatePriceUI() {
     const currency = getUserCurrency();
     const displayInfo = PRICING_DISPLAY[currency] || PRICING_DISPLAY['USD'];
-    
-    // Atualiza Texto do Preço
     const el = document.getElementById('price-display');
     if(el) el.innerText = `VALOR: ${displayInfo.text}`;
-
-    // A lógica de esconder/mostrar botões agora fica no resetPaymentView
-    // mas podemos reforçar aqui se necessário.
 }
-
 
 // --- 4. O PORTEIRO (Lógica do Modal) ---
 function resetPaymentView() {
@@ -96,32 +73,22 @@ function resetPaymentView() {
     const stripeView = document.getElementById('pay-stripe'); 
     const currency = getUserCurrency();
 
-    // 1. Reseta os estados (Desabilita botões visualmente)
     const checkStripe = document.getElementById('legalCheckStripe');
     if(checkStripe) { checkStripe.checked = false; toggleStripeButton(); }
     
     const checkMP = document.getElementById('check-terms-mp');
     if(checkMP) { checkMP.checked = false; toggleMPButton(); }
 
-    // Referência ao botão "Internacional" que precisa sumir no BR
     const btnStripeOption = document.getElementById('btn-opt-stripe'); 
 
-    // 2. LÓGICA DE EXIBIÇÃO
     if (currency === 'BRL') {
-        // === CASO BRASIL ===
-        // Mostra o container de opções (onde fica o Mercado Pago)
         if(opts) opts.style.display = 'block';
         if(stripeView) stripeView.style.display = 'none';
-
-        // TRAVA DE SEGURANÇA: Esconde o botão Internacional
         if(btnStripeOption) {
             btnStripeOption.style.display = 'none';
-            btnStripeOption.style.visibility = 'hidden'; // Garante que suma
+            btnStripeOption.style.visibility = 'hidden';
         }
-
     } else {
-        // === CASO GRINGO ===
-        // Esconde o menu BR e mostra o formulário Stripe direto
         if(opts) opts.style.display = 'none';
         if(stripeView) stripeView.style.display = 'block';
     }
@@ -134,13 +101,11 @@ function toggleStripeButton() {
     
     if (chk && btn) {
         if (chk.checked) {
-            // HABILITA (Aceso e com brilho roxo)
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
             btn.style.boxShadow = '0 0 15px rgba(99, 91, 255, 0.4)'; 
         } else {
-            // DESABILITA
             btn.disabled = true;
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
@@ -168,10 +133,7 @@ function toggleMPButton() {
     }
 }
 
-
 // --- 6. CHECKOUTS (PAGAMENTO) ---
-
-// Checkout Mercado Pago (Brasil)
 async function startCheckoutPro() {
     const btn = document.getElementById('btn-mp-pro');
     const originalText = btn.innerHTML;
@@ -206,7 +168,6 @@ async function startCheckoutPro() {
     }
 }
 
-// Checkout Stripe (Internacional)
 async function startStripeCheckout() {
     const btn = document.getElementById('btn-stripe-go');
     const originalText = btn.innerHTML;
@@ -242,9 +203,7 @@ async function startStripeCheckout() {
     }
 }
 
-
 // --- 7. SISTEMA DE LOGIN E CADASTRO ---
-
 async function loginUser() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPass').value;
@@ -263,21 +222,16 @@ async function loginUser() {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user)); 
             window.location.href='indexT2.html';
-        
         } else if(res.status===403) {
-            // Pagamento Pendente -> Manda para Tela de Pagamento
             audioError.currentTime = 0;
             audioError.play().catch(e=>{});
-
             currentUserId = data.userId; 
             currentUserEmail = data.email;
-            
             showMsg('Pagamento Pendente', 'Finalize o pagamento.', 'info');
             openModal('signup'); 
-            switchStep('step-payment'); // Vai para tela de pagamento
-            resetPaymentView(); // <--- AQUI ESTÁ A MÁGICA: Decide qual tela mostrar
+            switchStep('step-payment'); 
+            resetPaymentView(); 
             updatePriceUI();
-
         } else {
             audioError.currentTime = 0;
             audioError.play().catch(e=>{});
@@ -313,10 +267,8 @@ async function validateAndGoToPayment() {
         const data = await res.json();
         if(res.ok) {
             currentUserId = data.userId; currentUserEmail = data.email;
-            
-            // SUCESSO NO CADASTRO -> MANDA PRO PAGAMENTO
             switchStep('step-payment'); 
-            resetPaymentView(); // <--- AQUI: Ajusta a tela para Gringo ou BR
+            resetPaymentView();
             updatePriceUI();
         } else showMsg('Erro', data.error, 'error');
     } catch(e) { showMsg('Erro', 'Falha ao criar conta.', 'error'); }
@@ -354,9 +306,7 @@ async function requestPasswordReset() {
     finally { btn.innerText = originalText; btn.disabled = false; }
 }
 
-
 // --- 8. HELPERS E MODAIS ---
-
 function showMsg(title, text, type='info') {
     document.getElementById('msgTitle').innerText = title;
     document.getElementById('msgText').innerText = text;
@@ -372,33 +322,26 @@ function showMsg(title, text, type='info') {
 }
 
 function closeMsgModal() { document.getElementById('msgModal').style.display = 'none'; }
-
 function openModal(step) { 
     document.getElementById('authModal').style.display = 'flex'; 
     switchStep(step==='login'?'step-login':'step-signup'); 
 }
-
 function closeModal() { document.getElementById('authModal').style.display = 'none'; }
-
 function switchStep(stepId) {
     document.querySelectorAll('.modal-step').forEach(el => el.classList.remove('active'));
     document.getElementById(stepId).classList.add('active');
     document.querySelector('.close-modal').style.display = 'block';
 }
-
 function openLegalModal(id) { 
     const modal = document.getElementById(id);
     modal.style.zIndex = '2005'; 
     modal.style.display = 'flex'; 
 }
-
 function closeLegalModal(id) { document.getElementById(id).style.display = 'none'; }
-
 function formatGlobalPhone(input) { let v=input.value.replace(/[^0-9+]/g,''); if(v.includes('+')) v='+'+v.split('+').join(''); input.value=v; }
 function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 function showError(id, msg) { const el=document.getElementById(id); el.classList.add('input-invalid'); const sp=el.previousElementSibling; if(sp) {sp.innerText=msg; sp.style.display='block';} }
 function clearError(i) { i.classList.remove('input-invalid'); i.previousElementSibling.style.display='none'; }
-
 
 // --- 9. VERIFICAÇÃO DE RETORNO (URL) ---
 const urlParams = new URLSearchParams(window.location.search);
@@ -430,43 +373,38 @@ else if (paymentStatus === 'mp_failure') {
     showMsg('Erro', 'Pagamento não concluído.', 'error');
     window.history.replaceState({}, document.title, "indexT1.html");
 }
+// FECHAMENTO DO IF DE PAGAMENTO ACIMA ESTÁ OK. 
 
-// 1. Função para Girar os Cards (Flip)
+// --- FUNÇÕES GLOBAIS BLINDADAS (NOVO) ---
+// Colocadas fora de qualquer bloco para garantir que o navegador leia.
+
+// 1. CARDS
 window.flipCard = function(card) {
-    // Alterna a classe que ativa a rotação definida no CSS
     card.classList.toggle('flipped');
 };
 
-// 2. Funções da Seção da Sorte (Personagens)
+// 2. PERSONAGENS
 window.chooseSide = function(side) {
     if (side === 'left') {
-        // Lado Esquerdo: Exibe o modal do prêmio (Prompt)
         const prize = document.getElementById('prizeDisplay');
         if (prize) prize.classList.add('active');
-        
     } else if (side === 'right') {
-        // Lado Direito: Abre o modal de cadastro diretamente
         openModal('signup');
     }
 };
 
 window.resetLuckySection = function() {
-    // Botão Fechar do Prompt (Prêmio)
     const prize = document.getElementById('prizeDisplay');
     if (prize) prize.classList.remove('active');
 };
 
-// 3. Função do Olinho da Senha (Toggle)
+// 3. OLINHO DA SENHA
 window.togglePassword = function(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
-    
     if (input && icon) {
-        // Alterna entre texto e senha
         const isPassword = input.type === 'password';
         input.type = isPassword ? 'text' : 'password';
-        
-        // Alterna o ícone (olho aberto / fechado)
         icon.classList.toggle('fa-eye');
         icon.classList.toggle('fa-eye-slash');
     }
