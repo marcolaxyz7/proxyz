@@ -190,27 +190,33 @@ function renderPrompts(promptsList) {
 }
 
     function filterByCategory(category, btnElement) {
+    // 1. Garante que estamos na tela de prompts
     switchView('indexT2');
+
+    // 2. Atualiza visual do botão clicado na sidebar
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
 
+    // 3. Atualiza o Título da Página
     const displayTitle = category === 'all' ? 'TODOS OS PROMPTS' : category.replace(/^\d+\.\s+/, '').toUpperCase();
     const titleEl = document.getElementById('page-title');
     if(titleEl) titleEl.innerText = displayTitle;
     
+    // 4. Filtra e Renderiza os cards
     if (category === 'all') renderPrompts(allPrompts);
     else renderPrompts(allPrompts.filter(p => p.category === category));
     
+    // 5. Limpa o campo de busca
     const searchInp = document.getElementById('searchInput');
     if(searchInp) searchInp.value = '';
 
-    // --- CORREÇÃO: FECHAMENTO FORÇADO ---
-    // Remove a classe .active diretamente, sem perguntar se já tem.
+    // --- CORREÇÃO MOBILE: FORÇA O FECHAMENTO ---
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
-        if(sidebar) sidebar.classList.remove('active');
-        if(overlay) overlay.classList.remove('active');
+        // Remove 'active' para fechar imediatamente sem erro de toggle
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     }
 }
 
@@ -238,21 +244,24 @@ function copyToClipboard(text) {
 }
 
 function switchView(viewId, btn) {
+    // 1. Troca a tela visível (esconde todas, mostra a alvo)
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     const target = document.getElementById('view-' + viewId);
     if(target) target.classList.add('active');
     
+    // 2. Atualiza botão da sidebar se necessário
     if(btn) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
 
-    // --- CORREÇÃO: FECHAMENTO FORÇADO ---
+    // --- CORREÇÃO MOBILE: FORÇA O FECHAMENTO ---
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
-        if(sidebar) sidebar.classList.remove('active');
-        if(overlay) overlay.classList.remove('active');
+        // Remove 'active' para fechar imediatamente
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     }
 }
 
@@ -268,14 +277,21 @@ async function logCopyAction(promptId) {
     } catch (e) { console.error("Erro log copy", e); }
 }
 
-// --- MENU MOBILE (TOGGLE) ---
+// Função simples para abrir/fechar
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('menu-overlay');
-    if(sidebar) sidebar.classList.toggle('active');
-    if(overlay) overlay.classList.toggle('active');
+    
+    // Alterna a classe 'active' (Abre ou Fecha)
+    if (sidebar) sidebar.classList.toggle('active');
+    if (overlay) overlay.classList.toggle('active');
 }
 
-// Event Listeners Mobile
-const ovl = document.getElementById('menu-overlay');
-if(ovl) ovl.addEventListener('click', toggleMobileMenu);
+// Fechar menu forçado (usaremos ao clicar nos itens)
+function closeMobileMenu() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('menu-overlay');
+    
+    if (sidebar) sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+}
