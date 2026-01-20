@@ -189,11 +189,11 @@ function renderPrompts(promptsList) {
     });
 }
 
-   // 2. Função de Filtro (Fecha o menu ao clicar)
+   /* --- 2. AO CLICAR NA CATEGORIA (FILTRA E FECHA O MENU) --- */
 function filterByCategory(category, btnElement) {
     switchView('indexT2');
     
-    // Atualiza botões
+    // Atualiza visual dos botões
     document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
     if(btnElement) btnElement.classList.add('active');
 
@@ -202,15 +202,14 @@ function filterByCategory(category, btnElement) {
     const titleEl = document.getElementById('page-title');
     if(titleEl) titleEl.innerText = displayTitle;
     
-    // Renderiza Prompts (Seus prompts vão aparecer agora pq a sidebar saiu da frente)
+    // Renderiza Prompts
     if (category === 'all') renderPrompts(allPrompts);
     else renderPrompts(allPrompts.filter(p => p.category === category));
     
-    // Limpa busca
     const searchInp = document.getElementById('searchInput');
     if(searchInp) searchInp.value = '';
 
-    // LÓGICA MOBILE: Fechar a sidebar forçadamente
+    // --- CORREÇÃO MOBILE: FECHAR O MENU ---
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
@@ -242,7 +241,7 @@ function copyToClipboard(text) {
     });
 }
 
-// 3. Função de Trocar Tela (Tutorial/Home)
+/* --- 3. AO CLICAR EM "COMO USAR" (TROCA TELA E FECHA O MENU) --- */
 function switchView(viewId, btn) {
     document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
     const target = document.getElementById('view-' + viewId);
@@ -253,7 +252,7 @@ function switchView(viewId, btn) {
         btn.classList.add('active');
     }
 
-    // LÓGICA MOBILE: Fechar menu
+    // --- CORREÇÃO MOBILE: FECHAR O MENU ---
     if (window.innerWidth <= 768) {
         const sidebar = document.querySelector('.sidebar');
         const overlay = document.getElementById('menu-overlay');
@@ -274,7 +273,7 @@ async function logCopyAction(promptId) {
     } catch (e) { console.error("Erro log copy", e); }
 }
 
-// 1. Função que o botão do cabeçalho chama (Alterna)
+/* --- 1. BOTÃO DO MENU (ABRE/FECHA) --- */
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.getElementById('menu-overlay');
