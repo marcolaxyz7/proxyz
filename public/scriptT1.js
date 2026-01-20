@@ -431,45 +431,43 @@ else if (paymentStatus === 'mp_failure') {
     window.history.replaceState({}, document.title, "indexT1.html");
 }
 
-// Coloque no final do arquivo public/scriptT1.js
-function togglePassword(inputId, iconId) {
+// 1. Função para Girar os Cards (Flip)
+window.flipCard = function(card) {
+    // Alterna a classe que ativa a rotação definida no CSS
+    card.classList.toggle('flipped');
+};
+
+// 2. Funções da Seção da Sorte (Personagens)
+window.chooseSide = function(side) {
+    if (side === 'left') {
+        // Lado Esquerdo: Exibe o modal do prêmio (Prompt)
+        const prize = document.getElementById('prizeDisplay');
+        if (prize) prize.classList.add('active');
+        
+    } else if (side === 'right') {
+        // Lado Direito: Abre o modal de cadastro diretamente
+        openModal('signup');
+    }
+};
+
+window.resetLuckySection = function() {
+    // Botão Fechar do Prompt (Prêmio)
+    const prize = document.getElementById('prizeDisplay');
+    if (prize) prize.classList.remove('active');
+};
+
+// 3. Função do Olinho da Senha (Toggle)
+window.togglePassword = function(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+    if (input && icon) {
+        // Alterna entre texto e senha
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        
+        // Alterna o ícone (olho aberto / fechado)
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
     }
-}
-
-function flipCard(card) {
-    // Adiciona ou remove a classe 'flipped' que ativa a rotação no CSS
-    card.classList.toggle('flipped');
-}
-
-// --- FUNÇÕES DA SEÇÃO DA SORTE (PERSONAGENS) ---
-function chooseSide(side) {
-    if (side === 'left') {
-        // Personagem da Esquerda: Mostra o Prompt de Amostra (Prêmio)
-        const prize = document.getElementById('prizeDisplay');
-        if (prize) {
-            prize.classList.add('active');
-        }
-    } else if (side === 'right') {
-        // Personagem da Direita: Abre direto o Modal de Cadastro
-        openModal('signup');
-    }
-}
-
-function resetLuckySection() {
-    // Fecha a caixa do prêmio ao clicar em "FECHAR"
-    const prize = document.getElementById('prizeDisplay');
-    if (prize) {
-        prize.classList.remove('active');
-    }
-}
+};
