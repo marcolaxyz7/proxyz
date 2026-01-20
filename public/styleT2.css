@@ -122,48 +122,45 @@ footer {
 #menu-overlay { display: none; }
 
 /* ==========================================================
-   CSS MOBILE (CORREÇÃO DEFINITIVA)
+   CSS MOBILE (CORREÇÃO DE LAYOUT E ZOOM)
    ========================================================== */
 @media (max-width: 768px) {
     
     /* 1. LAYOUT DO CORPO */
     body { 
         flex-direction: column !important; 
-        overflow-x: hidden; 
+        overflow-x: hidden; /* Garante que nada vaze horizontalmente */
     } 
 
-    /* 2. CONTEÚDO PRINCIPAL (Ocupa a tela toda) */
+    /* 2. CONTEÚDO PRINCIPAL */
     .main-content { 
         width: 100% !important; 
         margin-left: 0 !important; 
         padding: 15px !important; 
+        min-width: 0; /* Previne que flex items forcem largura */
     }
 
-    /* 3. SIDEBAR (FLUTUANTE E ESCONDIDA) */
+    /* 3. SIDEBAR (FLUTUANTE) */
     .sidebar {
-        position: fixed !important;    /* Tira do fluxo da página */
+        position: fixed !important;
         top: 0 !important;
-        left: -100% !important;        /* Esconde na esquerda */
-        width: 80% !important;         
+        left: -100% !important;
+        width: 80% !important;     
         max-width: 300px;
         height: 100vh !important;
-        z-index: 9999 !important;      /* Fica acima de tudo */
+        z-index: 9999 !important;
         transition: left 0.3s ease !important;
         background: #000 !important;
         box-shadow: 5px 0 15px rgba(0,0,0,0.5);
     }
+    .sidebar.active { left: 0 !important; }
 
-    /* CLASSE PARA MOSTRAR A SIDEBAR */
-    .sidebar.active {
-        left: 0 !important;            /* Traz para a tela */
-    }
-
-    /* 4. FUNDO ESCURO (OVERLAY) */
+    /* 4. OVERLAY DE FUNDO */
     #menu-overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.8) !important;
-        z-index: 9998 !important;      /* Logo atrás da sidebar */
+        z-index: 9998 !important;
         display: none;
         backdrop-filter: blur(2px);
     }
@@ -181,7 +178,21 @@ footer {
     .user-info { order: 2; margin-left: auto; }
     .search-box { order: 3; width: 100% !important; margin-top: 5px; }
 
-    /* 6. GRID */
-    .dash-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
-}
+    /* 6. GRID (CORREÇÃO PRINCIPAL: 1 COLUNA) */
+    .dash-grid { 
+        grid-template-columns: 1fr !important; /* Cards ocupam largura total */
+        gap: 20px; 
+    }
+    
+    /* Ajuste fino para cards no mobile */
+    .dash-card {
+        padding: 20px; /* Reduz um pouco o padding interno */
+        min-height: auto; /* Remove altura mínima fixa para economizar espaço */
+    }
+    
+    /* Garante que títulos longos quebrem a linha em vez de esticar a tela */
+    .dash-card h3 { 
+        word-break: break-word; 
+        font-size: 1.1rem; 
+    }
 }
