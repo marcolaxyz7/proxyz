@@ -446,3 +446,30 @@ function togglePassword(inputId, iconId) {
         icon.classList.add('fa-eye');
     }
 }
+
+function flipCard(card) {
+    // Adiciona ou remove a classe 'flipped' que ativa a rotação no CSS
+    card.classList.toggle('flipped');
+}
+
+// --- FUNÇÕES DA SEÇÃO DA SORTE (PERSONAGENS) ---
+function chooseSide(side) {
+    if (side === 'left') {
+        // Personagem da Esquerda: Mostra o Prompt de Amostra (Prêmio)
+        const prize = document.getElementById('prizeDisplay');
+        if (prize) {
+            prize.classList.add('active');
+        }
+    } else if (side === 'right') {
+        // Personagem da Direita: Abre direto o Modal de Cadastro
+        openModal('signup');
+    }
+}
+
+function resetLuckySection() {
+    // Fecha a caixa do prêmio ao clicar em "FECHAR"
+    const prize = document.getElementById('prizeDisplay');
+    if (prize) {
+        prize.classList.remove('active');
+    }
+}
